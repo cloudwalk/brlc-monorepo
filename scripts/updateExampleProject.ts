@@ -3,10 +3,10 @@ import * as path from "path";
 
 // Script parameters
 
-const FILE_TO_UPDATE = process.env.SP_FILE_TO_UPDATE ?? ".cursor/rules/solidity-rules.mdc";
+const FILE_TO_UPDATE = process.env.SP_FILE_TO_UPDATE ?? ".cursor/rules/solidity-example-project.mdc";
 const CONTRACTS_DIR = process.env.SP_CONTRACTS_DIR ?? "./contracts";
-const SECTION_START_STRING = process.env.SP_SECTION_START_STRING ?? "# 6. Example Project";
-const SECTION_INITIAL_NUMBER = parseInt(process.env.SP_INITIAL_NUMBER ?? "6");
+const SECTION_START_STRING = process.env.SP_SECTION_START_STRING ?? "# 1. Example Project";
+const SECTION_INITIAL_NUMBER = parseInt(process.env.SP_INITIAL_NUMBER ?? "1");
 const INDENT_STRING = process.env.SP_INDENT_STRING ?? "  ";
 
 interface FileStructure {

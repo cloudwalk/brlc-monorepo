@@ -28,7 +28,7 @@ interface IBlueprintTypes {
     /**
      * @dev The data of a single operation of the blueprint smart-contract.
      *
-     * The fields:
+     * Fields:
      *
      * - status --- The status of the operation according to the {OperationStatus} enum.
      * - account -- The address of the account involved in the operation.
@@ -38,13 +38,13 @@ interface IBlueprintTypes {
         OperationStatus status;
         address account;
         uint64 amount;
-        // uint24 __reserved; // Reserved for future use until the end of the storage slot
+        // uint24 __reserved; // Reserved until the end of the storage slot
     }
 
     /**
      * @dev The state of a single account within the blueprint smart-contract.
      *
-     * The fields:
+     * Fields:
      *
      * - lastOpId -------- The identifier of the last operation related to the account.
      * - balance --------- The balance of the account.
@@ -58,6 +58,6 @@ interface IBlueprintTypes {
         // Slot 2
         uint64 balance;
         uint32 operationCount;
-        // uint160 __reserved; // Reserved for future use until the end of the storage slot
+        // uint160 __reserved; // Reserved until the end of the storage slot
     }
 }

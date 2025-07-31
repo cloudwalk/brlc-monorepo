@@ -29,7 +29,7 @@ abstract contract BlueprintStorageLayout is IBlueprintTypes {
     /**
      * @dev Defines the contract storage structure.
      *
-     * The fields:
+     * Fields:
      *
      * - token ---------------- The address of the underlying token.
      * - operationalTreasury -- The address of the operational treasury.
@@ -44,11 +44,11 @@ abstract contract BlueprintStorageLayout is IBlueprintTypes {
     struct BlueprintStorage {
         // Slot 1
         address token;
-        // uint96 __reserved1; // Reserved for future use until the end of the storage slot
+        // uint96 __reserved1; // Reserved until the end of the storage slot
 
         // Slot 2
         address operationalTreasury;
-        // uint96 __reserved2; // Reserved for future use until the end of the storage slot
+        // uint96 __reserved2; // Reserved until the end of the storage slot
 
         // Slot 3
         mapping(bytes32 opId => Operation operation) operations;

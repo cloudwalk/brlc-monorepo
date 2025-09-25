@@ -3,6 +3,7 @@
 pragma solidity 0.8.24;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import { AccessControlExtUpgradeable } from "./base/AccessControlExtUpgradeable.sol";
 import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
@@ -33,6 +34,10 @@ contract Blueprint is
     Versionable,
     IBlueprint
 {
+    // ------------------ Types ----------------------------------- //
+
+    using SafeERC20 for IERC20;
+
     // ------------------ Constants ------------------------------- //
 
     /// @dev The kind of operation that is deposit.
@@ -221,9 +226,9 @@ contract Blueprint is
         );
 
         if (operationKind == OPERATION_KIND_DEPOSIT) {
-            IERC20($.token).transferFrom(account, treasury, amount);
+            IERC20($.token).safeTransferFrom(account, treasury, amount);
         } else {
-            IERC20($.token).transferFrom(treasury, account, amount);
+            IERC20($.token).safeTransferFrom(treasury, account, amount);
         }
     }
 

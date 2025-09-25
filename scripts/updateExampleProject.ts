@@ -24,7 +24,7 @@ function scanDirectory(dirPath: string): FileStructure {
     children: [],
   };
 
-  const items = fs.readdirSync(dirPath);
+  const items = fs.readdirSync(dirPath).sort();
 
   for (const item of items) {
     const fullPath = path.join(dirPath, item);

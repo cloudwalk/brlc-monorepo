@@ -56,7 +56,7 @@ const ERROR_NAME_TREASURY_ALLOWANCE_ZERO = "Blueprint_TreasuryAllowanceZero";
 const EXPECTED_VERSION: Version = {
   major: 1,
   minor: 1,
-  patch: 0,
+  patch: 1,
 };
 
 enum OperationStatus {

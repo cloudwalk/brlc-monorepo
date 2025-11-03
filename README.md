@@ -6,8 +6,7 @@
 
 [![codecov](https://codecov.io/github/cloudwalk/brlc-treasury/branch/main/graph/badge.svg)](https://codecov.io/github/cloudwalk/brlc-treasury)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![example branch parameter](https://github.com/cloudwalk/brlc-treasury/actions/workflows/build.yml/badge.svg?branch=main)
-![example branch parameter](https://github.com/cloudwalk/brlc-treasury/actions/workflows/test.yml/badge.svg?branch=main)
+![Main branch build status](https://github.com/cloudwalk/brlc-treasury/actions/workflows/branch.yml/badge.svg?branch=main)
 
 This repository contains Treasury smart contracts.
 

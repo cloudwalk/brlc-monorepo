@@ -1,10 +1,10 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: brlc-treasury
+  name: brlc-treasury-wallet
   description: Treasury smart contracts
   annotations:
-    github.com/project-slug: cloudwalk/brlc-treasury
+    github.com/project-slug: cloudwalk/brlc-treasury-wallet
     backstage.io/techdocs-ref: dir:.
   tags:
     - solidity
@@ -12,7 +12,7 @@ metadata:
     - blockchain
     - smart-contract
   links:
-    - url: https://github.com/cloudwalk/brlc-treasury
+    - url: https://github.com/cloudwalk/brlc-treasury-wallet
       title: Repository
       icon: github
   labels:

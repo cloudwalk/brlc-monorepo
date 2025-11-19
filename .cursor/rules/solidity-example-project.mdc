@@ -6,8 +6,8 @@ alwaysApply: false
 ## 1.1 File Structure
 
 * `contracts/`
-  * `treasury.sol`
-  * `treasuryStorageLayout.sol`
+  * `Blueprint.sol`
+  * `BlueprintStorageLayout.sol`
   * `base/`
     * `AccessControlExtUpgradeable.sol`
     * `PausableExtUpgradeable.sol`
@@ -15,8 +15,8 @@ alwaysApply: false
     * `UUPSExtUpgradeable.sol`
     * `Versionable.sol`
   * `interfaces/`
-    * `Itreasury.sol`
-    * `ItreasuryTypes.sol`
+    * `IBlueprint.sol`
+    * `IBlueprintTypes.sol`
     * `IVersionable.sol`
   * `mocks/`
     * `base/`
@@ -27,14 +27,14 @@ alwaysApply: false
     * `tokens/`
       * `ERC20TokenMock.sol`
   * `testables/`
-    * `treasuryTestable.sol`
+    * `BlueprintTestable.sol`
 
 
 ## 1.2 Project Files
 
 ### Directory `contracts/`
 
-#### File `contracts/treasury.sol`
+#### File `contracts/Blueprint.sol`
 
 ```solidity
 // SPDX-License-Identifier: MIT
@@ -50,28 +50,28 @@ import { RescuableUpgradeable } from "./base/RescuableUpgradeable.sol";
 import { Versionable } from "./base/Versionable.sol";
 import { UUPSExtUpgradeable } from "./base/UUPSExtUpgradeable.sol";
 
-import { Itreasury } from "./interfaces/Itreasury.sol";
-import { ItreasuryPrimary } from "./interfaces/Itreasury.sol";
-import { ItreasuryConfiguration } from "./interfaces/Itreasury.sol";
+import { IBlueprint } from "./interfaces/IBlueprint.sol";
+import { IBlueprintPrimary } from "./interfaces/IBlueprint.sol";
+import { IBlueprintConfiguration } from "./interfaces/IBlueprint.sol";
 
-import { treasuryStorageLayout } from "./treasuryStorageLayout.sol";
+import { BlueprintStorageLayout } from "./BlueprintStorageLayout.sol";
 
 /**
- * @title treasury contract
+ * @title Blueprint contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev The smart contract is designed as a reference and template one.
  * It executes deposit and withdrawal operations using the underlying token smart contract and stores related data.
  *
- * See details about the contract in the comments of the {Itreasury} interface.
+ * See details about the contract in the comments of the {IBlueprint} interface.
  */
-contract treasury is
-    treasuryStorageLayout,
+contract Blueprint is
+    BlueprintStorageLayout,
     AccessControlExtUpgradeable,
     PausableExtUpgradeable,
     RescuableUpgradeable,
     UUPSExtUpgradeable,
     Versionable,
-    Itreasury
+    IBlueprint
 {
     // ------------------ Types ----------------------------------- //
 
@@ -115,10 +115,10 @@ contract treasury is
         __UUPSExt_init_unchained(); // This is needed only to avoid errors during coverage assessment
 
         if (token_ == address(0)) {
-            revert treasury_TokenAddressZero();
+            revert Blueprint_TokenAddressZero();
         }
 
-        _gettreasuryStorage().token = token_;
+        _getBlueprintStorage().token = token_;
 
         _setRoleAdmin(MANAGER_ROLE, GRANTOR_ROLE);
         _grantRole(OWNER_ROLE, _msgSender());
@@ -127,7 +127,7 @@ contract treasury is
     // ------------------ Transactional functions ----------------- //
 
     /**
-     * @inheritdoc ItreasuryConfiguration
+     * @inheritdoc IBlueprintConfiguration
      *
      * @dev Requirements:
      *
@@ -136,14 +136,14 @@ contract treasury is
      * - The new operational treasury address must not be the same as already configured.
      */
     function setOperationalTreasury(address newTreasury) external onlyRole(OWNER_ROLE) {
-        treasuryStorage storage $ = _gettreasuryStorage();
+        BlueprintStorage storage $ = _getBlueprintStorage();
         address oldTreasury = $.operationalTreasury;
         if (newTreasury == oldTreasury) {
-            revert treasury_TreasuryAddressAlreadyConfigured();
+            revert Blueprint_TreasuryAddressAlreadyConfigured();
         }
         if (newTreasury != address(0)) {
             if (IERC20($.token).allowance(newTreasury, address(this)) == 0) {
-                revert treasury_TreasuryAllowanceZero();
+                revert Blueprint_TreasuryAllowanceZero();
             }
         }
 
@@ -152,7 +152,7 @@ contract treasury is
     }
 
     /**
-     * @inheritdoc ItreasuryPrimary
+     * @inheritdoc IBlueprintPrimary
      *
      * @dev Requirements:
      *
@@ -170,7 +170,7 @@ contract treasury is
     }
 
     /**
-     * @inheritdoc ItreasuryPrimary
+     * @inheritdoc IBlueprintPrimary
      *
      * @dev Requirements:
      *
@@ -189,35 +189,35 @@ contract treasury is
 
     // ------------------ View functions -------------------------- //
 
-    /// @inheritdoc ItreasuryPrimary
+    /// @inheritdoc IBlueprintPrimary
     function getOperation(bytes32 opId) external view returns (Operation memory) {
-        return _gettreasuryStorage().operations[opId];
+        return _getBlueprintStorage().operations[opId];
     }
 
-    /// @inheritdoc ItreasuryPrimary
+    /// @inheritdoc IBlueprintPrimary
     function getAccountState(address account) external view returns (AccountState memory) {
-        return _gettreasuryStorage().accountStates[account];
+        return _getBlueprintStorage().accountStates[account];
     }
 
-    /// @inheritdoc ItreasuryPrimary
+    /// @inheritdoc IBlueprintPrimary
     function balanceOf(address account) public view returns (uint256) {
-        return _gettreasuryStorage().accountStates[account].balance;
+        return _getBlueprintStorage().accountStates[account].balance;
     }
 
-    /// @inheritdoc ItreasuryPrimary
+    /// @inheritdoc IBlueprintPrimary
     function underlyingToken() external view returns (address) {
-        return _gettreasuryStorage().token;
+        return _getBlueprintStorage().token;
     }
 
-    /// @inheritdoc ItreasuryConfiguration
+    /// @inheritdoc IBlueprintConfiguration
     function operationalTreasury() external view returns (address) {
-        return _gettreasuryStorage().operationalTreasury;
+        return _getBlueprintStorage().operationalTreasury;
     }
 
     // ------------------ Pure functions -------------------------- //
 
-    /// @inheritdoc Itreasury
-    function provetreasury() external pure {}
+    /// @inheritdoc IBlueprint
+    function proveBlueprint() external pure {}
 
     // ------------------ Internal functions ---------------------- //
 
@@ -230,7 +230,7 @@ contract treasury is
      */
     function _executeOperation(address account, uint256 amount, bytes32 opId, uint256 operationKind) internal {
         _checkOperationParameters(account, amount, opId);
-        treasuryStorage storage $ = _gettreasuryStorage();
+        BlueprintStorage storage $ = _getBlueprintStorage();
         address treasury = _getAndCheckOperationalTreasury($);
 
         Operation storage operation = _getAndCheckOperation(opId, $);
@@ -246,7 +246,7 @@ contract treasury is
             operation.status = OperationStatus.Deposit;
             newBalance += amount;
             if (newBalance > type(uint64).max) {
-                revert treasury_BalanceExcess();
+                revert Blueprint_BalanceExcess();
             }
         } else {
             newBalance -= amount;
@@ -279,21 +279,21 @@ contract treasury is
      */
     function _checkOperationParameters(address account, uint256 amount, bytes32 opId) internal pure {
         if (account == address(0)) {
-            revert treasury_AccountAddressZero();
+            revert Blueprint_AccountAddressZero();
         }
         if (opId == bytes32(0)) {
-            revert treasury_OperationIdZero();
+            revert Blueprint_OperationIdZero();
         }
         if (amount > type(uint64).max) {
-            revert treasury_AmountExcess();
+            revert Blueprint_AmountExcess();
         }
     }
 
     /// @dev Returns the operational treasury address after checking it.
-    function _getAndCheckOperationalTreasury(treasuryStorage storage $) internal view returns (address) {
+    function _getAndCheckOperationalTreasury(BlueprintStorage storage $) internal view returns (address) {
         address operationalTreasury_ = $.operationalTreasury;
         if (operationalTreasury_ == address(0)) {
-            revert treasury_OperationalTreasuryAddressZero();
+            revert Blueprint_OperationalTreasuryAddressZero();
         }
         return operationalTreasury_;
     }
@@ -303,10 +303,10 @@ contract treasury is
      * @param opId The off-chain identifier of the operation.
      * @return The current operation.
      */
-    function _getAndCheckOperation(bytes32 opId, treasuryStorage storage $) internal view returns (Operation storage) {
+    function _getAndCheckOperation(bytes32 opId, BlueprintStorage storage $) internal view returns (Operation storage) {
         Operation storage operation = $.operations[opId];
         if (operation.status != OperationStatus.Nonexistent) {
-            revert treasury_OperationAlreadyExecuted(opId);
+            revert Blueprint_OperationAlreadyExecuted(opId);
         }
         return operation;
     }
@@ -316,30 +316,30 @@ contract treasury is
      * @param newImplementation The address of the new implementation.
      */
     function _validateUpgrade(address newImplementation) internal view override onlyRole(OWNER_ROLE) {
-        try Itreasury(newImplementation).provetreasury() {} catch {
-            revert treasury_ImplementationAddressInvalid();
+        try IBlueprint(newImplementation).proveBlueprint() {} catch {
+            revert Blueprint_ImplementationAddressInvalid();
         }
     }
 }
 ```
 
-#### File `contracts/treasuryStorageLayout.sol`
+#### File `contracts/BlueprintStorageLayout.sol`
 
 ```solidity
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.18;
 
-import { ItreasuryTypes } from "./interfaces/ItreasuryTypes.sol";
+import { IBlueprintTypes } from "./interfaces/IBlueprintTypes.sol";
 
 /**
- * @title treasuryStorageLayout contract
+ * @title BlueprintStorageLayout contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Defines the storage layout for the reference smart-contract.
  *
- * See details about the contract in the comments of the {Itreasury} interface.
+ * See details about the contract in the comments of the {IBlueprint} interface.
  */
-abstract contract treasuryStorageLayout is ItreasuryTypes {
+abstract contract BlueprintStorageLayout is IBlueprintTypes {
     // ------------------ Constants ------------------------------- //
 
     /// @dev The role of manager that is allowed to deposit and withdraw tokens to the contract.
@@ -349,9 +349,9 @@ abstract contract treasuryStorageLayout is ItreasuryTypes {
 
     /*
      * ERC-7201: Namespaced Storage Layout
-     * keccak256(abi.encode(uint256(keccak256("cloudwalk.storage.treasury")) - 1)) & ~bytes32(uint256(0xff))
+     * keccak256(abi.encode(uint256(keccak256("cloudwalk.storage.Blueprint")) - 1)) & ~bytes32(uint256(0xff))
      */
-    bytes32 private constant treasury_STORAGE_LOCATION =
+    bytes32 private constant BLUEPRINT_STORAGE_LOCATION =
         0xafe7a9a1707fd5088d626d487a8abd113f3fb4bc089bd4284d3e123585a48c00;
 
     /**
@@ -367,9 +367,9 @@ abstract contract treasuryStorageLayout is ItreasuryTypes {
      * Notes:
      * 1. The operational treasury is used to deposit and withdraw tokens through special functions.
      *
-     * @custom:storage-location erc7201:cloudwalk.storage.treasury
+     * @custom:storage-location erc7201:cloudwalk.storage.Blueprint
      */
-    struct treasuryStorage {
+    struct BlueprintStorage {
         // Slot 1
         address token;
         // uint96 __reserved1; // Reserved until the end of the storage slot
@@ -389,10 +389,10 @@ abstract contract treasuryStorageLayout is ItreasuryTypes {
 
     // ------------------ Internal functions ---------------------- //
 
-    /// @dev Returns the storage slot location for the `treasuryStorage` struct.
-    function _gettreasuryStorage() internal pure returns (treasuryStorage storage $) {
+    /// @dev Returns the storage slot location for the `BlueprintStorage` struct.
+    function _getBlueprintStorage() internal pure returns (BlueprintStorage storage $) {
         assembly {
-            $.slot := treasury_STORAGE_LOCATION
+            $.slot := BLUEPRINT_STORAGE_LOCATION
         }
     }
 }
@@ -693,23 +693,23 @@ abstract contract Versionable is IVersionable {
 
 ### Directory `contracts/interfaces/`
 
-#### File `contracts/interfaces/Itreasury.sol`
+#### File `contracts/interfaces/IBlueprint.sol`
 
 ```solidity
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
 
-import { ItreasuryTypes } from "./ItreasuryTypes.sol";
+import { IBlueprintTypes } from "./IBlueprintTypes.sol";
 
 /**
- * @title ItreasuryPrimary interface
+ * @title IBlueprintPrimary interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The primary part of the treasury smart contract interface.
+ * @dev The primary part of the blueprint smart contract interface.
  *
- * See details about the contract in the comments of the {Itreasury} interface.
+ * See details about the contract in the comments of the {IBlueprint} interface.
  */
-interface ItreasuryPrimary is ItreasuryTypes {
+interface IBlueprintPrimary is IBlueprintTypes {
     // ------------------ Events ---------------------------------- //
 
     /**
@@ -803,11 +803,11 @@ interface ItreasuryPrimary is ItreasuryTypes {
 }
 
 /**
- * @title ItreasuryConfiguration interface
+ * @title IBlueprintConfiguration interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The configuration part of the treasury smart contract interface.
+ * @dev The configuration part of the blueprint smart contract interface.
  */
-interface ItreasuryConfiguration {
+interface IBlueprintConfiguration {
     // ------------------ Events ---------------------------------- //
 
     /**
@@ -840,55 +840,55 @@ interface ItreasuryConfiguration {
 }
 
 /**
- * @title ItreasuryErrors interface
+ * @title IBlueprintErrors interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev Defines the custom errors used in the treasury contract.
+ * @dev Defines the custom errors used in the blueprint contract.
  *
  * The errors are ordered alphabetically.
  */
-interface ItreasuryErrors {
+interface IBlueprintErrors {
     /// @dev Thrown if the provided account address is zero.
-    error treasury_AccountAddressZero();
+    error Blueprint_AccountAddressZero();
 
     /// @dev Thrown if the provided amount is greater than the allowed maximum.
-    error treasury_AmountExcess();
+    error Blueprint_AmountExcess();
 
     /// @dev Thrown if the result account balance is greater than the allowed maximum.
-    error treasury_BalanceExcess();
+    error Blueprint_BalanceExcess();
 
-    /// @dev Thrown if the provided new implementation address is not of a treasury contract.
-    error treasury_ImplementationAddressInvalid();
+    /// @dev Thrown if the provided new implementation address is not of a blueprint contract.
+    error Blueprint_ImplementationAddressInvalid();
 
     /**
      * @dev Thrown if the operation with the provided identifier is already executed.
      * @param opId The provided off-chain identifier of the related operation.
      */
-    error treasury_OperationAlreadyExecuted(bytes32 opId);
+    error Blueprint_OperationAlreadyExecuted(bytes32 opId);
 
     /// @dev Thrown if the provided off-chain operation identifier is zero.
-    error treasury_OperationIdZero();
+    error Blueprint_OperationIdZero();
 
     /**
      * @dev Thrown if the provided underlying token address is zero.
      *
      * This error can be thrown during the contract initialization.
      */
-    error treasury_TokenAddressZero();
+    error Blueprint_TokenAddressZero();
 
     /// @dev Thrown if the provided treasury address is already configured.
-    error treasury_TreasuryAddressAlreadyConfigured();
+    error Blueprint_TreasuryAddressAlreadyConfigured();
 
     /// @dev Thrown if the configured operational treasury address is zero, so token transfer operations are disabled.
-    error treasury_OperationalTreasuryAddressZero();
+    error Blueprint_OperationalTreasuryAddressZero();
 
     /// @dev Thrown if the provided treasury has not granted the contract allowance to spend tokens.
-    error treasury_TreasuryAllowanceZero();
+    error Blueprint_TreasuryAllowanceZero();
 }
 
 /**
- * @title Itreasury interface
+ * @title IBlueprint interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The full interface of the treasury smart contract.
+ * @dev The full interface of the blueprint smart contract.
  *
  * The smart contract is designed as a reference and template one.
  * It allows to deposit or withdraw tokens with specifying an external (off-chain) identifier.
@@ -899,18 +899,18 @@ interface ItreasuryErrors {
  *
  * Some logic and entities of this contract are just for demonstration purposes and do not have any real use.
  */
-interface Itreasury is ItreasuryPrimary, ItreasuryConfiguration, ItreasuryErrors {
+interface IBlueprint is IBlueprintPrimary, IBlueprintConfiguration, IBlueprintErrors {
     /**
-     * @dev Proves the contract is the treasury one. A marker function.
+     * @dev Proves the contract is the blueprint one. A marker function.
      *
      * It is used for simple contract compliance checks, e.g. during an upgrade.
      * This avoids situations where a wrong contract address is specified by mistake.
      */
-    function provetreasury() external pure;
+    function proveBlueprint() external pure;
 }
 ```
 
-#### File `contracts/interfaces/ItreasuryTypes.sol`
+#### File `contracts/interfaces/IBlueprintTypes.sol`
 
 ```solidity
 // SPDX-License-Identifier: MIT
@@ -918,15 +918,15 @@ interface Itreasury is ItreasuryPrimary, ItreasuryConfiguration, ItreasuryErrors
 pragma solidity ^0.8.0;
 
 /**
- * @title ItreasuryTypes interface
+ * @title IBlueprintTypes interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev Defines the types used in the treasury smart contract.
+ * @dev Defines the types used in the blueprint smart contract.
  *
- * See details about the contract in the comments of the {Itreasury} interface.
+ * See details about the contract in the comments of the {IBlueprint} interface.
  */
-interface ItreasuryTypes {
+interface IBlueprintTypes {
     /**
-     * @dev Possible statuses of an operation used in the treasury smart contract.
+     * @dev Possible statuses of an operation used in the blueprint smart contract.
      *
      * The values:
      *
@@ -941,7 +941,7 @@ interface ItreasuryTypes {
     }
 
     /**
-     * @dev The data of a single operation of the treasury smart-contract.
+     * @dev The data of a single operation of the blueprint smart-contract.
      *
      * Fields:
      *
@@ -957,7 +957,7 @@ interface ItreasuryTypes {
     }
 
     /**
-     * @dev The state of a single account within the treasury smart-contract.
+     * @dev The state of a single account within the blueprint smart-contract.
      *
      * Fields:
      *
@@ -1275,29 +1275,29 @@ contract ERC20TokenMock is ERC20 {
 
 ### Directory `contracts/testables/`
 
-#### File `contracts/testables/treasuryTestable.sol`
+#### File `contracts/testables/BlueprintTestable.sol`
 
 ```solidity
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.24;
 
-import { treasury } from "../treasury.sol";
+import { Blueprint } from "../Blueprint.sol";
 
 /**
- * @title treasuryTestable contract
+ * @title BlueprintTestable contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The version of the treasury contract with additions required for testing.
+ * @dev The version of the blueprint contract with additions required for testing.
  * @custom:oz-upgrades-unsafe-allow missing-initializer
  */
-contract treasuryTestable is treasury {
+contract BlueprintTestable is Blueprint {
     /**
      * @dev Sets the state of an account.
      * @param account The account to set the state of.
      * @param newState The new state of the account.
      */
     function setAccountState(address account, AccountState calldata newState) public {
-        _gettreasuryStorage().accountStates[account] = newState;
+        _getBlueprintStorage().accountStates[account] = newState;
     }
 }
 ```

@@ -8,8 +8,8 @@ alwaysApply: false
 
 1.  Act as an expert in Solidity and smart contract security.
 
-2.  Follow the structure, development approaches, styles, formatting, comments according to the `treasury` project
-    that can be found here: https://github.com/cloudwalk/brlc-treasury
+2.  Follow the structure, development approaches, styles, formatting, comments according to the `Blueprint` project
+    that can be found here: https://github.com/cloudwalk/brlc-blueprint
 
 3.  Follow the Solidity Style Guide from the language official documentation.
 
@@ -20,7 +20,7 @@ alwaysApply: false
 6.  Use the base `Version` contract to add version information to production contracts.
     Do NOT add the version to intermediate and basic contracts.
 
-7.  Separate storage layouts into dedicated contracts (like `treasuryStorage`).
+7.  Separate storage layouts into dedicated contracts (like `BlueprintStorage`).
 
 8.  Follow a consistent pattern for contract inheritance.
 
@@ -188,7 +188,7 @@ alwaysApply: false
 9.  NatSpec comments for an enum must include descriptions for all enum values including their number equivalents like:
     ```solidity
     /**
-     * @dev Possible statuses of a an operation used in the treasury smart contract.
+     * @dev Possible statuses of a an operation used in the blueprint smart contract.
      *
      * The values:
      *
@@ -206,7 +206,7 @@ alwaysApply: false
 10. NatSpec comments for a structure must include descriptions for all fields like:
      ```solidity
      /**
-      * @dev The data of a single operation of the treasury smart-contract.
+      * @dev The data of a single operation of the blueprint smart-contract.
       *
       * Fields:
       *

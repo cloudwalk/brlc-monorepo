@@ -15,6 +15,10 @@ const GRANTOR_ROLE = ethers.id("GRANTOR_ROLE");
 const WITHDRAWER_ROLE = ethers.id("WITHDRAWER_ROLE");
 const PAUSER_ROLE = ethers.id("PAUSER_ROLE");
 const RESCUER_ROLE = ethers.id("RESCUER_ROLE");
+const MINTER_ROLE = ethers.id("MINTER_ROLE");
+const BURNER_ROLE = ethers.id("BURNER_ROLE");
+const RESERVE_MINTER_ROLE = ethers.id("RESERVE_MINTER_ROLE");
+const RESERVE_BURNER_ROLE = ethers.id("RESERVE_BURNER_ROLE");
 
 // RecipientLimitPolicy enum values
 enum RecipientLimitPolicy {
@@ -30,6 +34,10 @@ let withdrawer: HardhatEthersSigner; // has WITHDRAWER_ROLE
 let account: HardhatEthersSigner; // has no roles
 let pauser: HardhatEthersSigner; // has PAUSER_ROLE
 let rescuer: HardhatEthersSigner; // has RESCUER_ROLE
+let minter: HardhatEthersSigner; // has MINTER_ROLE
+let burner: HardhatEthersSigner; // has BURNER_ROLE
+let reserveMinter: HardhatEthersSigner; // has RESERVE_MINTER_ROLE
+let reserveBurner: HardhatEthersSigner; // has RESERVE_BURNER_ROLE
 let stranger: HardhatEthersSigner; // has no roles
 
 let ROLES: Record<string, HardhatEthersSigner> = {};
@@ -64,6 +72,10 @@ async function configureContracts(
   await treasury.grantRole(WITHDRAWER_ROLE, withdrawer.address);
   await treasury.grantRole(PAUSER_ROLE, pauser.address);
   await treasury.grantRole(RESCUER_ROLE, rescuer.address);
+  await treasury.grantRole(MINTER_ROLE, minter.address);
+  await treasury.grantRole(BURNER_ROLE, burner.address);
+  await treasury.grantRole(RESERVE_MINTER_ROLE, reserveMinter.address);
+  await treasury.grantRole(RESERVE_BURNER_ROLE, reserveBurner.address);
 
   await tokenMock.mint(treasury, BALANCE_INITIAL);
   await tokenMock.mint(account, BALANCE_INITIAL);
@@ -78,8 +90,30 @@ async function deployAndConfigureContracts() {
 
 describe("Contract 'Treasury'", () => {
   before(async () => {
-    [deployer, withdrawer, account, pauser, rescuer, stranger] = await ethers.getSigners();
-    ROLES = { owner: deployer, withdrawer, account, pauser, rescuer, stranger };
+    [
+      deployer,
+      withdrawer,
+      account,
+      pauser,
+      rescuer,
+      minter,
+      burner,
+      reserveMinter,
+      reserveBurner,
+      stranger,
+    ] = await ethers.getSigners();
+    ROLES = {
+      owner: deployer,
+      withdrawer,
+      account,
+      pauser,
+      rescuer,
+      minter,
+      burner,
+      reserveMinter,
+      reserveBurner,
+      stranger,
+    };
     treasuryFactory = await ethers.getContractFactory("Treasury");
     treasuryFactory = treasuryFactory.connect(deployer);
     tokenMockFactory = await ethers.getContractFactory("ERC20TokenMock");
@@ -111,6 +145,10 @@ describe("Contract 'Treasury'", () => {
         expect(await deployedContract.WITHDRAWER_ROLE()).to.equal(WITHDRAWER_ROLE);
         expect(await deployedContract.PAUSER_ROLE()).to.equal(PAUSER_ROLE);
         expect(await deployedContract.RESCUER_ROLE()).to.equal(RESCUER_ROLE);
+        expect(await deployedContract.MINTER_ROLE()).to.equal(MINTER_ROLE);
+        expect(await deployedContract.BURNER_ROLE()).to.equal(BURNER_ROLE);
+        expect(await deployedContract.RESERVE_MINTER_ROLE()).to.equal(RESERVE_MINTER_ROLE);
+        expect(await deployedContract.RESERVE_BURNER_ROLE()).to.equal(RESERVE_BURNER_ROLE);
       });
 
       it("should set correct role admins", async () => {
@@ -119,6 +157,10 @@ describe("Contract 'Treasury'", () => {
         expect(await deployedContract.getRoleAdmin(WITHDRAWER_ROLE)).to.equal(GRANTOR_ROLE);
         expect(await deployedContract.getRoleAdmin(PAUSER_ROLE)).to.equal(GRANTOR_ROLE);
         expect(await deployedContract.getRoleAdmin(RESCUER_ROLE)).to.equal(GRANTOR_ROLE);
+        expect(await deployedContract.getRoleAdmin(MINTER_ROLE)).to.equal(GRANTOR_ROLE);
+        expect(await deployedContract.getRoleAdmin(BURNER_ROLE)).to.equal(GRANTOR_ROLE);
+        expect(await deployedContract.getRoleAdmin(RESERVE_MINTER_ROLE)).to.equal(GRANTOR_ROLE);
+        expect(await deployedContract.getRoleAdmin(RESERVE_BURNER_ROLE)).to.equal(GRANTOR_ROLE);
       });
 
       it("should set correct roles for the deployer", async () => {
@@ -127,6 +169,10 @@ describe("Contract 'Treasury'", () => {
         expect(await deployedContract.hasRole(WITHDRAWER_ROLE, deployer)).to.be.false;
         expect(await deployedContract.hasRole(PAUSER_ROLE, deployer)).to.be.false;
         expect(await deployedContract.hasRole(RESCUER_ROLE, deployer)).to.be.false;
+        expect(await deployedContract.hasRole(MINTER_ROLE, deployer)).to.be.false;
+        expect(await deployedContract.hasRole(BURNER_ROLE, deployer)).to.be.false;
+        expect(await deployedContract.hasRole(RESERVE_MINTER_ROLE, deployer)).to.be.false;
+        expect(await deployedContract.hasRole(RESERVE_BURNER_ROLE, deployer)).to.be.false;
       });
 
       it("should not pause the contract", async () => {
@@ -418,6 +464,224 @@ describe("Contract 'Treasury'", () => {
         )
           .to.be.revertedWithCustomError(treasury, "Treasury_InsufficientRecipientLimit")
           .withArgs(stranger.address, 100n, 0n);
+      });
+    });
+  });
+
+  describe("Method 'mint()'", () => {
+    describe("Should execute as expected when called properly and", () => {
+      const mintAmount = 500n;
+
+      it("should increase treasury balance correctly", async () => {
+        const balanceBefore = await tokenMock.balanceOf(treasury);
+        await treasury.connect(minter).mint(mintAmount);
+        const balanceAfter = await tokenMock.balanceOf(treasury);
+        expect(balanceAfter - balanceBefore).to.equal(mintAmount);
+      });
+
+      it("should emit the required event from token", async () => {
+        const tx = await treasury.connect(minter).mint(mintAmount);
+        await expect(tx).to.emit(tokenMock, "Minted")
+          .withArgs(await treasury.getAddress(), mintAmount);
+      });
+    });
+
+    describe("Should revert if", () => {
+      describe("called by non-minter, even if it is a ", () => {
+        const roleNames = [
+          "owner",
+          "withdrawer",
+          "pauser",
+          "rescuer",
+          "burner",
+          "reserveMinter",
+          "reserveBurner",
+          "stranger",
+        ];
+        for (const roleName of roleNames) {
+          it(roleName, async () => {
+            await expect(
+              treasury.connect(ROLES[roleName]).mint(100n),
+            )
+              .to.be.revertedWithCustomError(treasury, "AccessControlUnauthorizedAccount")
+              .withArgs(ROLES[roleName].address, MINTER_ROLE);
+          });
+        }
+      });
+
+      it("the contract is paused", async () => {
+        await treasury.connect(pauser).pause();
+        await expect(
+          treasury.connect(minter).mint(100n),
+        )
+          .to.be.revertedWithCustomError(treasury, "EnforcedPause");
+      });
+    });
+  });
+
+  describe("Method 'mintFromReserve()'", () => {
+    describe("Should execute as expected when called properly and", () => {
+      const mintAmount = 500n;
+
+      it("should increase treasury balance correctly", async () => {
+        const balanceBefore = await tokenMock.balanceOf(treasury);
+        await treasury.connect(reserveMinter).mintFromReserve(mintAmount);
+        const balanceAfter = await tokenMock.balanceOf(treasury);
+        expect(balanceAfter - balanceBefore).to.equal(mintAmount);
+      });
+
+      it("should emit the required event from token", async () => {
+        const tx = await treasury.connect(reserveMinter).mintFromReserve(mintAmount);
+        await expect(tx).to.emit(tokenMock, "MintedFromReserve")
+          .withArgs(await treasury.getAddress(), mintAmount);
+      });
+    });
+
+    describe("Should revert if", () => {
+      describe("called by non-reserve-minter, even if it is a ", () => {
+        const roleNames = [
+          "owner",
+          "withdrawer",
+          "pauser",
+          "rescuer",
+          "minter",
+          "burner",
+          "reserveBurner",
+          "stranger",
+        ];
+        for (const roleName of roleNames) {
+          it(roleName, async () => {
+            await expect(
+              treasury.connect(ROLES[roleName]).mintFromReserve(100n),
+            )
+              .to.be.revertedWithCustomError(treasury, "AccessControlUnauthorizedAccount")
+              .withArgs(ROLES[roleName].address, RESERVE_MINTER_ROLE);
+          });
+        }
+      });
+
+      it("the contract is paused", async () => {
+        await treasury.connect(pauser).pause();
+        await expect(
+          treasury.connect(reserveMinter).mintFromReserve(100n),
+        )
+          .to.be.revertedWithCustomError(treasury, "EnforcedPause");
+      });
+    });
+  });
+
+  describe("Method 'burn()'", () => {
+    describe("Should execute as expected when called properly and", () => {
+      const burnAmount = 500n;
+
+      it("should decrease treasury balance correctly", async () => {
+        const balanceBefore = await tokenMock.balanceOf(treasury);
+        await treasury.connect(burner).burn(burnAmount);
+        const balanceAfter = await tokenMock.balanceOf(treasury);
+        expect(balanceBefore - balanceAfter).to.equal(burnAmount);
+      });
+
+      it("should emit the required event from token", async () => {
+        const tx = await treasury.connect(burner).burn(burnAmount);
+        await expect(tx).to.emit(tokenMock, "Burned").withArgs(burnAmount);
+      });
+    });
+
+    describe("Should revert if", () => {
+      describe("called by non-burner, even if it is a ", () => {
+        const roleNames = [
+          "owner",
+          "withdrawer",
+          "pauser",
+          "rescuer",
+          "minter",
+          "reserveMinter",
+          "reserveBurner",
+          "stranger",
+        ];
+        for (const roleName of roleNames) {
+          it(roleName, async () => {
+            await expect(
+              treasury.connect(ROLES[roleName]).burn(100n),
+            )
+              .to.be.revertedWithCustomError(treasury, "AccessControlUnauthorizedAccount")
+              .withArgs(ROLES[roleName].address, BURNER_ROLE);
+          });
+        }
+      });
+
+      it("the contract is paused", async () => {
+        await treasury.connect(pauser).pause();
+        await expect(
+          treasury.connect(burner).burn(100n),
+        )
+          .to.be.revertedWithCustomError(treasury, "EnforcedPause");
+      });
+
+      it("burn amount exceeds treasury balance", async () => {
+        const excessiveAmount = BALANCE_INITIAL + 1n;
+        await expect(
+          treasury.connect(burner).burn(excessiveAmount),
+        )
+          .to.be.revertedWithCustomError(tokenMock, "ERC20InsufficientBalance");
+      });
+    });
+  });
+
+  describe("Method 'burnToReserve()'", () => {
+    describe("Should execute as expected when called properly and", () => {
+      const burnAmount = 500n;
+
+      it("should decrease treasury balance correctly", async () => {
+        const balanceBefore = await tokenMock.balanceOf(treasury);
+        await treasury.connect(reserveBurner).burnToReserve(burnAmount);
+        const balanceAfter = await tokenMock.balanceOf(treasury);
+        expect(balanceBefore - balanceAfter).to.equal(burnAmount);
+      });
+
+      it("should emit the required event from token", async () => {
+        const tx = await treasury.connect(reserveBurner).burnToReserve(burnAmount);
+        await expect(tx).to.emit(tokenMock, "BurnedToReserve").withArgs(burnAmount);
+      });
+    });
+
+    describe("Should revert if", () => {
+      describe("called by non-reserve-burner, even if it is a ", () => {
+        const roleNames = [
+          "owner",
+          "withdrawer",
+          "pauser",
+          "rescuer",
+          "minter",
+          "burner",
+          "reserveMinter",
+          "stranger",
+        ];
+        for (const roleName of roleNames) {
+          it(roleName, async () => {
+            await expect(
+              treasury.connect(ROLES[roleName]).burnToReserve(100n),
+            )
+              .to.be.revertedWithCustomError(treasury, "AccessControlUnauthorizedAccount")
+              .withArgs(ROLES[roleName].address, RESERVE_BURNER_ROLE);
+          });
+        }
+      });
+
+      it("the contract is paused", async () => {
+        await treasury.connect(pauser).pause();
+        await expect(
+          treasury.connect(reserveBurner).burnToReserve(100n),
+        )
+          .to.be.revertedWithCustomError(treasury, "EnforcedPause");
+      });
+
+      it("burn amount exceeds treasury balance", async () => {
+        const excessiveAmount = BALANCE_INITIAL + 1n;
+        await expect(
+          treasury.connect(reserveBurner).burnToReserve(excessiveAmount),
+        )
+          .to.be.revertedWithCustomError(tokenMock, "ERC20InsufficientBalance");
       });
     });
   });

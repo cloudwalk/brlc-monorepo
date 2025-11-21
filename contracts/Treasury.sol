@@ -11,6 +11,7 @@ import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
 import { RescuableUpgradeable } from "./base/RescuableUpgradeable.sol";
 import { Versionable } from "./base/Versionable.sol";
 
+import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 import { ITreasury, ITreasuryPrimary } from "./interfaces/ITreasury.sol";
 import { TreasuryStorageLayout } from "./TreasuryStorageLayout.sol";
 
@@ -38,6 +39,18 @@ contract Treasury is
 
     /// @dev The role of a withdrawer that is allowed to withdraw tokens from the treasury.
     bytes32 public constant WITHDRAWER_ROLE = keccak256("WITHDRAWER_ROLE");
+
+    /// @dev The role of an ordinary minter that is allowed to mint tokens.
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
+    /// @dev The role of an ordinary burner that is allowed to burn tokens.
+    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
+
+    /// @dev The role of a reserve minter that is allowed to mint tokens from reserve.
+    bytes32 public constant RESERVE_MINTER_ROLE = keccak256("RESERVE_MINTER_ROLE");
+
+    /// @dev The role of a reserve burner that is allowed to burn tokens to reserve.
+    bytes32 public constant RESERVE_BURNER_ROLE = keccak256("RESERVE_BURNER_ROLE");
 
     // ------------------ Constructor ----------------------------- //
 
@@ -80,6 +93,10 @@ contract Treasury is
         emit RecipientLimitPolicyUpdated(RecipientLimitPolicy.EnforceAll);
 
         _setRoleAdmin(WITHDRAWER_ROLE, GRANTOR_ROLE);
+        _setRoleAdmin(MINTER_ROLE, GRANTOR_ROLE);
+        _setRoleAdmin(BURNER_ROLE, GRANTOR_ROLE);
+        _setRoleAdmin(RESERVE_MINTER_ROLE, GRANTOR_ROLE);
+        _setRoleAdmin(RESERVE_BURNER_ROLE, GRANTOR_ROLE);
         _grantRole(OWNER_ROLE, _msgSender());
     }
 
@@ -107,6 +124,58 @@ contract Treasury is
      */
     function withdrawTo(address to, uint256 amount) external whenNotPaused onlyRole(WITHDRAWER_ROLE) {
         _withdraw(to, _msgSender(), amount);
+    }
+
+    /**
+     * @inheritdoc ITreasuryPrimary
+     *
+     * @dev Requirements:
+     *
+     * - The contract must not be paused.
+     * - The caller must have the {MINTER_ROLE} role.
+     */
+    function mint(uint256 amount) external whenNotPaused onlyRole(MINTER_ROLE) {
+        TreasuryStorage storage $ = _getTreasuryStorage();
+        IERC20Mintable($.underlyingToken).mint(address(this), amount);
+    }
+
+    /**
+     * @inheritdoc ITreasuryPrimary
+     *
+     * @dev Requirements:
+     *
+     * - The contract must not be paused.
+     * - The caller must have the {RESERVE_MINTER_ROLE} role.
+     */
+    function mintFromReserve(uint256 amount) external whenNotPaused onlyRole(RESERVE_MINTER_ROLE) {
+        TreasuryStorage storage $ = _getTreasuryStorage();
+        IERC20Mintable($.underlyingToken).mintFromReserve(address(this), amount);
+    }
+
+    /**
+     * @inheritdoc ITreasuryPrimary
+     *
+     * @dev Requirements:
+     *
+     * - The contract must not be paused.
+     * - The caller must have the {BURNER_ROLE} role.
+     */
+    function burn(uint256 amount) external whenNotPaused onlyRole(BURNER_ROLE) {
+        TreasuryStorage storage $ = _getTreasuryStorage();
+        IERC20Mintable($.underlyingToken).burn(amount);
+    }
+
+    /**
+     * @inheritdoc ITreasuryPrimary
+     *
+     * @dev Requirements:
+     *
+     * - The contract must not be paused.
+     * - The caller must have the {RESERVE_BURNER_ROLE} role.
+     */
+    function burnToReserve(uint256 amount) external whenNotPaused onlyRole(RESERVE_BURNER_ROLE) {
+        TreasuryStorage storage $ = _getTreasuryStorage();
+        IERC20Mintable($.underlyingToken).burnToReserve(amount);
     }
 
     /**

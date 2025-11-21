@@ -2,15 +2,15 @@
 
 pragma solidity ^0.8.30;
 
-import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import { AccessControlEnumerableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol";
 
 /**
  * @title AccessControlExtUpgradeable base contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev Extends the OpenZeppelin's {AccessControlUpgradeable} contract by introducing new roles and
+ * @dev Extends the OpenZeppelin's {AccessControlEnumerableUpgradeable} contract by introducing new roles and
  *      adding functions for granting and revoking roles in batch.
  */
-abstract contract AccessControlExtUpgradeable is AccessControlUpgradeable {
+abstract contract AccessControlExtUpgradeable is AccessControlEnumerableUpgradeable {
     // ------------------ Constants ------------------------------- //
 
     /// @dev The role of this contract owner.
@@ -69,6 +69,52 @@ abstract contract AccessControlExtUpgradeable is AccessControlUpgradeable {
         uint256 count = accounts.length;
         for (uint256 i = 0; i < count; ) {
             _revokeRole(role, accounts[i]);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    // ------------------ Administrative functions ---------------- //
+    // --------------- To be removed after migration -------------- //
+
+    /**
+     * @dev Sets the admin role for a role.
+     *
+     * Requirement: the caller must have the {OWNER_ROLE} role.
+     *
+     * @param role The role to set the admin for.
+     * @param adminRole The admin role to set.
+     */
+    function setRoleAdmin(bytes32 role, bytes32 adminRole) public virtual onlyRole(OWNER_ROLE) {
+        _setRoleAdmin(role, adminRole);
+    }
+
+    /**
+     * @dev Migrates existing role assignments to populate the enumerable storage.
+     *
+     * This function is useful after upgrading from {AccessControlUpgradeable} to
+     * {AccessControlEnumerableUpgradeable}. Pre-existing role assignments will work correctly
+     * but will not be enumerable until migrated.
+     *
+     * For each account in the provided array that has the specified role, the role is
+     * revoked and re-granted to populate the enumerable storage.
+     *
+     * Emits a {RoleRevoked} and {RoleGranted} event for each account that has the provided role.
+     *
+     * Requirement: the caller must have the {OWNER_ROLE} role.
+     *
+     * @param role The role to migrate.
+     * @param existingMembers The accounts that have the role and need to be migrated.
+     */
+    function migrateExistingRoles(bytes32 role, address[] memory existingMembers) public virtual onlyRole(OWNER_ROLE) {
+        uint256 count = existingMembers.length;
+        for (uint256 i = 0; i < count; ) {
+            address account = existingMembers[i];
+            if (hasRole(role, account)) {
+                _revokeRole(role, account);
+                _grantRole(role, account);
+            }
             unchecked {
                 ++i;
             }

@@ -101,6 +101,40 @@ interface ITreasuryPrimary is ITreasuryTypes {
     function withdrawTo(address to, uint256 amount) external;
 
     /**
+     * @dev Mints tokens to this treasury.
+     *
+     * @param amount The amount of tokens to mint.
+     */
+    function mint(uint256 amount) external;
+
+    /**
+     * @dev Mints tokens from reserve to this treasury.
+     *
+     * Minting from reserve means that the tokens are minted in a regular way, but the
+     * total reserve supply is also increased by the amount of tokens minted.
+     *
+     * @param amount The amount of tokens to mint from reserve.
+     */
+    function mintFromReserve(uint256 amount) external;
+
+    /**
+     * @dev Burns tokens from this treasury.
+     *
+     * @param amount The amount of tokens to burn.
+     */
+    function burn(uint256 amount) external;
+
+    /**
+     * @dev Burns tokens to reserve from this treasury.
+     *
+     * Burning to reserve means that the tokens are burned in a regular way, but the
+     * total reserve supply is also decreased by the amount of tokens burned.
+     *
+     * @param amount The amount of tokens to burn to reserve.
+     */
+    function burnToReserve(uint256 amount) external;
+
+    /**
      * @dev Sets the withdrawal limit for a recipient address.
      *
      * Recipient limits only take effect when the contract-wide policy is set to enforce them.

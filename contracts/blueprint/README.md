@@ -18,7 +18,7 @@ One of the rules files includes the example project generated from this reposito
 To update the example execute [the appropriate script file](scripts/updateExampleProject.ts) like:
 
 ```bash
- npx hardhat run scripts/updateExampleProject.ts
+ pnpx hardhat run scripts/updateExampleProject.ts
 ```
 
 ## Project Setup

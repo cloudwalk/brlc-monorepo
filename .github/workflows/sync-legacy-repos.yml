@@ -1,0 +1,83 @@
+name: Sync subfolders to legacy repos
+
+on:
+  push:
+    branches:
+      - monorepo # TODO: change to main t
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ## TODO: we use only direct object described by include for now. Later we will use name matrix.
+        # name:
+        #   - blueprint
+        #   - token
+        include:
+          - name: blueprint
+            target_branch: monorepo # TODO: change to main
+          - name: token
+            target_branch: monorepo # TODO: change to main
+
+    steps:
+      - name: Checkout monorepo (full history)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # subtree split requires history
+          persist-credentials: false
+
+      - name: Validate prefix exists
+        run: |
+          if [ ! -d "contracts/${{ matrix.name }}" ]; then
+            echo "Prefix folder does not exist: ${{ matrix.name }}"
+            exit 1
+          fi
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.DEV_EX_APP_ID }}
+          private-key: ${{ secrets.DEV_EX_APP_PRIVATE_KEY }}
+          repositories: brlc-${{ matrix.name }}
+          owner: cloudwalk
+
+      - name: Add target remote
+        run: |
+          git remote add target "https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/cloudwalk/brlc-${{ matrix.name }}.git"
+          git remote -v
+
+      - name: Split subtree and push only if changed
+        run: |
+          set -euo pipefail
+
+          PREFIX="contracts/${{ matrix.name }}"
+          TARGET_BRANCH="${{ matrix.target_branch }}"
+
+          SPLIT_SHA="$(git subtree split --prefix="$PREFIX")"
+          echo "Split SHA: $SPLIT_SHA"
+
+          if git ls-remote --exit-code --heads target "$TARGET_BRANCH" >/dev/null 2>&1; then
+            git fetch --no-tags --depth=1 target "$TARGET_BRANCH"
+            REMOTE_SHA="$(git rev-parse "FETCH_HEAD")"
+            echo "Remote SHA: $REMOTE_SHA"
+          else
+            REMOTE_SHA=""
+            echo "Remote branch does not exist yet: $TARGET_BRANCH"
+          fi
+
+          if [ -n "$REMOTE_SHA" ] && [ "$SPLIT_SHA" = "$REMOTE_SHA" ]; then
+            echo "No changes in $PREFIX since last sync. Skipping push."
+            exit 0
+          fi
+
+          split_branch="split-${{ matrix.name }}-${{ github.sha }}"
+          git branch -f "$split_branch" "$SPLIT_SHA"
+          git push --force target "$split_branch:$TARGET_BRANCH"

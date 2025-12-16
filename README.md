@@ -46,4 +46,3 @@ This repository contains utilities for smart contracts development
     - .github
     - .cursor
     - lint configs
-- [ ] Setup pnpm and test everything

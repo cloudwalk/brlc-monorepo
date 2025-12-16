@@ -1,0 +1,9 @@
+packages:
+  - packages/*
+  - contracts/*
+
+linkWorkspacePackages: false
+
+onlyBuiltDependencies:
+  - keccak
+  - secp256k1

@@ -27,12 +27,23 @@ This repository contains utilities for smart contracts development
     - [ ] brlc-token
     - [ ] brlc-treasury
 
-
-### Monorepo migration roadmap
+### Monorepo
+#### Tasks
+- [ ] Setup components codecov
+- [ ] Setup common precommit hooks and linting
 - [ ] Create CI to sync contracts from monorepo to legacy repos
 - [ ] Create CI to use in monorepo instead
+
+#### Monorepo migration roadmap
 - [ ] Move all contracts to the monorepo
 - [ ] Configure github repo with right permissions and rules
 - [ ] Migrate Stratus to the monorepo contracts
 - [ ] Join contracts by workspace and cross-reference contracts
 - [ ] Extract common contracts to a separate packages
+
+#### Monorepo migration checklist
+- [ ] Remove from repo some folders and files:
+    - .github
+    - .cursor
+    - lint configs
+- [ ] Setup pnpm and test everything

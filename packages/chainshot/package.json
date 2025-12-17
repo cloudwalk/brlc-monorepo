@@ -26,7 +26,7 @@
   },
   "peerDependencies": {
     "@nomicfoundation/hardhat-ethers": "^3.0.0",
-    "chai": ">=4",
+    "chai": "^4.5.0",
     "hardhat": "^2.0.0",
     "mocha": ">=10"
   },

@@ -1,0 +1,15 @@
+{
+  "name": "brlc-monorepo",
+  "description": "BRLC monorepo",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "onFail": "error"
+    },
+    "packageManager": {
+      "name": "pnpm",
+      "onFail": "error"
+    }
+  },
+  "packageManager": "pnpm@10.25.0"
+}

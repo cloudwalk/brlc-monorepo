@@ -1,6 +1,13 @@
 {
   "name": "brlc-monorepo",
   "description": "BRLC monorepo",
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4",
+    "eslint": "^9.39.2",
+    "typescript": "^5.9.3"
+  },
   "devEngines": {
     "runtime": {
       "name": "node",

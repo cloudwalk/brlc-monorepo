@@ -5,7 +5,9 @@
 </p>
 
 # TODO [![codecov](https://codecov.io/github/cloudwalk/brlc-blueprint/branch/main/graph/badge.svg)](https://codecov.io/github/cloudwalk/brlc-blueprint)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # TODO: [![Branch Workflow](https://github.com/cloudwalk/brlc-blueprint/actions/workflows/branch.yml/badge.svg?branch=main)](https://github.com/cloudwalk/brlc-blueprint/actions/workflows/branch.yml)
 
 This repository contains Blueprint smart contracts.

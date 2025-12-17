@@ -2,24 +2,27 @@
   "name": "brlc-monorepo",
   "description": "BRLC monorepo",
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "prettier:fix": "prettier --write \"**/*.{sol,md}\"",
+    "prettier:check": "prettier --check \"**/*.{sol,md}\"",
+    "eslint:fix": "eslint --fix \"**/*.{js,ts}\"",
+    "eslint:check": "eslint"
   },
   "lint-staged": {
-    "contracts/**/*.{js,ts}": [
-      "prettier --write"
-    ],
-    "contracts/**/*.sol": [
+    "**/*.{js,ts}": [
       "eslint --fix"
+    ],
+    "**/*.{sol,md}": [
+      "prettier --write"
     ]
   },
-  "prettier": "@cloudwalk/solidity-prettier-config",
   "devDependencies": {
     "@cloudwalk/eslint-config-smart-contracts": "^1.0.0",
-    "@cloudwalk/solidity-prettier-config": "^1.0.0",
+    "eslint": "^9.39.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
-    "eslint": "^9.39.2",
+    "prettier-plugin-solidity": "^2.2.0",
     "typescript": "^5.9.3"
   },
   "devEngines": {

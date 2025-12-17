@@ -120,7 +120,9 @@ Most editors (and GitHub) can render Mermaid diagrams directly. If not, copy the
 ```ts
 function mochaHooks(options?: {
   hre?: HardhatRuntimeEnvironment;
-  jestSnapshotPluginConfig?: Partial<import("@jest/types").Config.ProjectConfig>;
+  jestSnapshotPluginConfig?: Partial<
+    import("@jest/types").Config.ProjectConfig
+  >;
 }): import("mocha").RootHookObject;
 ```
 
@@ -157,11 +159,9 @@ Notes:
 ## Troubleshooting
 
 - Test fails with: `There are still running snapshot scenarios`
-
   - Ensure every `startChainshot` is paired with `stopChainshot` inside the same test.
 
 - No arrows for token movements in the diagram
-
   - Only ERC20 `Transfer` events are converted into arrows. Ensure the token is included in `tokens` and emits standard `Transfer(from, to, amount)`.
 
 - Balances look wrong

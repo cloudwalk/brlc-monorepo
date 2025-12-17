@@ -20,7 +20,8 @@ interface IBlueprintTypes {
      * - Withdrawal = 2 --- The withdrawal operation has been executed.
      */
     enum OperationStatus {
-        Nonexistent, Deposit,
+        Nonexistent,
+        Deposit,
         Withdrawal
     }
 

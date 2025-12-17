@@ -42,10 +42,11 @@ jobs:
 
       - run: pnpm run -r build
 
-      - run: pnpm run -r test
+      # todo: maybe split tests into separate jobs by dynamic matrix
+      - run: pnpm run -r test:coverage
 
-      # - name: run coverage action
-      #   if: runner.os == 'Linux'
-      #   uses: cloudwalk/brlc-dev-ex/.github/actions/coverage@main
-      #   with:
-      #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload results to Codecov
+        if: runner.os == 'Linux'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

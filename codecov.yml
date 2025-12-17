@@ -1,0 +1,11 @@
+component_management:
+  individual_components:
+    - component_id: contract-blueprint
+      paths:
+        - "contracts/blueprint/**"
+    - component_id: contract-token
+      paths:
+        - "contracts/token/**"
+
+comment:
+  layout: "header, diff, flags, components"

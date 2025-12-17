@@ -4,9 +4,9 @@
   <img src="./docs/media/brlc-cover.png">
 </p>
 
-[![codecov](https://codecov.io/github/cloudwalk/brlc-blueprint/branch/main/graph/badge.svg)](https://codecov.io/github/cloudwalk/brlc-blueprint)
+# TODO [![codecov](https://codecov.io/github/cloudwalk/brlc-blueprint/branch/main/graph/badge.svg)](https://codecov.io/github/cloudwalk/brlc-blueprint)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Branch Workflow](https://github.com/cloudwalk/brlc-blueprint/actions/workflows/branch.yml/badge.svg?branch=main)](https://github.com/cloudwalk/brlc-blueprint/actions/workflows/branch.yml)
+# TODO: [![Branch Workflow](https://github.com/cloudwalk/brlc-blueprint/actions/workflows/branch.yml/badge.svg?branch=main)](https://github.com/cloudwalk/brlc-blueprint/actions/workflows/branch.yml)
 
 This repository contains Blueprint smart contracts.
 
@@ -23,7 +23,8 @@ To update the example execute [the appropriate script file](scripts/updateExampl
 
 ## Project Setup
 
-Read [Documentation](https://github.com/cloudwalk/brlc-dev-ex/blob/main/docs/DEVELOPMENT.md).
+This repository is mirrored from the [BRLC monorepo](https://github.com/cloudwalk/brlc-monorepo).
+All development happens in the monorepo.
 
 ## Licensing
 

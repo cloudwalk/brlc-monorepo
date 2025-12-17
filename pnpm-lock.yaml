@@ -8,6 +8,12 @@ importers:
 
   .:
     devDependencies:
+      '@cloudwalk/eslint-config-smart-contracts':
+        specifier: ^1.0.0
+        version: 1.0.0(eslint@9.39.2)(typescript@5.9.3)
+      '@cloudwalk/solidity-prettier-config':
+        specifier: ^1.0.0
+        version: 1.0.0(prettier@3.7.4)
       eslint:
         specifier: ^9.39.2
         version: 9.39.2
@@ -453,6 +459,11 @@ packages:
     peerDependencies:
       eslint: ^9.33.0
       typescript: '>=5'
+
+  '@cloudwalk/solidity-prettier-config@1.0.0':
+    resolution: {integrity: sha512-E+Uvj70DpsZNStBNeBpNv6F3Y7AWhGZv8/MEeo7CbXVMiz/OWkQS1ciufAZvX7gA2vlOeR1FY0u8nlOvzGd8WQ==, tarball: https://npm.pkg.github.com/download/@cloudwalk/solidity-prettier-config/1.0.0/740a063493599c5f6ab88a053d941e212a426560}
+    peerDependencies:
+      prettier: ^3.6.2
 
   '@colors/colors@1.5.0':
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
@@ -4291,6 +4302,11 @@ snapshots:
       typescript-eslint: 8.50.0(eslint@9.39.2)(typescript@5.9.3)
     transitivePeerDependencies:
       - supports-color
+
+  '@cloudwalk/solidity-prettier-config@1.0.0(prettier@3.7.4)':
+    dependencies:
+      prettier: 3.7.4
+      prettier-plugin-solidity: 2.2.0(prettier@3.7.4)
 
   '@colors/colors@1.5.0':
     optional: true

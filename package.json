@@ -1,7 +1,21 @@
 {
   "name": "brlc-monorepo",
   "description": "BRLC monorepo",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "contracts/**/*.{js,ts}": [
+      "prettier --write"
+    ],
+    "contracts/**/*.sol": [
+      "eslint --fix"
+    ]
+  },
+  "prettier": "@cloudwalk/solidity-prettier-config",
   "devDependencies": {
+    "@cloudwalk/eslint-config-smart-contracts": "^1.0.0",
+    "@cloudwalk/solidity-prettier-config": "^1.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",

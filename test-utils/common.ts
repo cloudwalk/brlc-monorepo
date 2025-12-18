@@ -19,7 +19,7 @@ function arrayToObject(arr: unknown[], format: BaseObject): BaseObject {
   }, {} as BaseObject);
 }
 
-export function checkEquality<T extends BaseObject>(
+export function checkEquality<T extends Record<string, unknown>>(
   actualObject: T | unknown[],
   expectedObject: T,
   index?: number,

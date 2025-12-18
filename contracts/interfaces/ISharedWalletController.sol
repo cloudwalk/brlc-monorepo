@@ -3,6 +3,7 @@
 pragma solidity ^0.8.0;
 
 import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
+
 /**
  * @title ISharedWalletControllerTypes interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
@@ -196,6 +197,12 @@ interface ISharedWalletControllerPrimary is ISharedWalletControllerTypes {
     event WalletResumed(address indexed wallet);
 
     /**
+     * @dev Emitted when a shared wallet is deleted.
+     * @param wallet The address of the deleted wallet.
+     */
+    event WalletDeleted(address indexed wallet);
+
+    /**
      * @dev Emitted when a participant is added to a shared wallet.
      * @param wallet The address of the wallet.
      * @param participant The address of the participant.
@@ -331,6 +338,12 @@ interface ISharedWalletControllerPrimary is ISharedWalletControllerTypes {
      * @param participants The addresses of the participants.
      */
     function removeParticipants(address wallet, address[] calldata participants) external;
+
+    /**
+     * @dev Deletes a shared wallet.
+     * @param wallet The address of the shared wallet to delete.
+     */
+    function deleteWallet(address wallet) external;
 
     // ------------------ View functions --------------------------- //
 
@@ -474,6 +487,12 @@ interface ISharedWalletControllerErrors is ISharedWalletControllerTypes {
 
     /// @dev Thrown if the provided wallet address is zero.
     error SharedWalletController_WalletAddressZero();
+
+    /// @dev Thrown if the wallet address is a smart contract address.
+    error SharedWalletController_WalletAddressIsContract();
+
+    /// @dev Thrown if the wallet address has a non-zero token balance.
+    error SharedWalletController_WalletAddressHasBalance();
 
     /// @dev Thrown if the number of existing shared wallets exceeds the limit.
     error SharedWalletController_WalletCountExceedsLimit();

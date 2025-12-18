@@ -1,6 +1,5 @@
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
-import { Contract } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { connect, proveTx } from "../../test-utils/eth";
 import { setUpFixture } from "../../test-utils/common";
@@ -26,20 +25,20 @@ describe("Contract 'PausableExtUpgradeable'", async () => {
     [deployer, pauser] = await ethers.getSigners();
   });
 
-  async function deployPausableExtMock(): Promise<{ pausableExtMock: Contract }> {
+  async function deployPausableExtMock() {
     // The contract factory with the explicitly specified deployer account
     let pausableExtMockFactory = await ethers.getContractFactory("PausableExtUpgradeableMock");
     pausableExtMockFactory = pausableExtMockFactory.connect(deployer);
 
     // The contract under test with the explicitly specified initial account
-    let pausableExtMock = await upgrades.deployProxy(pausableExtMockFactory) as Contract;
+    let pausableExtMock = await upgrades.deployProxy(pausableExtMockFactory);
     await pausableExtMock.waitForDeployment();
     pausableExtMock = connect(pausableExtMock, deployer);
 
     return { pausableExtMock };
   }
 
-  async function deployAndConfigurePausableExtMock(): Promise<{ pausableExtMock: Contract }> {
+  async function deployAndConfigurePausableExtMock() {
     const { pausableExtMock } = await deployPausableExtMock();
     await proveTx(pausableExtMock.grantRole(GRANTOR_ROLE, deployer.address));
     await proveTx(pausableExtMock.grantRole(PAUSER_ROLE, pauser.address));

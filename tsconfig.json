@@ -6,8 +6,12 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "paths": {
+      "@contracts/*": ["./typechain-types/*"],
+      "@contracts": ["./typechain-types"]
+    }
   },
-  "include": ["./scripts/**/*", "./test/**/*"],
+  "include": ["./scripts/**/*", "./test/**/*", "./typechain-types/**/*"],
   "files": ["./hardhat.config.ts"]
 }

@@ -1,6 +1,6 @@
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
-import { Contract, TransactionResponse } from "ethers";
+import { TransactionResponse } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { connect, proveTx } from "../../test-utils/eth";
 import { setUpFixture } from "../../test-utils/common";
@@ -29,20 +29,20 @@ describe("Contract 'AccessControlExtUpgradeable'", async () => {
     userAddresses = [users[0].address, users[1].address, users[2].address];
   });
 
-  async function deployAccessControlExtMock(): Promise<{ accessControlExtMock: Contract }> {
+  async function deployAccessControlExtMock() {
     // The contract factory with the explicitly specified deployer account
     let accessControlExtMockFactory = await ethers.getContractFactory("AccessControlExtUpgradeableMock");
     accessControlExtMockFactory = accessControlExtMockFactory.connect(deployer);
 
     // The contract under test with the explicitly specified initial account
-    let accessControlExtMock = await upgrades.deployProxy(accessControlExtMockFactory) as Contract;
+    let accessControlExtMock = await upgrades.deployProxy(accessControlExtMockFactory);
     await accessControlExtMock.waitForDeployment();
     accessControlExtMock = connect(accessControlExtMock, deployer);
 
     return { accessControlExtMock };
   }
 
-  async function deployAndConfigureAccessControlExtMock(): Promise<{ accessControlExtMock: Contract }> {
+  async function deployAndConfigureAccessControlExtMock() {
     const { accessControlExtMock } = await deployAccessControlExtMock();
     await proveTx(accessControlExtMock.grantRole(GRANTOR_ROLE, deployer.address));
 

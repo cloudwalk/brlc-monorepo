@@ -39,7 +39,7 @@ alwaysApply: false
 ```solidity
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.24;
+pragma solidity 0.8.28;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -613,14 +613,16 @@ abstract contract RescuableUpgradeable is AccessControlExtUpgradeable {
 
 pragma solidity ^0.8.20;
 
-import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { UUPSUpgradeable } from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+
+import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 /**
  * @title UUPSExtUpgradeable base contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Extends OpenZeppelin's {UUPSUpgradeable} contract with additional checks for the new implementation address.
  */
-abstract contract UUPSExtUpgradeable is UUPSUpgradeable {
+abstract contract UUPSExtUpgradeable is UUPSUpgradeable, Initializable {
     // ------------------ Errors ---------------------------------- //
 
     /// @dev Thrown if the provided new implementation address is not a contract.
@@ -686,7 +688,7 @@ import "../interfaces/IVersionable.sol";
 abstract contract Versionable is IVersionable {
     /// @inheritdoc IVersionable
     function $__VERSION() external pure returns (Version memory) {
-        return Version(1, 1, 0);
+        return Version(1, 1, 1);
     }
 }
 ```

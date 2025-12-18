@@ -1,7 +1,7 @@
+import * as Contracts from "@contracts";
+import type { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
-import { Contract } from "ethers";
-import type { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { connect, getAddress, proveTx } from "../test-utils/eth";
 import { setUpFixture } from "../test-utils/common";
 
@@ -50,11 +50,6 @@ interface SharedOutgoingTestCase extends BaseTransferTestCase {
 }
 
 type TransferTestCase = DepositTestCase | WithdrawalTestCase | SharedIncomingTestCase | SharedOutgoingTestCase;
-
-interface Fixture {
-  sharedWalletController: Contract;
-  tokenMock: Contract;
-}
 
 // Helper functions for creating test cases
 
@@ -160,7 +155,7 @@ function createSharedOutgoingCase(
 
 // Contract deployment functions
 
-async function deployTokenMock(): Promise<Contract> {
+async function deployTokenMock() {
   const name = "ERC20 Test";
   const symbol = "TEST";
 
@@ -168,20 +163,20 @@ async function deployTokenMock(): Promise<Contract> {
   const [deployer] = await ethers.getSigners();
   tokenMockFactory = tokenMockFactory.connect(deployer);
 
-  let tokenMock = (await tokenMockFactory.deploy(name, symbol)) as Contract;
+  let tokenMock = (await tokenMockFactory.deploy(name, symbol));
   await tokenMock.waitForDeployment();
   tokenMock = connect(tokenMock, deployer);
 
   return tokenMock;
 }
 
-async function deploySharedWalletController(tokenMock: Contract): Promise<Contract> {
+async function deploySharedWalletController(tokenMock: Contracts.ERC20TokenMockWithHooks) {
   const sharedWalletControllerFactory = await ethers.getContractFactory("SharedWalletController");
   const [deployer] = await ethers.getSigners();
 
   let sharedWalletController = (await upgrades.deployProxy(sharedWalletControllerFactory, [
     getAddress(tokenMock),
-  ])) as Contract;
+  ]));
 
   await sharedWalletController.waitForDeployment();
   sharedWalletController = connect(sharedWalletController, deployer);
@@ -189,7 +184,7 @@ async function deploySharedWalletController(tokenMock: Contract): Promise<Contra
   return sharedWalletController;
 }
 
-async function deployAndConfigureContracts(): Promise<Fixture> {
+async function deployAndConfigureContracts() {
   const tokenMock = await deployTokenMock();
   const sharedWalletController = await deploySharedWalletController(tokenMock);
 
@@ -204,27 +199,27 @@ async function deployAndConfigureContracts(): Promise<Fixture> {
 
 // Helper functions for common test patterns
 async function createWalletWithParticipants(
-  sharedWalletController: Contract,
+  sharedWalletController: Contracts.SharedWalletController,
   admin: SignerWithAddress,
   walletAddress: string,
   participantAddresses: string[],
-): Promise<void> {
+) {
   await proveTx(connect(sharedWalletController, admin).createWallet(walletAddress, participantAddresses));
 }
 
 // Test engine class
 
 class TransferTestEngine {
-  private sharedWalletController: Contract;
-  private tokenMock: Contract;
+  private sharedWalletController: Contracts.SharedWalletController;
+  private tokenMock: Contracts.ERC20TokenMockWithHooks;
   private walletAddress: string;
   private participants: SignerWithAddress[];
   private admin: SignerWithAddress;
   private stranger: SignerWithAddress;
 
   constructor(
-    sharedWalletController: Contract,
-    tokenMock: Contract,
+    sharedWalletController: Contracts.SharedWalletController,
+    tokenMock: Contracts.ERC20TokenMockWithHooks,
     walletAddress: string,
     participants: SignerWithAddress[],
     admin: SignerWithAddress,

@@ -1,12 +1,14 @@
 import { upgrades } from "hardhat";
-import { BaseContract, Contract, ContractFactory, TransactionReceipt, TransactionResponse } from "ethers";
+import { BaseContract, ContractFactory, TransactionReceipt, TransactionResponse } from "ethers";
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
+import * as Contracts from "../typechain-types";
 
 export async function checkContractUupsUpgrading(
-  contract: Contract,
+  contract: Contracts.UUPSUpgradeable,
   contractFactory: ContractFactory,
-  upgradeFunctionSignature = "upgradeToAndCall(address,bytes)",
+  upgradeFunction: (expectedNewImplementationAddress: string) => Promise<TransactionResponse> =
+    (expectedNewImplementationAddress: string) => contract.upgradeToAndCall(expectedNewImplementationAddress, "0x"),
 ) {
   const contractAddress = await contract.getAddress();
   const oldImplementationAddress = await upgrades.erc1967.getImplementationAddress(contractAddress);
@@ -14,22 +16,18 @@ export async function checkContractUupsUpgrading(
   await newImplementation.waitForDeployment();
   const expectedNewImplementationAddress = await newImplementation.getAddress();
 
-  if (upgradeFunctionSignature === "upgradeToAndCall(address,bytes)") {
-    await proveTx(contract[upgradeFunctionSignature](expectedNewImplementationAddress, "0x"));
-  } else {
-    await proveTx(contract[upgradeFunctionSignature](expectedNewImplementationAddress));
-  }
+  await proveTx(upgradeFunction(expectedNewImplementationAddress));
 
   const actualNewImplementationAddress = await upgrades.erc1967.getImplementationAddress(contractAddress);
   expect(actualNewImplementationAddress).to.eq(expectedNewImplementationAddress);
   expect(actualNewImplementationAddress).not.to.eq(oldImplementationAddress);
 }
 
-export function connect(contract: BaseContract, signer: HardhatEthersSigner): Contract {
-  return contract.connect(signer) as Contract;
+export function connect<T extends BaseContract>(contract: T, signer: HardhatEthersSigner) {
+  return contract.connect(signer) as T;
 }
 
-export function getAddress(contract: Contract): string {
+export function getAddress(contract: BaseContract): string {
   const address = contract.target;
   if (typeof address !== "string" || address.length != 42 || !address.startsWith("0x")) {
     throw new Error("The '.target' field of the contract is not an address string");

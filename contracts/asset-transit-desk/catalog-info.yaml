@@ -1,0 +1,25 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: brlc-asset-transit-desk
+  description: Asset Transit Desk smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-asset-transit-desk
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - solidity
+    - typescript
+    - blockchain
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-asset-transit-desk
+      title: Repository
+      icon: github
+  labels:
+    cloudwalk.io/regulation-scope: none
+    cloudwalk.io/critical-level: hight
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain

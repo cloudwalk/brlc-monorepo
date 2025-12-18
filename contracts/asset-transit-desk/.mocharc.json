@@ -1,0 +1,5 @@
+{
+  "require": ["hardhat/register", "@cloudwalk/chainshot/hook"],
+  "timeout": 40000,
+  "_": ["test/**/*.ts"]
+}

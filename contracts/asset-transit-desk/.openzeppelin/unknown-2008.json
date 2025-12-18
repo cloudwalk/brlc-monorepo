@@ -1,0 +1,760 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0xed05008a02510B6c2B0bA35D1E7491EC98fBA1Ae",
+      "txHash": "0xcbe2c5d2ab7f6f3cbfce74dee9df7603c0a8b30e13f7ee84f3ae0c94fadac170",
+      "kind": "uups"
+    }
+  ],
+  "impls": {
+    "54cf6520e1ef9c95f29a402b9fc40d805bc11f85f95990ba6c233f831a4a7b46": {
+      "address": "0x1c11303509c568E79a1C68F5814E942f68018987",
+      "txHash": "0xc296451ff8a208f4cf033cc396643f6c47eec9d4dcc8e325bb2c87d5e79d6d55",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)26_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)36_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)26_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(AssetTransitDeskStorage)1415_storage": {
+            "label": "struct AssetTransitDeskStorageLayout.AssetTransitDeskStorage",
+            "members": [
+              {
+                "label": "token",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "surplusTreasury",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "liquidityPool",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(InitializableStorage)147_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(PausableStorage)298_storage": {
+            "label": "struct PausableUpgradeable.PausableStorage",
+            "members": [
+              {
+                "label": "_paused",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)26_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Pausable": [
+            {
+              "contract": "PausableUpgradeable",
+              "label": "_paused",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\utils\\PausableUpgradeable.sol:21",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)26_storage)",
+              "src": "@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:62",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ],
+          "erc7201:cloudwalk.storage.AssetTransitDesk": [
+            {
+              "contract": "AssetTransitDeskStorageLayout",
+              "label": "token",
+              "type": "t_address",
+              "src": "contracts\\AssetTransitDeskStorageLayout.sol:39",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "AssetTransitDeskStorageLayout",
+              "label": "surplusTreasury",
+              "type": "t_address",
+              "src": "contracts\\AssetTransitDeskStorageLayout.sol:43",
+              "offset": 0,
+              "slot": "1"
+            },
+            {
+              "contract": "AssetTransitDeskStorageLayout",
+              "label": "liquidityPool",
+              "type": "t_address",
+              "src": "contracts\\AssetTransitDeskStorageLayout.sol:47",
+              "offset": 0,
+              "slot": "2"
+            }
+          ]
+        }
+      }
+    },
+    "533b29e8326057902af5b16ca7bc96eb930f1b298485902b5b8ebf97b332835a": {
+      "address": "0xa17fb41DB7Bd3c8eF086Dfc9F61067EA13d9ed3e",
+      "txHash": "0x1bbdc800cdf1b4ff21a61b8c401129a1f45131fd9d2154f189a8cd3333b918c8",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_enum(OperationStatus)1348": {
+            "label": "enum IAssetTransitDeskTypes.OperationStatus",
+            "members": [
+              "Nonexistent",
+              "Successful"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(IssuanceOperation)1357_storage)": {
+            "label": "mapping(bytes32 => struct IAssetTransitDeskTypes.IssuanceOperation)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RedemptionOperation)1368_storage)": {
+            "label": "mapping(bytes32 => struct IAssetTransitDeskTypes.RedemptionOperation)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)26_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)36_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)26_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(AssetTransitDeskStorage)1205_storage": {
+            "label": "struct AssetTransitDeskStorageLayout.AssetTransitDeskStorage",
+            "members": [
+              {
+                "label": "token",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "surplusTreasury",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "liquidityPool",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "issuanceOperations",
+                "type": "t_mapping(t_bytes32,t_struct(IssuanceOperation)1357_storage)",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "redemptionOperations",
+                "type": "t_mapping(t_bytes32,t_struct(RedemptionOperation)1368_storage)",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_struct(InitializableStorage)147_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(IssuanceOperation)1357_storage": {
+            "label": "struct IAssetTransitDeskTypes.IssuanceOperation",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(OperationStatus)1348",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "buyer",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "principalAmount",
+                "type": "t_uint64",
+                "offset": 21,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(PausableStorage)298_storage": {
+            "label": "struct PausableUpgradeable.PausableStorage",
+            "members": [
+              {
+                "label": "_paused",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RedemptionOperation)1368_storage": {
+            "label": "struct IAssetTransitDeskTypes.RedemptionOperation",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(OperationStatus)1348",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "buyer",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "principalAmount",
+                "type": "t_uint64",
+                "offset": 21,
+                "slot": "0"
+              },
+              {
+                "label": "netYieldAmount",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(RoleData)26_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Pausable": [
+            {
+              "contract": "PausableUpgradeable",
+              "label": "_paused",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\utils\\PausableUpgradeable.sol:21",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)26_storage)",
+              "src": "@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:62",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ],
+          "erc7201:cloudwalk.storage.AssetTransitDesk": [
+            {
+              "contract": "AssetTransitDeskStorageLayout",
+              "label": "token",
+              "type": "t_address",
+              "src": "contracts\\AssetTransitDeskStorageLayout.sol:44",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "AssetTransitDeskStorageLayout",
+              "label": "surplusTreasury",
+              "type": "t_address",
+              "src": "contracts\\AssetTransitDeskStorageLayout.sol:48",
+              "offset": 0,
+              "slot": "1"
+            },
+            {
+              "contract": "AssetTransitDeskStorageLayout",
+              "label": "liquidityPool",
+              "type": "t_address",
+              "src": "contracts\\AssetTransitDeskStorageLayout.sol:52",
+              "offset": 0,
+              "slot": "2"
+            },
+            {
+              "contract": "AssetTransitDeskStorageLayout",
+              "label": "issuanceOperations",
+              "type": "t_mapping(t_bytes32,t_struct(IssuanceOperation)1357_storage)",
+              "src": "contracts\\AssetTransitDeskStorageLayout.sol:56",
+              "offset": 0,
+              "slot": "3"
+            },
+            {
+              "contract": "AssetTransitDeskStorageLayout",
+              "label": "redemptionOperations",
+              "type": "t_mapping(t_bytes32,t_struct(RedemptionOperation)1368_storage)",
+              "src": "contracts\\AssetTransitDeskStorageLayout.sol:60",
+              "offset": 0,
+              "slot": "4"
+            }
+          ]
+        }
+      }
+    },
+    "21d8fb3d809bbe7fd77b9c878f96bf11f356f203a19e32807c2a17e85177ec93": {
+      "address": "0xcAb48a3FE9fA3ddD98C4c016Bc57B6543834Ec4B",
+      "txHash": "0xda0776b469cc09d0adef82419e5ff977538283fa087ebc6e39d4560c038fca89",
+      "layout": {
+        "solcVersion": "0.8.28",
+        "storage": [],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_enum(OperationStatus)1592": {
+            "label": "enum IAssetTransitDeskTypes.OperationStatus",
+            "members": [
+              "Nonexistent",
+              "Successful"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(IssuanceOperation)1601_storage)": {
+            "label": "mapping(bytes32 => struct IAssetTransitDeskTypes.IssuanceOperation)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RedemptionOperation)1612_storage)": {
+            "label": "mapping(bytes32 => struct IAssetTransitDeskTypes.RedemptionOperation)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)26_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)36_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)26_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(AssetTransitDeskStorage)1449_storage": {
+            "label": "struct AssetTransitDeskStorageLayout.AssetTransitDeskStorage",
+            "members": [
+              {
+                "label": "token",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "surplusTreasury",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "liquidityPool",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "issuanceOperations",
+                "type": "t_mapping(t_bytes32,t_struct(IssuanceOperation)1601_storage)",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "redemptionOperations",
+                "type": "t_mapping(t_bytes32,t_struct(RedemptionOperation)1612_storage)",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_struct(InitializableStorage)147_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(IssuanceOperation)1601_storage": {
+            "label": "struct IAssetTransitDeskTypes.IssuanceOperation",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(OperationStatus)1592",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "buyer",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "principalAmount",
+                "type": "t_uint64",
+                "offset": 21,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(PausableStorage)298_storage": {
+            "label": "struct PausableUpgradeable.PausableStorage",
+            "members": [
+              {
+                "label": "_paused",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RedemptionOperation)1612_storage": {
+            "label": "struct IAssetTransitDeskTypes.RedemptionOperation",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(OperationStatus)1592",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "buyer",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "principalAmount",
+                "type": "t_uint64",
+                "offset": 21,
+                "slot": "0"
+              },
+              {
+                "label": "netYieldAmount",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(RoleData)26_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Pausable": [
+            {
+              "contract": "PausableUpgradeable",
+              "label": "_paused",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\utils\\PausableUpgradeable.sol:21",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)26_storage)",
+              "src": "@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:62",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ],
+          "erc7201:cloudwalk.storage.AssetTransitDesk": [
+            {
+              "contract": "AssetTransitDeskStorageLayout",
+              "label": "token",
+              "type": "t_address",
+              "src": "contracts\\AssetTransitDeskStorageLayout.sol:44",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "AssetTransitDeskStorageLayout",
+              "label": "surplusTreasury",
+              "type": "t_address",
+              "src": "contracts\\AssetTransitDeskStorageLayout.sol:48",
+              "offset": 0,
+              "slot": "1"
+            },
+            {
+              "contract": "AssetTransitDeskStorageLayout",
+              "label": "liquidityPool",
+              "type": "t_address",
+              "src": "contracts\\AssetTransitDeskStorageLayout.sol:52",
+              "offset": 0,
+              "slot": "2"
+            },
+            {
+              "contract": "AssetTransitDeskStorageLayout",
+              "label": "issuanceOperations",
+              "type": "t_mapping(t_bytes32,t_struct(IssuanceOperation)1601_storage)",
+              "src": "contracts\\AssetTransitDeskStorageLayout.sol:56",
+              "offset": 0,
+              "slot": "3"
+            },
+            {
+              "contract": "AssetTransitDeskStorageLayout",
+              "label": "redemptionOperations",
+              "type": "t_mapping(t_bytes32,t_struct(RedemptionOperation)1612_storage)",
+              "src": "contracts\\AssetTransitDeskStorageLayout.sol:60",
+              "offset": 0,
+              "slot": "4"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

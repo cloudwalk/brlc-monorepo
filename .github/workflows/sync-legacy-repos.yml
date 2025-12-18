@@ -19,21 +19,21 @@ jobs:
         target_branch:
           - main
         contract:
-          - asset-transit-desk
-          - balance-freezer
-          - balance-tracker
-          - blueprint
-          - capybara-finance
-          - card-payment-processor
-          - card-payment-processor-v2
-          - cashier
-          - credit-agent
-          - multisig
-          - net-yield-distributor
-          - periphery
-          - shared-wallet-controller
+          # - asset-transit-desk
+          # - balance-freezer
+          # - balance-tracker
+          # - blueprint
+          # - capybara-finance
+          # - card-payment-processor
+          # - card-payment-processor-v2
+          # - cashier
+          # - credit-agent
+          # - multisig
+          # - net-yield-distributor
+          # - periphery
+          # - shared-wallet-controller
           - token
-          - treasury
+          # - treasury
 
     steps:
       - name: Checkout monorepo (full history)

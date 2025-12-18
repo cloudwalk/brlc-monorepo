@@ -43,7 +43,7 @@ let stranger: HardhatEthersSigner; // has no roles
 let ROLES: Record<string, HardhatEthersSigner> = {};
 const EXPECTED_VERSION = {
   major: 1,
-  minor: 0,
+  minor: 1,
   patch: 0,
 };
 

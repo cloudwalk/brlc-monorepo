@@ -1,3 +1,5 @@
+# 1.1.0
+
 ## Main Changes
 
 - Added token mint and burn operations with role-based access control.
@@ -61,14 +63,17 @@
 The treasury now supports minting and burning tokens through the underlying ERC20 token contract that implements the `IERC20Mintable` interface.
 
 ### Mint Operations
+
 - `mint()` — Mints tokens directly to the treasury's balance. The underlying token's `mint()` function is called.
 - `mintFromReserve()` — Mints tokens to the treasury while also increasing the token's total reserve supply. This is useful for tokens with reserve accounting.
 
 ### Burn Operations
+
 - `burn()` — Burns tokens from the treasury's balance. The underlying token's `burn()` function is called.
 - `burnToReserve()` — Burns tokens from the treasury while also decreasing the token's total reserve supply. This is useful for tokens with reserve accounting.
 
 ### Security and Access Control
+
 - Each operation requires a specific role (`MINTER_ROLE`, `RESERVE_MINTER_ROLE`, `BURNER_ROLE`, `RESERVE_BURNER_ROLE`).
 - All operations respect the contract's pause state and will revert if the contract is paused.
 - Burn operations will revert if the treasury's balance is insufficient.
@@ -76,6 +81,7 @@ The treasury now supports minting and burning tokens through the underlying ERC2
 ## Recipient Limits Behavior
 
 ### When Policy is EnforceAll (default)
+
 - Only recipients with configured limits can receive funds (allowlist enforcement).
 - Recipients not in the map are treated as having a 0 limit and cannot receive funds.
 - Each withdrawal decrements the recipient's limit.
@@ -84,6 +90,7 @@ The treasury now supports minting and burning tokens through the underlying ERC2
 - Recipients with `type(uint256).max` have unlimited withdrawals (limit is not decremented).
 
 ### When Policy is Disabled
+
 - Withdrawals can be made to any address without checks.
 - Recipient limits are NOT decremented.
 - Configured limits are preserved and can be re-enforced by switching policy back to `EnforceAll`.
@@ -99,6 +106,7 @@ The Treasury contract is a secure, upgradeable vault for a single ERC20 token wi
 ### Transactional Functions
 
 #### `withdraw(uint256 amount)`
+
 - **Purpose**: Withdraws tokens to the caller's address
 - **Access**: WITHDRAWER_ROLE required
 - **Intended Usage**: Designed for smart contracts that need programmatic access to treasury funds. Grant WITHDRAWER_ROLE to smart contracts that require automated token withdrawals to their own addresses
@@ -107,6 +115,7 @@ The Treasury contract is a secure, upgradeable vault for a single ERC20 token wi
 - **Events**: Emits `Withdrawal` event
 
 #### `withdrawTo(address to, uint256 amount)`
+
 - **Purpose**: Withdraws tokens to a specified address
 - **Access**: WITHDRAWER_ROLE required (changed from MANAGER_ROLE in latest version)
 - **Intended Usage**: Allows withdrawers to transfer tokens to any destination address for treasury management and distribution purposes
@@ -116,6 +125,7 @@ The Treasury contract is a secure, upgradeable vault for a single ERC20 token wi
 - **Events**: Emits `Withdrawal` event
 
 #### `mint(uint256 amount)`
+
 - **Purpose**: Mints tokens to the treasury
 - **Access**: MINTER_ROLE required
 - **Parameters**:
@@ -123,6 +133,7 @@ The Treasury contract is a secure, upgradeable vault for a single ERC20 token wi
 - **Effects**: Calls mint function on underlying ERC20 token
 
 #### `mintFromReserve(uint256 amount)`
+
 - **Purpose**: Mints tokens from reserve to the treasury
 - **Access**: RESERVE_MINTER_ROLE required
 - **Parameters**:
@@ -130,6 +141,7 @@ The Treasury contract is a secure, upgradeable vault for a single ERC20 token wi
 - **Effects**: Calls mintFromReserve function on underlying ERC20 token
 
 #### `burn(uint256 amount)`
+
 - **Purpose**: Burns tokens from the treasury
 - **Access**: BURNER_ROLE required
 - **Parameters**:
@@ -137,6 +149,7 @@ The Treasury contract is a secure, upgradeable vault for a single ERC20 token wi
 - **Effects**: Calls burn function on underlying ERC20 token
 
 #### `burnToReserve(uint256 amount)`
+
 - **Purpose**: Burns tokens to reserve from the treasury
 - **Access**: RESERVE_BURNER_ROLE required
 - **Parameters**:
@@ -146,6 +159,7 @@ The Treasury contract is a secure, upgradeable vault for a single ERC20 token wi
 ### View Functions
 
 #### `underlyingToken()`
+
 - **Purpose**: Returns the address of the managed ERC20 token
 - **Access**: Public view
 - **Returns**: `address` - Token contract address
@@ -153,6 +167,7 @@ The Treasury contract is a secure, upgradeable vault for a single ERC20 token wi
 ## Events
 
 ### `Withdrawal(address indexed to, address indexed withdrawer, uint256 amount)`
+
 - **Emitted by**: `withdraw()` and `withdrawTo()` functions
 - **Purpose**: Logs token withdrawal operations
 - **Parameters**:
@@ -165,30 +180,35 @@ The Treasury contract is a secure, upgradeable vault for a single ERC20 token wi
 ### Treasury-Specific Roles
 
 #### `WITHDRAWER_ROLE`
+
 - **Purpose**: Allows withdrawing tokens from the treasury
 - **Functions**: `withdraw()`, `withdrawTo()`
 - **Admin Role**: GRANTOR_ROLE
 - **Intended Recipients**: Smart contracts and accounts that need to withdraw treasury funds
 
 #### `MINTER_ROLE`
+
 - **Purpose**: Allows minting tokens to the treasury
 - **Functions**: `mint()`
 - **Admin Role**: GRANTOR_ROLE
 - **Intended Recipients**: Accounts authorized to mint tokens directly to the treasury
 
 #### `BURNER_ROLE`
+
 - **Purpose**: Allows burning tokens from the treasury
 - **Functions**: `burn()`
 - **Admin Role**: GRANTOR_ROLE
 - **Intended Recipients**: Accounts authorized to burn tokens from the treasury balance
 
 #### `RESERVE_MINTER_ROLE`
+
 - **Purpose**: Allows minting tokens from reserve to the treasury
 - **Functions**: `mintFromReserve()`
 - **Admin Role**: GRANTOR_ROLE
 - **Intended Recipients**: Accounts authorized to mint tokens with reserve accounting
 
 #### `RESERVE_BURNER_ROLE`
+
 - **Purpose**: Allows burning tokens to reserve from the treasury
 - **Functions**: `burnToReserve()`
 - **Admin Role**: GRANTOR_ROLE

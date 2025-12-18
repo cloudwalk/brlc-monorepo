@@ -4,9 +4,9 @@
   <img src="./docs/media/brlc-cover.png">
 </p>
 
-[![codecov](https://codecov.io/github/cloudwalk/brlc-treasury-wallet/branch/main/graph/badge.svg)](https://codecov.io/github/cloudwalk/brlc-treasury-wallet)
+[![codecov](https://codecov.io/github/cloudwalk/brlc-treasury/branch/main/graph/badge.svg)](https://codecov.io/github/cloudwalk/brlc-treasury)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Branch Workflow](https://github.com/cloudwalk/brlc-treasury-wallet/actions/workflows/branch.yml/badge.svg?branch=main)](https://github.com/cloudwalk/brlc-treasury-wallet/actions/workflows/branch.yml)
+[![Branch Workflow](https://github.com/cloudwalk/brlc-treasury/actions/workflows/branch.yml/badge.svg?branch=main)](https://github.com/cloudwalk/brlc-treasury/actions/workflows/branch.yml)
 
 This repository contains Treasury smart contracts.
 

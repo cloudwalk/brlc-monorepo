@@ -1,0 +1,24 @@
+# Project dependencies
+node_modules
+
+# TypeChain files
+/typechain
+/typechain-types
+
+# Hardhat files
+/cache
+/artifacts
+
+# Coverage files
+/coverage
+/coverage.json
+
+# IDE-specific files
+.idea
+
+# Environment variables
+.env
+
+# Other
+/flatten
+/tmp

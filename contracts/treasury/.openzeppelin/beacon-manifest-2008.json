@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "beacons": [
+    {
+      "address": "0x85C38802763f9F7b5BaB7Bab1f59C13fcfF0eDf5",
+      "txHash": "0x7d7a4f891033d54ea2b38b52d19bd08fa6f6d49b45785b5391d8e46439471ba5"
+    }
+  ]
+}

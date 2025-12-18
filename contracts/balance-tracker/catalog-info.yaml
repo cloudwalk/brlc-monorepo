@@ -1,0 +1,25 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: brlc-balance-tracker
+  description: Balance tracker smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-balance-tracker
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - solidity
+    - typescript
+    - blockchain
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-balance-tracker
+      title: Repository
+      icon: github
+  labels:
+    cloudwalk.io/regulation-scope: none
+    cloudwalk.io/critical-level: high
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain

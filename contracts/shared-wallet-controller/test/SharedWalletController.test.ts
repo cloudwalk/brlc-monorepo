@@ -1,15 +1,17 @@
 /* eslint @typescript-eslint/no-unused-expressions: "off", @typescript-eslint/no-non-null-assertion: "off" */
-
+import * as Contracts from "@contracts";
+import type {
+  ISharedWalletControllerTypes,
+} from "@contracts/contracts/interfaces/ISharedWalletController.sol/ISharedWalletControllerPrimary";
+import type { ContractTransactionResponse } from "ethers";
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
-import { Contract, ContractFactory } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import type { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { checkContractUupsUpgrading, connect, getAddress, proveTx } from "../test-utils/eth";
 import { checkEquality, setUpFixture } from "../test-utils/common";
 
 // Expected version of the contract
-const EXPECTED_VERSION: Version = {
+const EXPECTED_VERSION = {
   major: 1,
   minor: 0,
   patch: 0,
@@ -21,6 +23,7 @@ const ALLOWANCE_MAX = ethers.MaxUint256;
 const MAX_PARTICIPANTS_PER_WALLET = 100;
 const BALANCE_INITIAL = 1000000000000n;
 const ACCURACY_FACTOR = 10000n;
+const MAX_UINT64 = 2n ** 64n - 1n;
 
 // Roles of the contract under test
 const OWNER_ROLE: string = ethers.id("OWNER_ROLE");
@@ -33,6 +36,7 @@ const ADMIN_ROLE: string = ethers.id("ADMIN_ROLE");
 const EVENT_NAME_WALLET_CREATED = "WalletCreated";
 const EVENT_NAME_WALLET_SUSPENDED = "WalletSuspended";
 const EVENT_NAME_WALLET_RESUMED = "WalletResumed";
+const EVENT_NAME_WALLET_DELETED = "WalletDeleted";
 const EVENT_NAME_PARTICIPANT_ADDED = "ParticipantAdded";
 const EVENT_NAME_PARTICIPANT_REMOVED = "ParticipantRemoved";
 const EVENT_NAME_DEPOSIT = "Deposit";
@@ -69,9 +73,11 @@ const ERROR_NAME_PARTICIPANT_IS_SHARED_WALLET = "SharedWalletController_Particip
 const ERROR_NAME_PARTICIPANT_BALANCE_NOT_ZERO = "SharedWalletController_ParticipantBalanceNotZero";
 const ERROR_NAME_PARTICIPANT_BALANCE_INSUFFICIENT = "SharedWalletController_ParticipantBalanceInsufficient";
 const ERROR_NAME_TRANSFER_AMOUNT_NOT_ROUNDED = "SharedWalletController_TransferAmountNotRounded";
+const ERROR_NAME_WALLET_ADDRESS_IS_CONTRACT = "SharedWalletController_WalletAddressIsContract";
+const ERROR_NAME_WALLET_ADDRESS_HAS_BALANCE = "SharedWalletController_WalletAddressHasBalance";
 const ERROR_NAME_WALLET_AND_PARTICIPANT_ADDRESSES_BOTH_ZERO =
   "SharedWalletController_WalletAndParticipantAddressesBothZero";
-
+const ERROR_NAME_AGGREGATED_BALANCE_EXCEEDS_LIMIT = "SharedWalletController_AggregatedBalanceExceedsLimit";
 // Types of the contract under test
 enum WalletStatus {
   Nonexistent = 0,
@@ -84,77 +90,14 @@ enum ParticipantStatus {
   Registered = 1,
 }
 
-interface WalletOverview {
-  wallet: string;
-  walletStatus: WalletStatus;
-  walletBalance: bigint;
-  participantSummaries: ParticipantSummary[];
-  // Indexing signature to ensure that fields are iterated over in a key-value style
-  [key: string]: string | number | bigint | ParticipantSummary[];
-}
-
-interface WalletSummary {
-  wallet: string;
-  walletStatus: WalletStatus;
-  walletBalance: bigint;
-  participantBalance: bigint;
-  // Indexing signature to ensure that fields are iterated over in a key-value style
-  [key: string]: string | number | bigint;
-}
-
-interface ParticipantOverview {
-  participant: string;
-  totalBalance: bigint;
-  walletSummaries: WalletSummary[];
-  // Indexing signature to ensure that fields are iterated over in a key-value style
-  [key: string]: string | bigint | WalletSummary[];
-}
-
-interface ParticipantSummary {
-  participant: string;
-  participantBalance: bigint;
-  // Indexing signature to ensure that fields are iterated over in a key-value style
-  [key: string]: string | number | bigint;
-}
-
-interface WalletParticipantPair {
-  wallet: string;
-  participant: string;
-  // Indexing signature to ensure that fields are iterated over in a key-value style
-  [key: string]: string;
-}
-
-interface RelationshipOverview {
-  // Wallet information
-  wallet: string;
-  walletStatus: WalletStatus;
-  walletBalance: bigint;
-  // Participant information
-  participant: string;
-  participantBalance: bigint;
-  // Indexing signature to ensure that fields are iterated over in a key-value style
-  [key: string]: string | number | bigint;
-}
-
-interface Version {
-  major: number;
-  minor: number;
-  patch: number;
-  // Indexing signature to ensure that fields are iterated over in a key-value style
-  [key: string]: number;
-}
-
-interface Fixture {
-  sharedWalletController: Contract;
-  tokenMock: Contract;
-}
+type WalletParticipantPair = ISharedWalletControllerTypes.WalletParticipantPairStruct;
 
 // Helper functions for creating test data
 function createTestWalletOverview(
   wallet: string,
   status: WalletStatus = WalletStatus.Active,
   balance = 0n,
-): WalletOverview {
+): ISharedWalletControllerTypes.WalletOverviewStruct {
   return {
     wallet,
     walletStatus: status,
@@ -168,7 +111,7 @@ function createTestWalletSummary(
   walletStatus: WalletStatus = WalletStatus.Active,
   walletBalance = 0n,
   participantBalance = 0n,
-): WalletSummary {
+): ISharedWalletControllerTypes.WalletSummaryStruct {
   return {
     wallet,
     walletStatus,
@@ -180,7 +123,7 @@ function createTestWalletSummary(
 function createTestParticipantSummary(
   participant: string,
   balance = 0n,
-): ParticipantSummary {
+): ISharedWalletControllerTypes.ParticipantSummaryStruct {
   return {
     participant,
     participantBalance: balance,
@@ -190,8 +133,8 @@ function createTestParticipantSummary(
 function createTestParticipantOverview(
   participant: string,
   totalBalance = 0n,
-  walletSummaries: WalletSummary[] = [],
-): ParticipantOverview {
+  walletSummaries: ISharedWalletControllerTypes.WalletSummaryStruct[] = [],
+): ISharedWalletControllerTypes.ParticipantOverviewStruct {
   return {
     participant,
     totalBalance,
@@ -206,7 +149,7 @@ function createTestRelationshipOverview(
   walletStatus: WalletStatus = WalletStatus.Active,
   walletBalance = 0n,
   participantStatus: ParticipantStatus = ParticipantStatus.Registered,
-): RelationshipOverview {
+): ISharedWalletControllerTypes.RelationshipOverviewStruct {
   return {
     wallet,
     walletStatus,
@@ -218,7 +161,7 @@ function createTestRelationshipOverview(
 }
 
 describe("Contract 'SharedWalletController'", () => {
-  let sharedWalletControllerFactory: ContractFactory;
+  let sharedWalletControllerFactory: Contracts.SharedWalletController__factory;
 
   let deployer: HardhatEthersSigner;
   let grantor: HardhatEthersSigner;
@@ -440,24 +383,24 @@ describe("Contract 'SharedWalletController'", () => {
     };
   }
 
-  async function deployTokenMock(): Promise<Contract> {
+  async function deployTokenMock() {
     const name = "ERC20 Test";
     const symbol = "TEST";
 
     let tokenMockFactory = await ethers.getContractFactory("ERC20TokenMockWithHooks");
     tokenMockFactory = tokenMockFactory.connect(deployer);
 
-    let tokenMock = (await tokenMockFactory.deploy(name, symbol)) as Contract;
+    let tokenMock = (await tokenMockFactory.deploy(name, symbol));
     await tokenMock.waitForDeployment();
     tokenMock = connect(tokenMock, deployer);
 
     return tokenMock;
   }
 
-  async function deploySharedWalletController(tokenMock: Contract): Promise<Contract> {
+  async function deploySharedWalletController(tokenMock: Contracts.ERC20TokenMockWithHooks) {
     let sharedWalletController = (await upgrades.deployProxy(sharedWalletControllerFactory, [
       getAddress(tokenMock),
-    ])) as Contract;
+    ]));
 
     await sharedWalletController.waitForDeployment();
     sharedWalletController = connect(sharedWalletController, deployer);
@@ -465,7 +408,7 @@ describe("Contract 'SharedWalletController'", () => {
     return sharedWalletController;
   }
 
-  async function deployContracts(): Promise<Fixture> {
+  async function deployContracts() {
     const tokenMock = await deployTokenMock();
     const sharedWalletController = await deploySharedWalletController(tokenMock);
 
@@ -475,7 +418,7 @@ describe("Contract 'SharedWalletController'", () => {
     };
   }
 
-  async function deployAndConfigureContracts(): Promise<Fixture> {
+  async function deployAndConfigureContracts() {
     const fixture = await deployContracts();
     const { sharedWalletController, tokenMock } = fixture;
 
@@ -496,39 +439,39 @@ describe("Contract 'SharedWalletController'", () => {
 
   // Helper functions for common test patterns
   async function createWalletWithParticipants(
-    sharedWalletController: Contract,
+    sharedWalletController: Contracts.SharedWalletController,
     walletAddress: string,
     participantAddresses: string[],
-  ): Promise<void> {
+  ) {
     await proveTx(connect(sharedWalletController, admin).createWallet(walletAddress, participantAddresses));
   }
 
   async function expectAccessControlError(
     promise: Promise<unknown>,
-    contract: Contract,
+    contract: Contracts.SharedWalletController,
     account: string,
     role: string,
-  ): Promise<void> {
+  ) {
     await expect(promise)
       .to.be.revertedWithCustomError(contract, ERROR_NAME_ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT)
       .withArgs(account, role);
   }
 
-  async function expectPauseError(promise: Promise<unknown>, contract: Contract): Promise<void> {
+  async function expectPauseError(promise: Promise<unknown>, contract: Contracts.SharedWalletController) {
     await expect(promise).to.be.revertedWithCustomError(contract, ERROR_NAME_ENFORCED_PAUSE);
   }
 
-  async function pauseContract(sharedWalletController: Contract): Promise<void> {
+  async function pauseContract(sharedWalletController: Contracts.SharedWalletController) {
     await proveTx(connect(sharedWalletController, grantor).grantRole(PAUSER_ROLE, pauser.address));
     await proveTx(connect(sharedWalletController, pauser).pause());
   }
 
   async function transferTokens(
-    tokenMock: Contract,
-    from: SignerWithAddress,
+    tokenMock: Contracts.ERC20TokenMockWithHooks,
+    from: HardhatEthersSigner,
     to: string,
     amount: bigint,
-  ): Promise<void> {
+  ) {
     await proveTx(connect(tokenMock, from).transfer(to, amount));
   }
 
@@ -585,7 +528,7 @@ describe("Contract 'SharedWalletController'", () => {
       it("The token address is zero", async () => {
         const anotherContract = (await upgrades.deployProxy(sharedWalletControllerFactory, [], {
           initializer: false,
-        })) as Contract;
+        }));
 
         await expect(anotherContract.initialize(ADDRESS_ZERO)).to.be.revertedWithCustomError(
           anotherContract,
@@ -603,7 +546,7 @@ describe("Contract 'SharedWalletController'", () => {
 
       it("Is called for the contract implementation", async () => {
         const tokenAddress = participants[0].address;
-        const implementation = (await sharedWalletControllerFactory.deploy()) as Contract;
+        const implementation = await sharedWalletControllerFactory.deploy();
         await implementation.waitForDeployment();
 
         await expect(implementation.initialize(tokenAddress)).to.be.revertedWithCustomError(
@@ -828,6 +771,28 @@ describe("Contract 'SharedWalletController'", () => {
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_ALREADY_EXISTS);
       });
 
+      it("The wallet address is a smart contract", async () => {
+        const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
+
+        // Try to create wallet with token contract address (which is a smart contract)
+        await expect(
+          connect(sharedWalletController, admin).createWallet(getAddress(tokenMock), [participants[0].address]),
+        ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_ADDRESS_IS_CONTRACT);
+      });
+
+      it("The wallet address has existing token balance", async () => {
+        const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
+        const walletAddress = sharedWallets[0].address;
+
+        // Give the wallet address some token balance first
+        await proveTx(tokenMock.mint(walletAddress, BALANCE_INITIAL));
+
+        // Try to create wallet with address that has token balance
+        await expect(
+          connect(sharedWalletController, admin).createWallet(walletAddress, [participants[0].address]),
+        ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_ADDRESS_HAS_BALANCE);
+      });
+
       it("The wallet count exceeds maximum limit (to be implemented)", async () => {
         // This test would require creating 2^32 wallets which is impractical
         // Instead, we temporarily test that the error exists
@@ -930,7 +895,7 @@ describe("Contract 'SharedWalletController'", () => {
         await transferTokens(tokenMock, participant, walletAddress, transferAmount);
 
         // Verify wallet has non-zero balance before suspension attempt
-        const walletOverviews: WalletOverview[] = await sharedWalletController.getWalletOverviews([walletAddress]);
+        const walletOverviews = await sharedWalletController.getWalletOverviews([walletAddress]);
         expect(walletOverviews[0].walletBalance).to.equal(transferAmount);
 
         // Try to suspend wallet with non-zero balance
@@ -938,6 +903,116 @@ describe("Contract 'SharedWalletController'", () => {
           sharedWalletController,
           ERROR_NAME_WALLET_BALANCE_NOT_ZERO,
         );
+      });
+    });
+  });
+
+  describe("Function 'deleteWallet()'", () => {
+    describe("Executes as expected", () => {
+      for (const participantCount of [1, 2, 3]) {
+        describe(`Deletes wallet with ${participantCount} participants successfully`, () => {
+          let initialWalletCount: bigint;
+          let walletAddress: string;
+          let tx: ContractTransactionResponse;
+          let sharedWalletController: Contracts.SharedWalletController;
+          beforeEach(async () => {
+            ({ sharedWalletController } = await setUpFixture(deployAndConfigureContracts));
+            walletAddress = sharedWallets[0].address;
+            initialWalletCount = await sharedWalletController.getWalletCount();
+
+            await sharedWalletController.connect(admin)
+              .createWallet(walletAddress, participants.slice(0, participantCount).map(p => p.address));
+
+            tx = await sharedWalletController.connect(deployer).deleteWallet(walletAddress);
+          });
+
+          it("Emits required event", async () => {
+            await expect(tx).to.emit(sharedWalletController, EVENT_NAME_WALLET_DELETED).withArgs(walletAddress);
+          });
+
+          it("Decreases the wallet count by 1", async () => {
+            expect(await sharedWalletController.getWalletCount()).to.equal(initialWalletCount);
+          });
+
+          it("Removes wallet from participants", async () => {
+            for (const participant of participants.slice(0, participantCount)) {
+              expect(await sharedWalletController.getParticipantWallets(participant.address))
+                .to.not.include(walletAddress);
+            }
+          });
+
+          it("Remove participant from wallet", async () => {
+            expect(await sharedWalletController.getWalletParticipants(walletAddress))
+              .to.deep.equal([]);
+          });
+
+          it("Returns empty wallet overview for deleted wallet", async () => {
+            expect(await sharedWalletController.getWalletOverviews([walletAddress])).to.deep.equal([
+              [
+                walletAddress,
+                WalletStatus.Nonexistent,
+                0n,
+                [],
+              ],
+            ]);
+          });
+        });
+      }
+    });
+
+    describe("Is reverted if", () => {
+      let sharedWalletController: Contracts.SharedWalletController;
+      let tokenMock: Contracts.ERC20TokenMockWithHooks;
+      let walletAddress: string;
+      beforeEach(async () => {
+        ({ sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts));
+        walletAddress = sharedWallets[0].address;
+      });
+
+      it("The caller does not have the owner role", async () => {
+        await createWalletWithParticipants(sharedWalletController, walletAddress, [participants[0].address]);
+
+        // Try to delete with unauthorized account
+        await expectAccessControlError(
+          sharedWalletController.connect(stranger).deleteWallet(walletAddress),
+          sharedWalletController,
+          stranger.address,
+          OWNER_ROLE,
+        );
+      });
+
+      it("The contract is paused", async () => {
+        await createWalletWithParticipants(sharedWalletController, walletAddress, [participants[0].address]);
+
+        await pauseContract(sharedWalletController);
+
+        await expectPauseError(
+          sharedWalletController.connect(deployer).deleteWallet(walletAddress),
+          sharedWalletController,
+        );
+      });
+
+      it("The wallet address is zero", async () => {
+        await expect(
+          sharedWalletController.connect(deployer).deleteWallet(ADDRESS_ZERO),
+        ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_NONEXISTENT);
+      });
+
+      it("The wallet does not exist", async () => {
+        await expect(
+          sharedWalletController.connect(deployer).deleteWallet(sharedWallets[0].address),
+        ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_NONEXISTENT);
+      });
+
+      it("The wallet has non-zero balance", async () => {
+        // Create wallet and add balance
+        await createWalletWithParticipants(sharedWalletController, walletAddress, [participants[0].address]);
+        await proveTx(tokenMock.connect(participants[0]).transfer(walletAddress, 10000n));
+
+        // Try to delete wallet with balance
+        await expect(
+          sharedWalletController.connect(deployer).deleteWallet(walletAddress),
+        ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_BALANCE_NOT_ZERO);
       });
     });
   });
@@ -1544,7 +1619,7 @@ describe("Contract 'SharedWalletController'", () => {
 
   describe("Function 'afterTokenTransfer()'", () => {
     describe("Executes as expected", () => {
-      it("Ignores zero amount transfers correctly", async () => {
+      it("Handles zero amount transfers correctly", async () => {
         const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
         const walletAddress = sharedWallets[0].address;
 
@@ -1561,11 +1636,22 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Transfer zero amount from participant
         const tx1 = connect(tokenMock, participants[0]).transfer(walletAddress, 0n);
-        // Transfer zero amount from non-participant
-        await connect(tokenMock, stranger).transfer(walletAddress, 0n);
 
-        await expect(tx1).not.to.emit(sharedWalletController, EVENT_NAME_DEPOSIT);
+        await expect(tx1).to.emit(sharedWalletController, EVENT_NAME_DEPOSIT).withArgs(
+          walletAddress,
+          participants[0].address,
+          initialParticipantBalance,
+          initialParticipantBalance,
+          initialWalletBalance,
+          initialWalletBalance,
+        );
+
         await expect(tx1).not.to.emit(sharedWalletController, EVENT_NAME_TRANSFER_IN);
+
+        // Transfer zero amount from non-participant
+        const tx2 = await connect(tokenMock, stranger).transfer(walletAddress, 0n);
+
+        await expect(tx2).not.to.emit(sharedWalletController, EVENT_NAME_TRANSFER_IN);
 
         // Verify balances unchanged
         const finalParticipantBalance: bigint = await sharedWalletController.getParticipantBalance(
@@ -1979,44 +2065,17 @@ describe("Contract 'SharedWalletController'", () => {
       });
 
       it("The wallet is suspended (transfer FROM a suspended wallet)", async () => {
-        // This test covers the specific case where tokens are transferred FROM a suspended wallet
-        // The challenge is creating a scenario where:
-        // 1. The wallet has ERC20 tokens to transfer (to avoid ERC20InsufficientBalance)
-        // 2. The SharedWalletController considers the wallet suspended
-        // 3. The transfer originates FROM the wallet (not TO the wallet)
-
-        const { sharedWalletController, tokenMock } = await setUpFixture(deployContracts);
+        const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
         const walletAddress = sharedWallets[0].address;
         const participant = participants[0];
+        const walletSigner = await ethers.getImpersonatedSigner(walletAddress);
 
-        // CRITICAL: We use deployContracts() instead of deployAndConfigureContracts()
-        // because we need to mint tokens to the wallet BEFORE the hook is active.
-        // If the hook were active during minting, it would trigger afterTokenTransfer()
-        // and cause an error for transfer TO suspended wallet instead of FROM suspended wallet.
-
-        // Mint tokens to wallet BEFORE hook is active
-        await proveTx(tokenMock.mint(walletAddress, 10000n));
-
-        // Set up hook contract manually AFTER minting
-        await proveTx(tokenMock.setHookContract(getAddress(sharedWalletController)));
-        await proveTx(sharedWalletController.grantRole(GRANTOR_ROLE, grantor.address));
-        await proveTx(connect(sharedWalletController, grantor).grantRole(ADMIN_ROLE, admin.address));
-
-        // Set up participants
-        await proveTx(tokenMock.mint(participant.address, BALANCE_INITIAL));
-
-        // Create wallet - SharedWalletController sees it as empty (balance = 0)
-        // because the pre-minted tokens don't count in its tracking
+        // Create wallet and suspend it (empty wallet can be suspended)
         await proveTx(connect(sharedWalletController, admin).createWallet(walletAddress, [participant.address]));
-
-        // Suspend the wallet (possible because controller thinks balance = 0)
         await proveTx(connect(sharedWalletController, admin).suspendWallet(walletAddress));
 
-        // Attempt transfer FROM suspended wallet
-        // This triggers afterTokenTransfer() with fromStatus = Suspended
-        // and should trigger the WalletStatusIncompatible error for FROM suspended wallet
-        const walletSigner = await ethers.getImpersonatedSigner(walletAddress);
-        await expect(connect(tokenMock, walletSigner).transfer(stranger.address, 5000n))
+        // Test that we cannot withdraw zero amount from a suspended wallet
+        await expect(tokenMock.connect(walletSigner).transfer(participant.address, 0n))
           .to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_STATUS_INCOMPATIBLE)
           .withArgs(WalletStatus.Active, WalletStatus.Suspended);
       });
@@ -2043,62 +2102,6 @@ describe("Contract 'SharedWalletController'", () => {
         await expect(
           connect(tokenMock, walletSigner).transfer(stranger.address, withdrawAmount),
         ).to.be.revertedWithCustomError(tokenMock, ERROR_NAME_ERC20_INSUFFICIENT_BALANCE);
-      });
-
-      it("The wallet balance is insufficient for a shared outgoing transfer", async () => {
-        // This test covers the case where a shared outgoing transfer fails because
-        // the SharedWalletController's tracked balance is less than the transfer amount.
-        // The challenge is creating a scenario where:
-        // 1. The wallet has enough ERC20 tokens for the transfer (to avoid ERC20 errors)
-        // 2. The SharedWalletController tracks less balance than the transfer amount
-        // 3. The transfer is a "shared" transfer (not participant-to-participant)
-
-        const { sharedWalletController, tokenMock } = await setUpFixture(deployContracts);
-        const walletAddress = sharedWallets[0].address;
-
-        // CRITICAL: We use deployContracts() and manual setup to control the sequence
-        // We need to mint tokens to the wallet BEFORE the hook is active, so the
-        // SharedWalletController doesn't track those initial tokens.
-
-        // Mint tokens to wallet BEFORE hook is active (untracked by controller)
-        await proveTx(tokenMock.mint(walletAddress, 10000n));
-
-        // Set up hook contract manually AFTER minting
-        await proveTx(tokenMock.setHookContract(getAddress(sharedWalletController)));
-        await proveTx(sharedWalletController.grantRole(GRANTOR_ROLE, grantor.address));
-        await proveTx(connect(sharedWalletController, grantor).grantRole(ADMIN_ROLE, admin.address));
-
-        // Set up participants and stranger with tokens
-        await proveTx(tokenMock.mint(participants[0].address, BALANCE_INITIAL));
-        await proveTx(tokenMock.mint(participants[1].address, BALANCE_INITIAL));
-        await proveTx(tokenMock.mint(stranger.address, BALANCE_INITIAL));
-
-        // Create wallet - SharedWalletController tracks it as empty (balance = 0)
-        // because the pre-minted tokens don't count in its tracking
-        await proveTx(
-          connect(sharedWalletController, admin).createWallet(walletAddress, [
-            participants[0].address,
-            participants[1].address,
-          ]),
-        );
-
-        // Add tracked amount to wallet via external transfer
-        // This amount WILL be tracked by SharedWalletController
-        // Must be divisible by ACCURACY_FACTOR (10000n)
-        await proveTx(connect(tokenMock, stranger).transfer(walletAddress, 10000n));
-
-        // Attempt to transfer more than tracked balance
-        // Current state:
-        // - ERC20 wallet balance: 20000n (10000n pre-minted + 10000n tracked)
-        // - SharedWalletController tracked balance: 10000n (only the tracked transfer)
-        // - Transfer attempt: 20000n (more than tracked balance)
-        // This should trigger _processSharedOutgoingTransfer() and cause the
-        // SharedWalletController_WalletBalanceInsufficient error
-        const walletSigner = await ethers.getImpersonatedSigner(walletAddress);
-        await expect(connect(tokenMock, walletSigner).transfer(stranger.address, 20000n)).to.be.revertedWithCustomError(
-          sharedWalletController,
-          ERROR_NAME_WALLET_BALANCE_INSUFFICIENT,
-        );
       });
 
       it("The participant balance is insufficient for a direct withdrawal", async () => {
@@ -2213,6 +2216,35 @@ describe("Contract 'SharedWalletController'", () => {
         await expect(
           connect(tokenMock, participants[0]).transfer(walletAddress, invalidAmount),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_TRANSFER_AMOUNT_NOT_ROUNDED);
+      });
+
+      it("The aggregated balance exceeds the uint64 limit", async () => {
+        const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
+        const walletAddress1 = sharedWallets[0].address;
+        const walletAddress2 = sharedWallets[1].address;
+
+        // create two wallets with participants
+        await createWalletWithParticipants(
+          sharedWalletController,
+          walletAddress1,
+          [participants[0].address, participants[1].address],
+        );
+
+        await createWalletWithParticipants(
+          sharedWalletController,
+          walletAddress2,
+          [participants[2].address],
+        );
+
+        tokenMock.mint(stranger.address, MAX_UINT64 * 2n);
+
+        // first transfer almost max amount to wallet1
+        await tokenMock.connect(stranger).transfer(walletAddress1, ACCURACY_FACTOR * (MAX_UINT64 / ACCURACY_FACTOR));
+
+        // then we cant handle more tokens in all shared wallets
+        await expect(
+          tokenMock.connect(stranger).transfer(walletAddress2, ACCURACY_FACTOR),
+        ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_AGGREGATED_BALANCE_EXCEEDS_LIMIT);
       });
     });
   });
@@ -2338,12 +2370,12 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(connect(tokenMock, participant).transfer(walletAddress, depositAmount));
 
         // Get participant overview
-        const overviews: ParticipantOverview[] = await sharedWalletController.getParticipantOverviews([
+        const overviews = await sharedWalletController.getParticipantOverviews([
           participant.address,
         ]);
         expect(overviews.length).to.equal(1);
 
-        const overview: ParticipantOverview = overviews[0];
+        const overview = overviews[0];
 
         const expectedOverview = createTestParticipantOverview(participant.address, depositAmount);
         const expectedWalletSummary = createTestWalletSummary(
@@ -2373,14 +2405,14 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(connect(tokenMock, participants[1]).transfer(walletAddress, 20000n));
 
         // Get participant overviews
-        const participantOverviews: ParticipantOverview[] = await sharedWalletController.getParticipantOverviews([
+        const participantOverviews = await sharedWalletController.getParticipantOverviews([
           participants[0].address,
           participants[1].address,
         ]);
         expect(participantOverviews.length).to.equal(2);
 
         // Verify first participant
-        const overview0: ParticipantOverview = participantOverviews[0];
+        const overview0 = participantOverviews[0];
         const expectedOverview0 = createTestParticipantOverview(participants[0].address, 10000n);
         const expectedWalletSummary0 = createTestWalletSummary(
           walletAddress,
@@ -2392,7 +2424,7 @@ describe("Contract 'SharedWalletController'", () => {
         checkEquality(overview0, expectedOverview0);
 
         // Verify second participant
-        const overview1: ParticipantOverview = participantOverviews[1];
+        const overview1 = participantOverviews[1];
         const expectedOverview1 = createTestParticipantOverview(participants[1].address, 20000n);
         const expectedWalletSummary1 = createTestWalletSummary(
           walletAddress,
@@ -2419,12 +2451,12 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(connect(tokenMock, participant).transfer(wallet2Address, 20000n));
 
         // Get participant overview
-        const participantOverviews: ParticipantOverview[] = await sharedWalletController.getParticipantOverviews([
+        const participantOverviews = await sharedWalletController.getParticipantOverviews([
           participant.address,
         ]);
         expect(participantOverviews.length).to.equal(1);
 
-        const overview: ParticipantOverview = participantOverviews[0];
+        const overview = participantOverviews[0];
         const expectedOverview = createTestParticipantOverview(participant.address, 30000n); // 10000 + 20000
         const expectedWalletSummary1 = createTestWalletSummary(
           wallet1Address,
@@ -2457,10 +2489,10 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(connect(tokenMock, participant).transfer(wallet2Address, 20000n));
 
         // Get participant overview
-        const participantOverviews: ParticipantOverview[] = await sharedWalletController.getParticipantOverviews([
+        const participantOverviews = await sharedWalletController.getParticipantOverviews([
           participant.address,
         ]);
-        const overview: ParticipantOverview = participantOverviews[0];
+        const overview = participantOverviews[0];
 
         // Verify main overview properties
         const expectedOverview = createTestParticipantOverview(participant.address, 30000n); // 10000 + 20000
@@ -2532,10 +2564,10 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(connect(tokenMock, participant).transfer(walletAddress, depositAmount));
 
         // Get wallet overview
-        const walletOverviews: WalletOverview[] = await sharedWalletController.getWalletOverviews([walletAddress]);
+        const walletOverviews = await sharedWalletController.getWalletOverviews([walletAddress]);
         expect(walletOverviews.length).to.equal(1);
 
-        const overview: WalletOverview = walletOverviews[0];
+        const overview = walletOverviews[0];
         const expectedOverview = createTestWalletOverview(walletAddress, WalletStatus.Active, depositAmount);
         const expectedParticipantSummary = createTestParticipantSummary(
           participant.address,
@@ -2559,14 +2591,14 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(connect(tokenMock, participants[1]).transfer(wallet2Address, 20000n));
 
         // Get wallet overviews
-        const walletOverviews: WalletOverview[] = await sharedWalletController.getWalletOverviews([
+        const walletOverviews = await sharedWalletController.getWalletOverviews([
           wallet1Address,
           wallet2Address,
         ]);
         expect(walletOverviews.length).to.equal(2);
 
         // Check first wallet
-        const overview1: WalletOverview = walletOverviews[0];
+        const overview1 = walletOverviews[0];
         const expectedOverview1 = createTestWalletOverview(wallet1Address, WalletStatus.Active, 10000n);
         const expectedParticipantSummary1 = createTestParticipantSummary(
           participants[0].address,
@@ -2576,7 +2608,7 @@ describe("Contract 'SharedWalletController'", () => {
         checkEquality(overview1, expectedOverview1);
 
         // Check second wallet
-        const overview2: WalletOverview = walletOverviews[1];
+        const overview2 = walletOverviews[1];
         const expectedOverview2 = createTestWalletOverview(wallet2Address, WalletStatus.Active, 20000n);
         const expectedParticipantSummary2 = createTestParticipantSummary(
           participants[1].address,
@@ -2599,8 +2631,8 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(connect(tokenMock, participants[1]).transfer(walletAddress, 20000n));
 
         // Get wallet overview
-        const walletOverviews: WalletOverview[] = await sharedWalletController.getWalletOverviews([walletAddress]);
-        const overview: WalletOverview = walletOverviews[0];
+        const walletOverviews = await sharedWalletController.getWalletOverviews([walletAddress]);
+        const overview = walletOverviews[0];
 
         // Verify main overview properties
         const expectedOverview = createTestWalletOverview(walletAddress, WalletStatus.Active, 30000n); // 10000 + 20000
@@ -2632,10 +2664,10 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Get relationship overview for specific pair
         const pairs: WalletParticipantPair[] = [{ wallet: walletAddress, participant: participant.address }];
-        const overviews: RelationshipOverview[] = await sharedWalletController.getRelationshipOverviews(pairs);
+        const overviews = await sharedWalletController.getRelationshipOverviews(pairs);
         expect(overviews.length).to.equal(1);
 
-        const overview: RelationshipOverview = overviews[0];
+        const overview = overviews[0];
         const expectedOverview = createTestRelationshipOverview(
           walletAddress,
           participant.address,
@@ -2663,10 +2695,10 @@ describe("Contract 'SharedWalletController'", () => {
 
           // Get relationship overview for specific pair
           const pairs: WalletParticipantPair[] = [{ wallet: walletAddress, participant: participant2.address }];
-          const overviews: RelationshipOverview[] = await sharedWalletController.getRelationshipOverviews(pairs);
+          const overviews = await sharedWalletController.getRelationshipOverviews(pairs);
           expect(overviews.length).to.equal(1);
 
-          const overview: RelationshipOverview = overviews[0];
+          const overview = overviews[0];
           const expectedOverview = createTestRelationshipOverview(
             walletAddress,
             participant2.address,
@@ -2694,15 +2726,15 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Get relationship overview with zero wallet address (all wallets for participant)
         const pairs: WalletParticipantPair[] = [{ wallet: ADDRESS_ZERO, participant: participant.address }];
-        const overviews: RelationshipOverview[] = await sharedWalletController.getRelationshipOverviews(pairs);
+        const overviews = await sharedWalletController.getRelationshipOverviews(pairs);
         expect(overviews.length).to.equal(2);
 
         // Check both relationships are returned
-        const overview1: RelationshipOverview | undefined = overviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet1Address,
+        const overview1 = overviews.find(
+          o => o.wallet === wallet1Address,
         );
-        const overview2: RelationshipOverview | undefined = overviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet2Address,
+        const overview2 = overviews.find(
+          o => o.wallet === wallet2Address,
         );
 
         expect(overview1).not.to.be.undefined;
@@ -2749,15 +2781,15 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Get relationship overview with zero participant address (all participants for wallet)
         const pairs: WalletParticipantPair[] = [{ wallet: walletAddress, participant: ADDRESS_ZERO }];
-        const overviews: RelationshipOverview[] = await sharedWalletController.getRelationshipOverviews(pairs);
+        const overviews = await sharedWalletController.getRelationshipOverviews(pairs);
         expect(overviews.length).to.equal(2);
 
         // Check both relationships are returned
-        const overview1: RelationshipOverview | undefined = overviews.find(
-          (o: RelationshipOverview) => o.participant === participant1.address,
+        const overview1 = overviews.find(
+          o => o.participant === participant1.address,
         );
-        const overview2: RelationshipOverview | undefined = overviews.find(
-          (o: RelationshipOverview) => o.participant === participant2.address,
+        const overview2 = overviews.find(
+          o => o.participant === participant2.address,
         );
 
         expect(overview1).not.to.be.undefined;
@@ -2810,16 +2842,16 @@ describe("Contract 'SharedWalletController'", () => {
           { wallet: wallet1Address, participant: participant1.address }, // specific pair
           { wallet: wallet1Address, participant: participant2.address }, // specific pair
         ];
-        const overviews: RelationshipOverview[] = await sharedWalletController.getRelationshipOverviews(pairs);
+        const overviews = await sharedWalletController.getRelationshipOverviews(pairs);
 
         expect(overviews.length).to.equal(2);
 
         // Check first specific pair
-        const overview1: RelationshipOverview | undefined = overviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet1Address && o.participant === participant1.address,
+        const overview1 = overviews.find(
+          o => o.wallet === wallet1Address && o.participant === participant1.address,
         );
-        const overview2: RelationshipOverview | undefined = overviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet1Address && o.participant === participant2.address,
+        const overview2 = overviews.find(
+          o => o.wallet === wallet1Address && o.participant === participant2.address,
         );
 
         expect(overview1).not.to.be.undefined;
@@ -2882,10 +2914,10 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Verify both wallet relationships are returned
         const wallet1Overview = participant0Overviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet1Address,
+          o => o.wallet === wallet1Address,
         );
         const wallet2Overview = participant0Overviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet2Address,
+          o => o.wallet === wallet2Address,
         );
 
         expect(wallet1Overview).not.to.be.undefined;
@@ -2902,10 +2934,10 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Verify both participant relationships are returned
         const p0Overview = wallet1Overviews.find(
-          (o: RelationshipOverview) => o.participant === participants[0].address,
+          o => o.participant === participants[0].address,
         );
         const p1Overview = wallet1Overviews.find(
-          (o: RelationshipOverview) => o.participant === participants[1].address,
+          o => o.participant === participants[1].address,
         );
 
         expect(p0Overview).not.to.be.undefined;
@@ -2964,13 +2996,13 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Verify all expected pairs are present
         const wallet1P0 = mixedOverviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet1Address && o.participant === participants[0].address,
+          o => o.wallet === wallet1Address && o.participant === participants[0].address,
         );
         const wallet1P1 = mixedOverviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet1Address && o.participant === participants[1].address,
+          o => o.wallet === wallet1Address && o.participant === participants[1].address,
         );
         const wallet2P2 = mixedOverviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet2Address && o.participant === participants[2].address,
+          o => o.wallet === wallet2Address && o.participant === participants[2].address,
         );
 
         expect(wallet1P0).not.to.be.undefined;
@@ -3196,7 +3228,7 @@ describe("Contract 'SharedWalletController'", () => {
       await proveTx(connect(sharedWalletController, admin).suspendWallet(walletAddress));
 
       // Verify final state
-      const finalOverviews: WalletOverview[] = await sharedWalletController.getWalletOverviews([walletAddress]);
+      const finalOverviews = await sharedWalletController.getWalletOverviews([walletAddress]);
       const expectedSuspendedOverview = createTestWalletOverview(walletAddress, WalletStatus.Suspended, 0n);
       const remainingParticipantSummaries = [participants[0].address, participants[1].address].map(addr =>
         createTestParticipantSummary(addr, 0n),
@@ -3277,10 +3309,10 @@ describe("Contract 'SharedWalletController'", () => {
       );
 
       // Check participant overviews show total balances across wallets
-      const participant1Overviews: ParticipantOverview[] = await sharedWalletController.getParticipantOverviews([
+      const participant1Overviews = await sharedWalletController.getParticipantOverviews([
         participants[1].address,
       ]);
-      const participant2Overviews: ParticipantOverview[] = await sharedWalletController.getParticipantOverviews([
+      const participant2Overviews = await sharedWalletController.getParticipantOverviews([
         participants[2].address,
       ]);
 
@@ -3316,8 +3348,8 @@ describe("Contract 'SharedWalletController'", () => {
       await proveTx(connect(sharedWalletController, admin).suspendWallet(wallet1Address));
 
       // Wallet 2 should still be active
-      const wallet1Overview: WalletOverview[] = await sharedWalletController.getWalletOverviews([wallet1Address]);
-      const wallet2Overview: WalletOverview[] = await sharedWalletController.getWalletOverviews([wallet2Address]);
+      const wallet1Overview = await sharedWalletController.getWalletOverviews([wallet1Address]);
+      const wallet2Overview = await sharedWalletController.getWalletOverviews([wallet2Address]);
 
       const expectedSuspendedOverview = createTestWalletOverview(wallet1Address, WalletStatus.Suspended, 0n);
       const expectedActiveOverview = createTestWalletOverview(wallet2Address, WalletStatus.Active, 20000n);
@@ -3384,7 +3416,7 @@ describe("Contract 'SharedWalletController'", () => {
       );
 
       // Verify initial active state
-      let walletOverviews: WalletOverview[] = await sharedWalletController.getWalletOverviews([walletAddress]);
+      let walletOverviews = await sharedWalletController.getWalletOverviews([walletAddress]);
       const expectedActiveOverview = createTestWalletOverview(walletAddress, WalletStatus.Active, 0n);
       const expectedParticipantSummaries = [
         createTestParticipantSummary(participants[0].address, 0n),
@@ -3474,7 +3506,7 @@ describe("Contract 'SharedWalletController'", () => {
       }
 
       // Phase 6: Final suspension
-      const initialWalletCount: number = await sharedWalletController.getWalletCount();
+      const initialWalletCount = await sharedWalletController.getWalletCount();
       await proveTx(connect(sharedWalletController, admin).suspendWallet(walletAddress));
 
       // Verify final suspended state
@@ -3622,13 +3654,22 @@ describe("Contract 'SharedWalletController'", () => {
         // Create wallet
         await createWalletWithParticipants(sharedWalletController, walletAddress, [participants[0].address]);
 
-        // Transfer zero amount (should be ignored by hook)
         const initialBalance = await sharedWalletController.getParticipantBalance(
           walletAddress,
           participants[0].address,
         );
 
-        await proveTx(connect(tokenMock, participants[0]).transfer(walletAddress, 0));
+        const tx = await proveTx(connect(tokenMock, participants[0]).transfer(walletAddress, 0));
+
+        await expect(tx).to.emit(sharedWalletController, EVENT_NAME_DEPOSIT).withArgs(
+          walletAddress,
+          participants[0].address,
+          initialBalance,
+          initialBalance,
+          initialBalance,
+          initialBalance,
+        );
+        await expect(tx).not.to.emit(sharedWalletController, EVENT_NAME_TRANSFER_IN);
 
         const finalBalance = await sharedWalletController.getParticipantBalance(walletAddress, participants[0].address);
 
@@ -3713,8 +3754,8 @@ describe("Contract 'SharedWalletController'", () => {
         expect(overview.walletSummaries.length).to.equal(2);
 
         // Verify wallet summaries
-        const wallet1Summary = overview.walletSummaries.find((s: WalletSummary) => s.wallet === wallet1Address);
-        const wallet2Summary = overview.walletSummaries.find((s: WalletSummary) => s.wallet === wallet2Address);
+        const wallet1Summary = overview.walletSummaries.find(s => s.wallet === wallet1Address);
+        const wallet2Summary = overview.walletSummaries.find(s => s.wallet === wallet2Address);
 
         expect(wallet1Summary).not.to.be.undefined;
         expect(wallet2Summary).not.to.be.undefined;
@@ -3752,7 +3793,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Verify wallet balance equals sum of participant balances
         const totalFromParticipantOverviews = participantOverviews.reduce(
-          (sum: bigint, overview: ParticipantOverview) => sum + overview.totalBalance,
+          (sum, overview) => sum + overview.totalBalance,
           0n,
         );
         expect(walletOverview.walletBalance).to.equal(totalFromParticipantOverviews);
@@ -3832,7 +3873,7 @@ describe("Contract 'SharedWalletController'", () => {
     describe("Function '$__VERSION()'", () => {
       it("Returns the expected version values", async () => {
         const { sharedWalletController } = await setUpFixture(deployAndConfigureContracts);
-        const sharedWalletControllerVersion: Version = await sharedWalletController.$__VERSION();
+        const sharedWalletControllerVersion = await sharedWalletController.$__VERSION();
         checkEquality(sharedWalletControllerVersion, EXPECTED_VERSION);
       });
     });

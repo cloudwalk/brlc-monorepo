@@ -1,6 +1,5 @@
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
-import { Contract } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { connect, getAddress, proveTx } from "../../test-utils/eth";
 import { setUpFixture } from "../../test-utils/common";
@@ -27,36 +26,33 @@ describe("Contract 'RescuableUpgradeable'", async () => {
     [deployer, rescuer] = await ethers.getSigners();
   });
 
-  async function deployRescuableMock(): Promise<{ rescuableMock: Contract }> {
+  async function deployRescuableMock() {
     // The contract factory with the explicitly specified deployer account
     let rescuableMockFactory = await ethers.getContractFactory("RescuableUpgradeableMock");
     rescuableMockFactory = rescuableMockFactory.connect(deployer);
 
     // The contract under test with the explicitly specified initial account
-    let rescuableMock = await upgrades.deployProxy(rescuableMockFactory) as Contract;
+    let rescuableMock = await upgrades.deployProxy(rescuableMockFactory);
     await rescuableMock.waitForDeployment();
     rescuableMock = connect(rescuableMock, deployer); // Explicitly specifying the initial account
 
     return { rescuableMock };
   }
 
-  async function deployTokenMock(): Promise<{ tokenMock: Contract }> {
+  async function deployTokenMock() {
     // The token contract factory with the explicitly specified deployer account
     let tokenMockFactory = await ethers.getContractFactory("ERC20TokenMock");
     tokenMockFactory = tokenMockFactory.connect(deployer);
 
     // The token contract with the explicitly specified initial account
-    let tokenMock = await tokenMockFactory.deploy("ERC20 Test", "TEST") as Contract;
+    let tokenMock = await tokenMockFactory.deploy("ERC20 Test", "TEST");
     await tokenMock.waitForDeployment();
     tokenMock = connect(tokenMock, deployer); // Explicitly specifying the initial account
 
     return { tokenMock };
   }
 
-  async function deployAndConfigureAllContracts(): Promise<{
-    rescuableMock: Contract;
-    tokenMock: Contract;
-  }> {
+  async function deployAndConfigureAllContracts() {
     const { rescuableMock } = await deployRescuableMock();
     const { tokenMock } = await deployTokenMock();
 

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity 0.8.28;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import { AccessControlExtUpgradeable } from "./base/AccessControlExtUpgradeable.sol";
 import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
@@ -100,16 +101,25 @@ contract SharedWalletController is
      * - The caller must have the {ADMIN_ROLE} role.
      * - The provided wallet address must not be zero.
      * - The provided participants array must not be empty.
+     * - The wallet address must not be a smart contract.
+     * - The wallet address must have zero token balance.
      */
     function createWallet(address wallet, address[] calldata participants) external whenNotPaused onlyRole(ADMIN_ROLE) {
+        SharedWalletControllerStorage storage $ = _getStorage();
+
         if (wallet == address(0)) {
             revert SharedWalletController_WalletAddressZero();
         }
         if (participants.length == 0) {
             revert SharedWalletController_ParticipantArrayEmpty();
         }
+        if (wallet.code.length > 0) {
+            revert SharedWalletController_WalletAddressIsContract();
+        }
+        if (IERC20($.token).balanceOf(wallet) > 0) {
+            revert SharedWalletController_WalletAddressHasBalance();
+        }
 
-        SharedWalletControllerStorage storage $ = _getStorage();
         WalletState storage walletState = $.walletStates[wallet];
 
         if (walletState.status != WalletStatus.Nonexistent) {
@@ -220,6 +230,38 @@ contract SharedWalletController is
         }
     }
 
+    /**
+     * @inheritdoc ISharedWalletControllerPrimary
+     *
+     * @dev Requirements:
+     *
+     * - The caller must have the {OWNER_ROLE} role.
+     * - The provided wallet address must not be zero.
+     * - The wallet must exist.
+     * - The wallet must have zero balance.
+     */
+    function deleteWallet(address wallet) external whenNotPaused onlyRole(OWNER_ROLE) {
+        SharedWalletControllerStorage storage $ = _getStorage();
+        WalletState storage walletState = _getExistentWallet(wallet, $);
+
+        if (walletState.balance > 0) {
+            revert SharedWalletController_WalletBalanceNotZero();
+        }
+
+        address[] memory participants = walletState.participantBalances.keys();
+        uint256 participantCount = participants.length;
+        for (uint256 i = 0; i < participantCount; i++) {
+            address participant = participants[i];
+            _removeParticipantFromWallet(walletState, participant);
+            _removeWalletFromParticipant(wallet, participant, $);
+        }
+
+        delete $.walletStates[wallet];
+        $.walletCount--;
+
+        emit WalletDeleted(wallet);
+    }
+
     // ------------------ Transactional hook functions ------------ //
 
     /**
@@ -247,11 +289,8 @@ contract SharedWalletController is
         SharedWalletControllerStorage storage $ = _getStorage();
 
         // Immutable storage access is not supported because of the upgradeable contract
-        if (_msgSender() != address($.token)) {
+        if (_msgSender() != $.token) {
             revert SharedWalletController_TokenUnauthorized();
-        }
-        if (amount == 0) {
-            return;
         }
 
         WalletState storage fromWalletState = $.walletStates[from];

@@ -1,6 +1,6 @@
+import * as Contracts from "@contracts";
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
-import { Contract, ContractFactory } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { connect } from "../../test-utils/eth";
 import { setUpFixture } from "../../test-utils/common";
@@ -19,7 +19,7 @@ describe("Contract 'UUPSExtUpgradeable'", async () => {
   const ERROR_NAME_IMPLEMENTATION_ADDRESS_NOT_CONTRACT = "UUPSExtUpgradeable_ImplementationAddressNotContract";
   const ERROR_NAME_IMPLEMENTATION_ADDRESS_ZERO = "UUPSExtUpgradeable_ImplementationAddressZero";
 
-  let uupsExtensionFactory: ContractFactory;
+  let uupsExtensionFactory: Contracts.UUPSExtUpgradeableMock__factory;
   let deployer: HardhatEthersSigner;
 
   before(async () => {
@@ -30,9 +30,9 @@ describe("Contract 'UUPSExtUpgradeable'", async () => {
     uupsExtensionFactory = uupsExtensionFactory.connect(deployer);
   });
 
-  async function deployContract(): Promise<{ uupsExtension: Contract }> {
+  async function deployContract() {
     // The contract under test with the explicitly specified initial account
-    let uupsExtension = await upgrades.deployProxy(uupsExtensionFactory, []) as Contract;
+    let uupsExtension = await upgrades.deployProxy(uupsExtensionFactory, []);
     await uupsExtension.waitForDeployment();
     uupsExtension = connect(uupsExtension, deployer); // Explicitly specifying the initial account
 

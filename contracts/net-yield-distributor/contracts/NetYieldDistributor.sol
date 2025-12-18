@@ -37,6 +37,10 @@ contract NetYieldDistributor is
     Versionable,
     INetYieldDistributor
 {
+    // ------------------ Types ----------------------------------- //
+
+    using SafeERC20 for IERC20;
+
     // ------------------ Constructor ----------------------------- //
 
     /**
@@ -326,7 +330,7 @@ contract NetYieldDistributor is
      */
     function _advanceNetYield(NetYieldDistributorStorage storage $, address account, uint64 amount) internal {
         _increaseAdvancedNetYield($, account, amount);
-        SafeERC20.safeTransfer(IERC20($.underlyingToken), account, amount);
+        IERC20($.underlyingToken).safeTransfer(account, amount);
     }
 
     /**

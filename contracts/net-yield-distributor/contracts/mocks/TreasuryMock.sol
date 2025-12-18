@@ -15,6 +15,10 @@ import { ITreasury } from "../interfaces/ITreasury.sol";
  * successful withdrawals and failure cases.
  */
 contract TreasuryMock is ITreasury {
+    // ------------------ Types ----------------------------------- //
+
+    using SafeERC20 for IERC20;
+
     // ------------------ State variables ------------------------- //
 
     /// @dev The address of the underlying token.
@@ -51,7 +55,7 @@ contract TreasuryMock is ITreasury {
     function withdraw(uint256 amount) external {
         withdrawCallCount++;
         totalWithdrawn += amount;
-        SafeERC20.safeTransfer(IERC20(_underlyingToken), msg.sender, amount);
+        IERC20(_underlyingToken).safeTransfer(msg.sender, amount);
     }
 
     /// @inheritdoc ITreasury

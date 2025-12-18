@@ -22,12 +22,12 @@ This repository contains utilities for smart contracts development
    - [x] card-payment-processor-v2
    - [x] cashier
    - [x] credit-agent
-   - [ ] multisig
-   - [ ] net-yield-distributor
-   - [ ] periphery
-   - [ ] shared-wallet-controller
+   - [x] multisig
+   - [x] net-yield-distributor
+   - [x] periphery
+   - [x] shared-wallet-controller
    - [x] token
-   - [ ] treasury
+   - [x] treasury
 
 ### Monorepo
 
@@ -51,3 +51,4 @@ This repository contains utilities for smart contracts development
 - [ ] Migrate Stratus to the monorepo contracts
 - [ ] Join contracts by workspace and cross-reference contracts
 - [ ] Extract common contracts to a separate packages
+- [ ] Use workspace defined versions for dependencies (hardhat, openzeppelin, etc.)

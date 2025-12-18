@@ -1,4 +1,5 @@
 {
+  "name": "@cloudwalk/brlc-blueprint",
   "dependencies": {
     "@openzeppelin/contracts": "5.5.0",
     "@openzeppelin/contracts-upgradeable": "5.5.0"

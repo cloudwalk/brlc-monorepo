@@ -14,6 +14,7 @@ The purpose of multi-signature wallets is to increase security by requiring mult
 - An upgradeable implementation (`MultiSigWalletUpgradeable.sol`) using the UUPS pattern
 
 Key features:
+
 - Configurable number of required approvals
 - Transaction expiration time
 - Comprehensive security measures
@@ -35,8 +36,10 @@ NOTE: There have been some changes in the contracts since the last audit, but th
 
 ## Project Setup
 
-Read [Documentation](https://github.com/cloudwalk/brlc-dev-ex/blob/main/docs/DEVELOPMENT.md).
+This repository is mirrored from the [BRLC monorepo](https://github.com/cloudwalk/brlc-monorepo).
+All development happens in the monorepo.
 
+Read [Documentation](https://github.com/cloudwalk/brlc-dev-ex/blob/main/docs/DEVELOPMENT.md).
 
 ## Licensing
 

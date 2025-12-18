@@ -3,7 +3,7 @@ name: Sync subfolders to legacy repos
 on:
   push:
     branches:
-      - monorepo # TODO: change to main t
+      - main
   workflow_dispatch: {}
 
 permissions:
@@ -17,10 +17,23 @@ jobs:
       fail-fast: false
       matrix:
         target_branch:
-          - monorepo
+          - main
         contract:
+          - asset-transit-desk
+          - balance-freezer
+          - balance-tracker
           - blueprint
+          - capybara-finance
+          - card-payment-processor
+          - card-payment-processor-v2
+          - cashier
+          - credit-agent
+          - multisig
+          - net-yield-distributor
+          - periphery
+          - shared-wallet-controller
           - token
+          - treasury
 
     steps:
       - name: Checkout monorepo (full history)

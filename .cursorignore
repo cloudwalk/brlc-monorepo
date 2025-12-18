@@ -2,8 +2,8 @@
 node_modules
 
 # Hardhat files
-/cache
-/artifacts
+contracts/*/cache
+contracts/*/artifacts
 
 # IDE-specific files
 .idea
@@ -15,5 +15,5 @@ node_modules
 .env
 
 # Other files
-/tmp
-/flatten
+contracts/*/flatten
+contracts/*/tmp

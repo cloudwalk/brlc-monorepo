@@ -10,8 +10,10 @@
 
 This repository contains Asset Transit Desk smart contracts.
 
-
 ## Project Setup
+
+This repository is mirrored from the [BRLC monorepo](https://github.com/cloudwalk/brlc-monorepo).
+All development happens in the monorepo.
 
 Read [Documentation](https://github.com/cloudwalk/brlc-dev-ex/blob/main/docs/DEVELOPMENT.md).
 

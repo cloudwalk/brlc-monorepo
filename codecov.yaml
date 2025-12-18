@@ -1,13 +1,65 @@
 component_management:
   individual_components:
+    - component_id: contract-asset-transit-desk
+      name: Asset Transit Desk
+      paths:
+        - "contracts/asset-transit-desk/**"
+    - component_id: contract-balance-freezer
+      name: Balance Freezer
+      paths:
+        - "contracts/balance-freezer/**"
+    - component_id: contract-balance-tracker
+      name: Balance Tracker
+      paths:
+        - "contracts/balance-tracker/**"
     - component_id: contract-blueprint
       name: Blueprint
       paths:
         - "contracts/blueprint/**"
+    - component_id: contract-capybara-finance
+      name: Capybara Finance
+      paths:
+        - "contracts/capybara-finance/**"
+    - component_id: contract-card-payment-processor
+      name: Card Payment Processor
+      paths:
+        - "contracts/card-payment-processor/**"
+    - component_id: contract-card-payment-processor-v2
+      name: Card Payment Processor V2
+      paths:
+        - "contracts/card-payment-processor-v2/**"
+    - component_id: contract-cashier
+      name: Cashier
+      paths:
+        - "contracts/cashier/**"
+    - component_id: contract-credit-agent
+      name: Credit Agent
+      paths:
+        - "contracts/credit-agent/**"
+    - component_id: contract-multisig
+      name: Multisig
+      paths:
+        - "contracts/multisig/**"
+    - component_id: contract-net-yield-distributor
+      name: Net Yield Distributor
+      paths:
+        - "contracts/net-yield-distributor/**"
+    - component_id: contract-periphery
+      name: Periphery
+      paths:
+        - "contracts/periphery/**"
+    - component_id: contract-shared-wallet-controller
+      name: Shared Wallet Controller
+      paths:
+        - "contracts/shared-wallet-controller/**"
     - component_id: contract-token
       name: BRLC Token
       paths:
         - "contracts/token/**"
+    - component_id: contract-treasury
+      name: Treasury
+      paths:
+        - "contracts/treasury/**"
 
 comment:
   layout: "header, diff, flags, components"

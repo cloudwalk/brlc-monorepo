@@ -30,6 +30,82 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  contracts/asset-transit-desk:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: 5.4.0
+        version: 5.4.0
+      '@openzeppelin/contracts-upgradeable':
+        specifier: 5.4.0
+        version: 5.4.0(@openzeppelin/contracts@5.4.0)
+    devDependencies:
+      '@nomicfoundation/hardhat-toolbox':
+        specifier: ^5.0.0
+        version: 5.0.0(e52ffc50434626b14a3d4eccef62eea7)
+      '@openzeppelin/hardhat-upgrades':
+        specifier: ^3.9.1
+        version: 3.9.1(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(@nomicfoundation/hardhat-verify@2.1.3(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
+      hardhat-contract-sizer:
+        specifier: ^2.10.1
+        version: 2.10.1(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+    optionalDependencies:
+      '@cloudwalk/chainshot':
+        specifier: 0.5.2
+        version: 0.5.2(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(chai@4.5.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))(mocha@11.7.5)
+
+  contracts/balance-freezer:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: 5.4.0
+        version: 5.4.0
+      '@openzeppelin/contracts-upgradeable':
+        specifier: 5.4.0
+        version: 5.4.0(@openzeppelin/contracts@5.4.0)
+    devDependencies:
+      '@nomicfoundation/hardhat-toolbox':
+        specifier: ^5.0.0
+        version: 5.0.0(e52ffc50434626b14a3d4eccef62eea7)
+      '@openzeppelin/hardhat-upgrades':
+        specifier: ^3.9.1
+        version: 3.9.1(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(@nomicfoundation/hardhat-verify@2.1.3(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      dotenv:
+        specifier: ^17.2.1
+        version: 17.2.3
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.2
+      hardhat-contract-sizer:
+        specifier: ^2.10.1
+        version: 2.10.1(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+
+  contracts/balance-tracker:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: 4.9.6
+        version: 4.9.6
+      '@openzeppelin/contracts-upgradeable':
+        specifier: 4.9.6
+        version: 4.9.6
+    devDependencies:
+      '@nomicfoundation/hardhat-toolbox':
+        specifier: ^5.0.0
+        version: 5.0.0(e52ffc50434626b14a3d4eccef62eea7)
+      '@openzeppelin/hardhat-upgrades':
+        specifier: ^3.9.1
+        version: 3.9.1(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(@nomicfoundation/hardhat-verify@2.1.3(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      dotenv:
+        specifier: ^17.2.1
+        version: 17.2.3
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.2
+      hardhat-contract-sizer:
+        specifier: ^2.10.1
+        version: 2.10.1(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+
   contracts/blueprint:
     dependencies:
       '@openzeppelin/contracts':
@@ -58,6 +134,239 @@ importers:
         specifier: ^2.10.1
         version: 2.10.1(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
 
+  contracts/capybara-finance:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: 5.4.0
+        version: 5.4.0
+      '@openzeppelin/contracts-upgradeable':
+        specifier: 5.4.0
+        version: 5.4.0(@openzeppelin/contracts@5.4.0)
+    devDependencies:
+      '@nomicfoundation/hardhat-toolbox':
+        specifier: ^5.0.0
+        version: 5.0.0(e52ffc50434626b14a3d4eccef62eea7)
+      '@openzeppelin/hardhat-upgrades':
+        specifier: ^3.9.1
+        version: 3.9.1(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(@nomicfoundation/hardhat-verify@2.1.3(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      dotenv:
+        specifier: ^17.2.2
+        version: 17.2.3
+      eslint:
+        specifier: ^9.35.0
+        version: 9.39.2
+      hardhat-contract-sizer:
+        specifier: ^2.10.1
+        version: 2.10.1(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+    optionalDependencies:
+      '@cloudwalk/chainshot':
+        specifier: 0.5.2
+        version: 0.5.2(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(chai@4.5.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))(mocha@11.7.5)
+
+  contracts/card-payment-processor:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: 4.9.6
+        version: 4.9.6
+      '@openzeppelin/contracts-upgradeable':
+        specifier: 4.9.6
+        version: 4.9.6
+    devDependencies:
+      '@nomicfoundation/hardhat-toolbox':
+        specifier: ^5.0.0
+        version: 5.0.0(e52ffc50434626b14a3d4eccef62eea7)
+      '@openzeppelin/hardhat-upgrades':
+        specifier: ^3.9.1
+        version: 3.9.1(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(@nomicfoundation/hardhat-verify@2.1.3(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      dotenv:
+        specifier: ^17.2.1
+        version: 17.2.3
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.2
+      hardhat-contract-sizer:
+        specifier: ^2.10.1
+        version: 2.10.1(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+
+  contracts/card-payment-processor-v2:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: 5.4.0
+        version: 5.4.0
+      '@openzeppelin/contracts-upgradeable':
+        specifier: 5.4.0
+        version: 5.4.0(@openzeppelin/contracts@5.4.0)
+    devDependencies:
+      '@nomicfoundation/hardhat-toolbox':
+        specifier: ^5.0.0
+        version: 5.0.0(e52ffc50434626b14a3d4eccef62eea7)
+      '@openzeppelin/hardhat-upgrades':
+        specifier: ^3.9.1
+        version: 3.9.1(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(@nomicfoundation/hardhat-verify@2.1.3(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      dotenv:
+        specifier: ^17.2.1
+        version: 17.2.3
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.2
+      hardhat-contract-sizer:
+        specifier: ^2.10.1
+        version: 2.10.1(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+    optionalDependencies:
+      '@cloudwalk/chainshot':
+        specifier: 0.4.0
+        version: 0.4.0(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(chai@4.5.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))(mocha@11.7.5)
+
+  contracts/cashier:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: 5.4.0
+        version: 5.4.0
+      '@openzeppelin/contracts-upgradeable':
+        specifier: 5.4.0
+        version: 5.4.0(@openzeppelin/contracts@5.4.0)
+    devDependencies:
+      '@nomicfoundation/hardhat-toolbox':
+        specifier: ^5.0.0
+        version: 5.0.0(e52ffc50434626b14a3d4eccef62eea7)
+      '@openzeppelin/hardhat-upgrades':
+        specifier: ^3.9.1
+        version: 3.9.1(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(@nomicfoundation/hardhat-verify@2.1.3(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      dotenv:
+        specifier: ^17.2.1
+        version: 17.2.3
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.2
+      hardhat-contract-sizer:
+        specifier: ^2.10.1
+        version: 2.10.1(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+
+  contracts/credit-agent:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: 5.5.0
+        version: 5.5.0
+      '@openzeppelin/contracts-upgradeable':
+        specifier: 5.5.0
+        version: 5.5.0(@openzeppelin/contracts@5.5.0)
+    devDependencies:
+      '@nomicfoundation/hardhat-toolbox':
+        specifier: ^5.0.0
+        version: 5.0.0(e52ffc50434626b14a3d4eccef62eea7)
+      '@openzeppelin/hardhat-upgrades':
+        specifier: ^3.9.1
+        version: 3.9.1(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(@nomicfoundation/hardhat-verify@2.1.3(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
+      eslint:
+        specifier: ^9.39.1
+        version: 9.39.2
+      hardhat-contract-sizer:
+        specifier: ^2.10.1
+        version: 2.10.1(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+
+  contracts/multisig:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: 4.9.6
+        version: 4.9.6
+      '@openzeppelin/contracts-upgradeable':
+        specifier: 4.9.6
+        version: 4.9.6
+    devDependencies:
+      '@nomicfoundation/hardhat-toolbox':
+        specifier: ^5.0.0
+        version: 5.0.0(e52ffc50434626b14a3d4eccef62eea7)
+      '@openzeppelin/hardhat-upgrades':
+        specifier: ^3.9.1
+        version: 3.9.1(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(@nomicfoundation/hardhat-verify@2.1.3(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
+      eslint:
+        specifier: ^9.37.0
+        version: 9.39.2
+      hardhat-contract-sizer:
+        specifier: ^2.10.1
+        version: 2.10.1(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+
+  contracts/net-yield-distributor:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: 5.4.0
+        version: 5.4.0
+      '@openzeppelin/contracts-upgradeable':
+        specifier: 5.4.0
+        version: 5.4.0(@openzeppelin/contracts@5.4.0)
+    devDependencies:
+      '@nomicfoundation/hardhat-toolbox':
+        specifier: ^5.0.0
+        version: 5.0.0(e52ffc50434626b14a3d4eccef62eea7)
+      '@openzeppelin/hardhat-upgrades':
+        specifier: ^3.9.1
+        version: 3.9.1(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(@nomicfoundation/hardhat-verify@2.1.3(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      dotenv:
+        specifier: ^17.2.1
+        version: 17.2.3
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.2
+      hardhat-contract-sizer:
+        specifier: ^2.10.1
+        version: 2.10.1(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+
+  contracts/periphery:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: 5.4.0
+        version: 5.4.0
+      '@openzeppelin/contracts-upgradeable':
+        specifier: 5.4.0
+        version: 5.4.0(@openzeppelin/contracts@5.4.0)
+    devDependencies:
+      '@nomicfoundation/hardhat-toolbox':
+        specifier: ^5.0.0
+        version: 5.0.0(e52ffc50434626b14a3d4eccef62eea7)
+      '@openzeppelin/hardhat-upgrades':
+        specifier: ^3.9.1
+        version: 3.9.1(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(@nomicfoundation/hardhat-verify@2.1.3(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      dotenv:
+        specifier: ^17.2.1
+        version: 17.2.3
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.2
+      hardhat-contract-sizer:
+        specifier: ^2.10.1
+        version: 2.10.1(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+
+  contracts/shared-wallet-controller:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: 5.4.0
+        version: 5.4.0
+      '@openzeppelin/contracts-upgradeable':
+        specifier: 5.4.0
+        version: 5.4.0(@openzeppelin/contracts@5.4.0)
+    devDependencies:
+      '@nomicfoundation/hardhat-toolbox':
+        specifier: ^5.0.0
+        version: 5.0.0(e52ffc50434626b14a3d4eccef62eea7)
+      '@openzeppelin/hardhat-upgrades':
+        specifier: ^3.9.1
+        version: 3.9.1(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(@nomicfoundation/hardhat-verify@2.1.3(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      dotenv:
+        specifier: ^17.2.1
+        version: 17.2.3
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.2
+      hardhat-contract-sizer:
+        specifier: ^2.10.1
+        version: 2.10.1(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+
   contracts/token:
     dependencies:
       '@openzeppelin/contracts':
@@ -82,6 +391,31 @@ importers:
       hardhat:
         specifier: ^2.28.0
         version: 2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)
+      hardhat-contract-sizer:
+        specifier: ^2.10.1
+        version: 2.10.1(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+
+  contracts/treasury:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: 5.5.0
+        version: 5.5.0
+      '@openzeppelin/contracts-upgradeable':
+        specifier: 5.5.0
+        version: 5.5.0(@openzeppelin/contracts@5.5.0)
+    devDependencies:
+      '@nomicfoundation/hardhat-toolbox':
+        specifier: ^5.0.0
+        version: 5.0.0(e52ffc50434626b14a3d4eccef62eea7)
+      '@openzeppelin/hardhat-upgrades':
+        specifier: ^3.9.1
+        version: 3.9.1(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(@nomicfoundation/hardhat-verify@2.1.3(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
+      eslint:
+        specifier: ^9.38.0
+        version: 9.39.2
       hardhat-contract-sizer:
         specifier: ^2.10.1
         version: 2.10.1(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
@@ -456,6 +790,22 @@ packages:
 
   '@bytecodealliance/preview2-shim@0.17.2':
     resolution: {integrity: sha512-mNm/lblgES8UkVle8rGImXOz4TtL3eU3inHay/7TVchkKrb/lgcVvTK0+VAw8p5zQ0rgQsXm1j5dOlAAd+MeoA==}
+
+  '@cloudwalk/chainshot@0.4.0':
+    resolution: {integrity: sha512-ZPJRVZo6yLbqb/yWZjhorxyikLoRuzdcRYyyuUr2roRVeCp7qrfjddGw1h7HFrf+CYyhA9BNFDO6giko+IwrIQ==, tarball: https://npm.pkg.github.com/download/@cloudwalk/chainshot/0.4.0/42075476793f9c47be8a13dd970439a231fc56ad}
+    peerDependencies:
+      '@nomicfoundation/hardhat-ethers': ^3.0.0
+      chai: '>=4'
+      hardhat: ^2.0.0
+      mocha: '>=10'
+
+  '@cloudwalk/chainshot@0.5.2':
+    resolution: {integrity: sha512-Egieco7G5kZ8QBWZvroyqBVjP7y/m28YpGRV2RcCKL4qMwy86MOoH+aRRkJm3qu3BEW/1r3GmGK5+UQHWkoIWw==, tarball: https://npm.pkg.github.com/download/@cloudwalk/chainshot/0.5.2/8e9889f72caf92779d78b3078036559ccf32fcb2}
+    peerDependencies:
+      '@nomicfoundation/hardhat-ethers': ^3.0.0
+      chai: '>=4'
+      hardhat: ^2.0.0
+      mocha: '>=10'
 
   '@cloudwalk/eslint-config-smart-contracts@1.0.0':
     resolution: {integrity: sha512-6nqnFMHQJ7NLtAxReYPTXYbKNDdrU2QNYQONY+XMC6yQ9Q/yQO+8Khq3jQ2fbfzvM3VfscAVRtYJ9pDUJwCbSg==, tarball: https://npm.pkg.github.com/download/@cloudwalk/eslint-config-smart-contracts/1.0.0/7a7f734072761d77a5a2db1bc1d5fef193e719a4}
@@ -896,6 +1246,9 @@ packages:
     resolution: {integrity: sha512-q4n32/FNKIhQ3zQGGw5CvPF6GTvDCpYwIf7bEY/dZTZbgfDsHyjJwURxUJf3VQuuJj+fDIFl4+KkBVbw4Ef6jA==}
     engines: {node: '>= 12'}
 
+  '@openzeppelin/contracts-upgradeable@4.9.6':
+    resolution: {integrity: sha512-m4iHazOsOCv1DgM7eD7GupTJ+NFVujRZt1wzddDPSVGpWdKq1SKkla5htKG7+IS4d2XOCtzkUNwRZ7Vq5aEUMA==}
+
   '@openzeppelin/contracts-upgradeable@5.4.0':
     resolution: {integrity: sha512-STJKyDzUcYuB35Zub1JpWW58JxvrFFVgQ+Ykdr8A9PGXgtq/obF5uoh07k2XmFyPxfnZdPdBdhkJ/n2YxJ87HQ==}
     peerDependencies:
@@ -905,6 +1258,9 @@ packages:
     resolution: {integrity: sha512-Va5hKG5oaK0EE5bXTVWugcGimMHazxL+SL523dH6WVbGiuLXwuWr9oxtLyPHQSVGtgmlIgtKNR5V+OUpCIUwFQ==}
     peerDependencies:
       '@openzeppelin/contracts': 5.5.0
+
+  '@openzeppelin/contracts@4.9.6':
+    resolution: {integrity: sha512-xSmezSupL+y9VkHZJGDoCBpmnB2ogM13ccaYDWqJTfS3dbuHkgjuwDFUmaFauBCboQMGB/S5UqUl2y54X99BmA==}
 
   '@openzeppelin/contracts@5.4.0':
     resolution: {integrity: sha512-eCYgWnLg6WO+X52I16TZt8uEjbtdkgLC0SUX/xnAksjjrQI4Xfn4iBRoI5j55dmlOhDv1Y7BoR3cU7e3WWhC6A==}
@@ -4299,6 +4655,30 @@ snapshots:
 
   '@bytecodealliance/preview2-shim@0.17.2': {}
 
+  '@cloudwalk/chainshot@0.4.0(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(chai@4.5.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))(mocha@11.7.5)':
+    dependencies:
+      '@nomicfoundation/hardhat-ethers': 3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      chai: 4.5.0
+      handlebars: 4.7.8
+      hardhat: 2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)
+      mocha: 11.7.5
+      mocha-chai-jest-snapshot: 1.1.7
+    transitivePeerDependencies:
+      - supports-color
+    optional: true
+
+  '@cloudwalk/chainshot@0.5.2(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(chai@4.5.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))(mocha@11.7.5)':
+    dependencies:
+      '@nomicfoundation/hardhat-ethers': 3.1.3(ethers@6.16.0)(hardhat@2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      chai: 4.5.0
+      handlebars: 4.7.8
+      hardhat: 2.28.0(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)
+      mocha: 11.7.5
+      mocha-chai-jest-snapshot: 1.1.7
+    transitivePeerDependencies:
+      - supports-color
+    optional: true
+
   '@cloudwalk/eslint-config-smart-contracts@1.0.0(eslint@9.39.2)(typescript@5.9.3)':
     dependencies:
       '@stylistic/eslint-plugin': 5.6.1(eslint@9.39.2)
@@ -4977,6 +5357,8 @@ snapshots:
       '@nomicfoundation/solidity-analyzer-linux-x64-musl': 0.1.2
       '@nomicfoundation/solidity-analyzer-win32-x64-msvc': 0.1.2
 
+  '@openzeppelin/contracts-upgradeable@4.9.6': {}
+
   '@openzeppelin/contracts-upgradeable@5.4.0(@openzeppelin/contracts@5.4.0)':
     dependencies:
       '@openzeppelin/contracts': 5.4.0
@@ -4984,6 +5366,8 @@ snapshots:
   '@openzeppelin/contracts-upgradeable@5.5.0(@openzeppelin/contracts@5.5.0)':
     dependencies:
       '@openzeppelin/contracts': 5.5.0
+
+  '@openzeppelin/contracts@4.9.6': {}
 
   '@openzeppelin/contracts@5.4.0': {}
 

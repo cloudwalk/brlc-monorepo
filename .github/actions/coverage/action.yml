@@ -9,7 +9,7 @@ runs:
   using: "composite"
   steps:
     - name: Run tests with coverage
-      run: pnpx hardhat coverage
+      run: phardhat coverage
       shell: bash
 
     - name: Upload results to Codecov

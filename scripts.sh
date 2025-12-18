@@ -24,5 +24,5 @@ for contract in "${contracts[@]}"; do
   rm -rf contracts/$contract/.github
   rm -rf contracts/$contract/.husky
   rm -rf contracts/$contract/eslint.config.js
-  rm -rf contracts/$contract/docs
+  rm -rf contracts/$contract/package-lock.json
 done;

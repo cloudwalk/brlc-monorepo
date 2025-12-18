@@ -1,0 +1,301 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Contract 'CashbackVault' BDD scenarios snapshot scenario test 1`] = `
+Array [
+  Object {
+    "args": Array [
+      "account",
+      1000n,
+    ],
+    "balances": Object {
+      "BRLC": Object {
+        "BRLC": 0n,
+        "account": 0n,
+        "cashbackVault": 1000n,
+        "manager": 0n,
+        "operator": 57896044618658097711785492504343953926634992332820282019728792003956564818967n,
+      },
+    },
+    "caller": "operator",
+    "contract": "cashbackVault",
+    "customState": Object {
+      "accountCashbackState": Object {
+        "balance": 1000n,
+        "totalClaimed": 0n,
+      },
+    },
+    "events": Array [
+      Object {
+        "args": Array [
+          "operator",
+          "cashbackVault",
+          1000n,
+        ],
+        "contract": "BRLC",
+        "name": "Transfer",
+      },
+      Object {
+        "args": Array [
+          "account",
+          "operator",
+          1000n,
+          1000n,
+        ],
+        "contract": "cashbackVault",
+        "name": "CashbackGranted",
+      },
+    ],
+    "methodFragment": FunctionFragment {
+      "constant": false,
+      "gas": null,
+      "inputs": Array [
+        ParamType {
+          "arrayChildren": null,
+          "arrayLength": null,
+          "baseType": "address",
+          "components": null,
+          "indexed": undefined,
+          "name": "account",
+          "type": "address",
+        },
+        ParamType {
+          "arrayChildren": null,
+          "arrayLength": null,
+          "baseType": "uint64",
+          "components": null,
+          "indexed": undefined,
+          "name": "amount",
+          "type": "uint64",
+        },
+      ],
+      "name": "grantCashback",
+      "outputs": Array [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function",
+    },
+    "type": "methodCall",
+  },
+  Object {
+    "args": Array [
+      "account",
+      100n,
+    ],
+    "balances": Object {
+      "BRLC": Object {
+        "BRLC": 0n,
+        "account": 0n,
+        "cashbackVault": 900n,
+        "manager": 0n,
+        "operator": 57896044618658097711785492504343953926634992332820282019728792003956564819067n,
+      },
+    },
+    "caller": "operator",
+    "contract": "cashbackVault",
+    "customState": Object {
+      "accountCashbackState": Object {
+        "balance": 900n,
+        "totalClaimed": 0n,
+      },
+    },
+    "events": Array [
+      Object {
+        "args": Array [
+          "cashbackVault",
+          "operator",
+          100n,
+        ],
+        "contract": "BRLC",
+        "name": "Transfer",
+      },
+      Object {
+        "args": Array [
+          "account",
+          "operator",
+          100n,
+          900n,
+        ],
+        "contract": "cashbackVault",
+        "name": "CashbackRevoked",
+      },
+    ],
+    "methodFragment": FunctionFragment {
+      "constant": false,
+      "gas": null,
+      "inputs": Array [
+        ParamType {
+          "arrayChildren": null,
+          "arrayLength": null,
+          "baseType": "address",
+          "components": null,
+          "indexed": undefined,
+          "name": "account",
+          "type": "address",
+        },
+        ParamType {
+          "arrayChildren": null,
+          "arrayLength": null,
+          "baseType": "uint64",
+          "components": null,
+          "indexed": undefined,
+          "name": "amount",
+          "type": "uint64",
+        },
+      ],
+      "name": "revokeCashback",
+      "outputs": Array [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function",
+    },
+    "type": "methodCall",
+  },
+  Object {
+    "args": Array [
+      "account",
+      100n,
+    ],
+    "balances": Object {
+      "BRLC": Object {
+        "BRLC": 0n,
+        "account": 100n,
+        "cashbackVault": 800n,
+        "manager": 0n,
+        "operator": 57896044618658097711785492504343953926634992332820282019728792003956564819067n,
+      },
+    },
+    "caller": "manager",
+    "contract": "cashbackVault",
+    "customState": Object {
+      "accountCashbackState": Object {
+        "balance": 800n,
+        "totalClaimed": 100n,
+      },
+    },
+    "events": Array [
+      Object {
+        "args": Array [
+          "cashbackVault",
+          "account",
+          100n,
+        ],
+        "contract": "BRLC",
+        "name": "Transfer",
+      },
+      Object {
+        "args": Array [
+          "account",
+          "manager",
+          100n,
+          800n,
+        ],
+        "contract": "cashbackVault",
+        "name": "CashbackClaimed",
+      },
+    ],
+    "methodFragment": FunctionFragment {
+      "constant": false,
+      "gas": null,
+      "inputs": Array [
+        ParamType {
+          "arrayChildren": null,
+          "arrayLength": null,
+          "baseType": "address",
+          "components": null,
+          "indexed": undefined,
+          "name": "account",
+          "type": "address",
+        },
+        ParamType {
+          "arrayChildren": null,
+          "arrayLength": null,
+          "baseType": "uint64",
+          "components": null,
+          "indexed": undefined,
+          "name": "amount",
+          "type": "uint64",
+        },
+      ],
+      "name": "claim",
+      "outputs": Array [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function",
+    },
+    "type": "methodCall",
+  },
+]
+`;
+
+exports[`Contract 'CashbackVault' BDD scenarios snapshot scenario test 2 1`] = `
+Array [
+  Object {
+    "args": Array [
+      "account",
+      1000n,
+    ],
+    "balances": Object {
+      "tokenMock": Object {
+        "account": 0n,
+        "cashbackVault": 1000n,
+        "manager": 0n,
+        "operator": 57896044618658097711785492504343953926634992332820282019728792003956564818967n,
+        "tokenMock": 0n,
+      },
+    },
+    "caller": "operator",
+    "contract": "cashbackVault",
+    "events": Array [
+      Object {
+        "args": Array [
+          "operator",
+          "cashbackVault",
+          1000n,
+        ],
+        "contract": "tokenMock",
+        "name": "Transfer",
+      },
+      Object {
+        "args": Array [
+          "account",
+          "operator",
+          1000n,
+          1000n,
+        ],
+        "contract": "cashbackVault",
+        "name": "CashbackGranted",
+      },
+    ],
+    "methodFragment": FunctionFragment {
+      "constant": false,
+      "gas": null,
+      "inputs": Array [
+        ParamType {
+          "arrayChildren": null,
+          "arrayLength": null,
+          "baseType": "address",
+          "components": null,
+          "indexed": undefined,
+          "name": "account",
+          "type": "address",
+        },
+        ParamType {
+          "arrayChildren": null,
+          "arrayLength": null,
+          "baseType": "uint64",
+          "components": null,
+          "indexed": undefined,
+          "name": "amount",
+          "type": "uint64",
+        },
+      ],
+      "name": "grantCashback",
+      "outputs": Array [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function",
+    },
+    "type": "methodCall",
+  },
+]
+`;

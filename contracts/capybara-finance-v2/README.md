@@ -1,7 +1,7 @@
 # Capybara Finance V2
 
 <p align="center">
-  <img src="./docs/media/brlc-cover.png">
+  <img src="../../docs/media/brlc-cover.png">
 </p>
 
 [![codecov](https://codecov.io/github/cloudwalk/brlc-capybara-finance-v2/branch/main/graph/badge.svg)](https://codecov.io/github/cloudwalk/brlc-capybara-finance-v2)
@@ -16,7 +16,8 @@ The configuration steps of the protocol can be found in the [docs/configuration.
 
 ## Project Setup
 
-Read [Documentation](https://github.com/cloudwalk/brlc-dev-ex/blob/main/docs/DEVELOPMENT.md).
+This repository is mirrored from the [BRLC monorepo](https://github.com/cloudwalk/brlc-monorepo).
+All development happens in the monorepo.
 
 ## Licensing
 

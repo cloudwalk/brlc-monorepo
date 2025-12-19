@@ -1,0 +1,3841 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0x923CE8dE290F3Fac574e45E84d30bDad223eB87E",
+      "txHash": "0x10fd0908c1c486842319f773343ad5f5b49488e9194629de8326c6e880a034b2",
+      "kind": "uups",
+      "cw_tag": "lending_engine_v2"
+    },
+    {
+      "address": "0x1Fd6A297263d0dc4047793c6bA6A7102A818c9fD",
+      "txHash": "0xe56e04998135a2347270b4c459e7158fa47ca83732f6dbab29f8282ec991f2cf",
+      "kind": "uups",
+      "cw_tag": "lending_market_v2_brlc"
+    },
+    {
+      "address": "0x68Ed1D943CA1B79b3D2846EA606e55EE15d01c65",
+      "txHash": "0x2220177bab455d352f104377f5722e612fda484c628decf8d21ff5d6a14f49e5",
+      "kind": "uups",
+      "cw_tag": "credit_line_v2_brlc_1"
+    }
+  ],
+  "impls": {
+    "d1add4d34aad57e8d15d5e8cd2d95a59174e831e570c0a93b09f6705d96b3dbd": {
+      "address": "0x28da4EE67Ab6067804a3115DaA66e491467c11e5",
+      "txHash": "0x2eb0bdf6e81fff62396e1697e8628a9009bd74b69844d2a920277309cd79b099",
+      "layout": {
+        "solcVersion": "0.8.30",
+        "storage": [],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)46_storage": {
+            "label": "uint256[46]",
+            "numberOfBytes": "1472"
+          },
+          "t_array(t_uint256)48_storage": {
+            "label": "uint256[48]",
+            "numberOfBytes": "1536"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_enum(GracePeriodStatus)6126": {
+            "label": "enum ILendingMarketV2Types.GracePeriodStatus",
+            "members": [
+              "None",
+              "Active"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(LendingProgramStatus)6116": {
+            "label": "enum ILendingMarketV2Types.LendingProgramStatus",
+            "members": [
+              "Nonexistent",
+              "Active",
+              "Closed"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(OperationKind)6147": {
+            "label": "enum ILendingMarketV2Types.OperationKind",
+            "members": [
+              "Nonexistent",
+              "Repayment",
+              "Discount",
+              "Revocation",
+              "Freezing",
+              "Unfreezing",
+              "RemuneratoryRateSetting",
+              "MoratoryRateSetting",
+              "LateFeeRateSetting",
+              "GraceDiscountRateSetting",
+              "DurationSetting"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(OperationStatus)6134": {
+            "label": "enum ILendingMarketV2Types.OperationStatus",
+            "members": [
+              "Nonexistent",
+              "Pending",
+              "Applied",
+              "Skipped",
+              "Dismissed",
+              "Revoked"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(SubLoanStatus)6122": {
+            "label": "enum ILendingMarketV2Types.SubLoanStatus",
+            "members": [
+              "Nonexistent",
+              "Ongoing",
+              "Repaid",
+              "Revoked"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)27_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_address)": {
+            "label": "mapping(uint256 => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(LendingProgram)6156_storage)": {
+            "label": "mapping(uint256 => struct ILendingMarketV2Types.LendingProgram)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Operation)6474_storage)": {
+            "label": "mapping(uint256 => struct ILendingMarketV2Types.Operation)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(SubLoan)6278_storage)": {
+            "label": "mapping(uint256 => struct ILendingMarketV2Types.SubLoan)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)37_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)27_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(InitializableStorage)794_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(LendingMarketStorage)7532_storage": {
+            "label": "struct LendingMarketV2StorageLayout.LendingMarketStorage",
+            "members": [
+              {
+                "label": "storageKind",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "underlyingToken",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "subLoanCounter",
+                "type": "t_uint64",
+                "offset": 21,
+                "slot": "0"
+              },
+              {
+                "label": "programCounter",
+                "type": "t_uint24",
+                "offset": 29,
+                "slot": "0"
+              },
+              {
+                "label": "engine",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "subLoanAutoIdCounter",
+                "type": "t_uint64",
+                "offset": 20,
+                "slot": "1"
+              },
+              {
+                "label": "subLoans",
+                "type": "t_mapping(t_uint256,t_struct(SubLoan)6278_storage)",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "programs",
+                "type": "t_mapping(t_uint256,t_struct(LendingProgram)6156_storage)",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "accountAddressBook",
+                "type": "t_struct(Table)7075_storage",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_struct(LendingProgram)6156_storage": {
+            "label": "struct ILendingMarketV2Types.LendingProgram",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(LendingProgramStatus)6116",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "creditLine",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "liquidityPool",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Operation)6474_storage": {
+            "label": "struct ILendingMarketV2Types.Operation",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(OperationStatus)6134",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "kind",
+                "type": "t_enum(OperationKind)6147",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "nextOperationId",
+                "type": "t_uint16",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "prevOperationId",
+                "type": "t_uint16",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint32",
+                "offset": 6,
+                "slot": "0"
+              },
+              {
+                "label": "value",
+                "type": "t_uint64",
+                "offset": 10,
+                "slot": "0"
+              },
+              {
+                "label": "accountId",
+                "type": "t_uint64",
+                "offset": 18,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)27_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(SubLoan)6278_storage": {
+            "label": "struct ILendingMarketV2Types.SubLoan",
+            "members": [
+              {
+                "label": "inception",
+                "type": "t_struct(SubLoanInception)6186_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "__gap0",
+                "type": "t_array(t_uint256)48_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "state",
+                "type": "t_struct(SubLoanState)6250_storage",
+                "offset": 0,
+                "slot": "50"
+              },
+              {
+                "label": "__gap1",
+                "type": "t_array(t_uint256)46_storage",
+                "offset": 0,
+                "slot": "54"
+              },
+              {
+                "label": "metadata",
+                "type": "t_struct(SubLoanMetadata)6204_storage",
+                "offset": 0,
+                "slot": "100"
+              },
+              {
+                "label": "__gap2",
+                "type": "t_array(t_uint256)49_storage",
+                "offset": 0,
+                "slot": "101"
+              },
+              {
+                "label": "operations",
+                "type": "t_mapping(t_uint256,t_struct(Operation)6474_storage)",
+                "offset": 0,
+                "slot": "150"
+              }
+            ],
+            "numberOfBytes": "4832"
+          },
+          "t_struct(SubLoanInception)6186_storage": {
+            "label": "struct ILendingMarketV2Types.SubLoanInception",
+            "members": [
+              {
+                "label": "borrowedAmount",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "addonAmount",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "0"
+              },
+              {
+                "label": "initialRemuneratoryRate",
+                "type": "t_uint32",
+                "offset": 16,
+                "slot": "0"
+              },
+              {
+                "label": "initialMoratoryRate",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "initialLateFeeRate",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "0"
+              },
+              {
+                "label": "initialGraceDiscountRate",
+                "type": "t_uint32",
+                "offset": 28,
+                "slot": "0"
+              },
+              {
+                "label": "initialDuration",
+                "type": "t_uint16",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "startTimestamp",
+                "type": "t_uint32",
+                "offset": 2,
+                "slot": "1"
+              },
+              {
+                "label": "programId",
+                "type": "t_uint24",
+                "offset": 6,
+                "slot": "1"
+              },
+              {
+                "label": "borrower",
+                "type": "t_address",
+                "offset": 9,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(SubLoanMetadata)6204_storage": {
+            "label": "struct ILendingMarketV2Types.SubLoanMetadata",
+            "members": [
+              {
+                "label": "subLoanIndex",
+                "type": "t_uint16",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "subLoanCount",
+                "type": "t_uint16",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "updateIndex",
+                "type": "t_uint24",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "pendingTimestamp",
+                "type": "t_uint32",
+                "offset": 7,
+                "slot": "0"
+              },
+              {
+                "label": "operationCount",
+                "type": "t_uint16",
+                "offset": 11,
+                "slot": "0"
+              },
+              {
+                "label": "earliestOperationId",
+                "type": "t_uint16",
+                "offset": 13,
+                "slot": "0"
+              },
+              {
+                "label": "recentOperationId",
+                "type": "t_uint16",
+                "offset": 15,
+                "slot": "0"
+              },
+              {
+                "label": "latestOperationId",
+                "type": "t_uint16",
+                "offset": 17,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(SubLoanState)6250_storage": {
+            "label": "struct ILendingMarketV2Types.SubLoanState",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(SubLoanStatus)6122",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "gracePeriodStatus",
+                "type": "t_enum(GracePeriodStatus)6126",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "duration",
+                "type": "t_uint16",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "freezeTimestamp",
+                "type": "t_uint32",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "trackedTimestamp",
+                "type": "t_uint32",
+                "offset": 8,
+                "slot": "0"
+              },
+              {
+                "label": "remuneratoryRate",
+                "type": "t_uint32",
+                "offset": 12,
+                "slot": "0"
+              },
+              {
+                "label": "moratoryRate",
+                "type": "t_uint32",
+                "offset": 16,
+                "slot": "0"
+              },
+              {
+                "label": "lateFeeRate",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "graceDiscountRate",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "0"
+              },
+              {
+                "label": "trackedPrincipal",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "trackedRemuneratoryInterest",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "1"
+              },
+              {
+                "label": "trackedMoratoryInterest",
+                "type": "t_uint64",
+                "offset": 16,
+                "slot": "1"
+              },
+              {
+                "label": "trackedLateFee",
+                "type": "t_uint64",
+                "offset": 24,
+                "slot": "1"
+              },
+              {
+                "label": "repaidPrincipal",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "repaidRemuneratoryInterest",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "2"
+              },
+              {
+                "label": "repaidMoratoryInterest",
+                "type": "t_uint64",
+                "offset": 16,
+                "slot": "2"
+              },
+              {
+                "label": "repaidLateFee",
+                "type": "t_uint64",
+                "offset": 24,
+                "slot": "2"
+              },
+              {
+                "label": "discountPrincipal",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "discountRemuneratoryInterest",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "3"
+              },
+              {
+                "label": "discountMoratoryInterest",
+                "type": "t_uint64",
+                "offset": 16,
+                "slot": "3"
+              },
+              {
+                "label": "discountLateFee",
+                "type": "t_uint64",
+                "offset": 24,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(Table)7075_storage": {
+            "label": "struct AddressBook.Table",
+            "members": [
+              {
+                "label": "idToAccount",
+                "type": "t_mapping(t_uint256,t_address)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "accountToId",
+                "type": "t_mapping(t_address,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "recordCount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint24": {
+            "label": "uint24",
+            "numberOfBytes": "3"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:cloudwalk.storage.LendingMarket": [
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "storageKind",
+              "type": "t_uint8",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:63",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "underlyingToken",
+              "type": "t_address",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:64",
+              "offset": 1,
+              "slot": "0"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "subLoanCounter",
+              "type": "t_uint64",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:65",
+              "offset": 21,
+              "slot": "0"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "programCounter",
+              "type": "t_uint24",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:66",
+              "offset": 29,
+              "slot": "0"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "engine",
+              "type": "t_address",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:70",
+              "offset": 0,
+              "slot": "1"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "subLoanAutoIdCounter",
+              "type": "t_uint64",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:71",
+              "offset": 20,
+              "slot": "1"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "subLoans",
+              "type": "t_mapping(t_uint256,t_struct(SubLoan)6278_storage)",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:75",
+              "offset": 0,
+              "slot": "2"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "programs",
+              "type": "t_mapping(t_uint256,t_struct(LendingProgram)6156_storage)",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:76",
+              "offset": 0,
+              "slot": "3"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "accountAddressBook",
+              "type": "t_struct(Table)7075_storage",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:78",
+              "offset": 0,
+              "slot": "4"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)27_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:62",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "56f62a0fed9aee9eb6f1b29f15e3005f71828bf8b1529eae356e88b111236c60": {
+      "address": "0xF7B88439796Da913a940bb19D3cdBE03C22DAC9C",
+      "txHash": "0x570245137ac5291d8d4c65d97d2b18fddd6b725a988aa9107b57578114aeaf33",
+      "layout": {
+        "solcVersion": "0.8.30",
+        "storage": [],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)46_storage": {
+            "label": "uint256[46]",
+            "numberOfBytes": "1472"
+          },
+          "t_array(t_uint256)48_storage": {
+            "label": "uint256[48]",
+            "numberOfBytes": "1536"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_enum(GracePeriodStatus)6126": {
+            "label": "enum ILendingMarketV2Types.GracePeriodStatus",
+            "members": [
+              "None",
+              "Active"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(LendingProgramStatus)6116": {
+            "label": "enum ILendingMarketV2Types.LendingProgramStatus",
+            "members": [
+              "Nonexistent",
+              "Active",
+              "Closed"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(OperationKind)6147": {
+            "label": "enum ILendingMarketV2Types.OperationKind",
+            "members": [
+              "Nonexistent",
+              "Repayment",
+              "Discount",
+              "Revocation",
+              "Freezing",
+              "Unfreezing",
+              "RemuneratoryRateSetting",
+              "MoratoryRateSetting",
+              "LateFeeRateSetting",
+              "GraceDiscountRateSetting",
+              "DurationSetting"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(OperationStatus)6134": {
+            "label": "enum ILendingMarketV2Types.OperationStatus",
+            "members": [
+              "Nonexistent",
+              "Pending",
+              "Applied",
+              "Skipped",
+              "Dismissed",
+              "Revoked"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(SubLoanStatus)6122": {
+            "label": "enum ILendingMarketV2Types.SubLoanStatus",
+            "members": [
+              "Nonexistent",
+              "Ongoing",
+              "Repaid",
+              "Revoked"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(AddressSet)3799_storage)": {
+            "label": "mapping(bytes32 => struct EnumerableSet.AddressSet)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)27_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_address)": {
+            "label": "mapping(uint256 => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(LendingProgram)6156_storage)": {
+            "label": "mapping(uint256 => struct ILendingMarketV2Types.LendingProgram)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Operation)6474_storage)": {
+            "label": "mapping(uint256 => struct ILendingMarketV2Types.Operation)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(SubLoan)6278_storage)": {
+            "label": "mapping(uint256 => struct ILendingMarketV2Types.SubLoan)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlEnumerableStorage)180_storage": {
+            "label": "struct AccessControlEnumerableUpgradeable.AccessControlEnumerableStorage",
+            "members": [
+              {
+                "label": "_roleMembers",
+                "type": "t_mapping(t_bytes32,t_struct(AddressSet)3799_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)37_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)27_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(AddressSet)3799_storage": {
+            "label": "struct EnumerableSet.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)3611_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(InitializableStorage)794_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(LendingMarketStorage)7532_storage": {
+            "label": "struct LendingMarketV2StorageLayout.LendingMarketStorage",
+            "members": [
+              {
+                "label": "storageKind",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "underlyingToken",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "subLoanCounter",
+                "type": "t_uint64",
+                "offset": 21,
+                "slot": "0"
+              },
+              {
+                "label": "programCounter",
+                "type": "t_uint24",
+                "offset": 29,
+                "slot": "0"
+              },
+              {
+                "label": "engine",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "subLoanAutoIdCounter",
+                "type": "t_uint64",
+                "offset": 20,
+                "slot": "1"
+              },
+              {
+                "label": "subLoans",
+                "type": "t_mapping(t_uint256,t_struct(SubLoan)6278_storage)",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "programs",
+                "type": "t_mapping(t_uint256,t_struct(LendingProgram)6156_storage)",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "accountAddressBook",
+                "type": "t_struct(Table)7075_storage",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_struct(LendingProgram)6156_storage": {
+            "label": "struct ILendingMarketV2Types.LendingProgram",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(LendingProgramStatus)6116",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "creditLine",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "liquidityPool",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Operation)6474_storage": {
+            "label": "struct ILendingMarketV2Types.Operation",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(OperationStatus)6134",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "kind",
+                "type": "t_enum(OperationKind)6147",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "nextOperationId",
+                "type": "t_uint16",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "prevOperationId",
+                "type": "t_uint16",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint32",
+                "offset": 6,
+                "slot": "0"
+              },
+              {
+                "label": "value",
+                "type": "t_uint64",
+                "offset": 10,
+                "slot": "0"
+              },
+              {
+                "label": "accountId",
+                "type": "t_uint64",
+                "offset": 18,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(PausableStorage)309_storage": {
+            "label": "struct PausableUpgradeable.PausableStorage",
+            "members": [
+              {
+                "label": "_paused",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)27_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Set)3611_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_positions",
+                "type": "t_mapping(t_bytes32,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(SubLoan)6278_storage": {
+            "label": "struct ILendingMarketV2Types.SubLoan",
+            "members": [
+              {
+                "label": "inception",
+                "type": "t_struct(SubLoanInception)6186_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "__gap0",
+                "type": "t_array(t_uint256)48_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "state",
+                "type": "t_struct(SubLoanState)6250_storage",
+                "offset": 0,
+                "slot": "50"
+              },
+              {
+                "label": "__gap1",
+                "type": "t_array(t_uint256)46_storage",
+                "offset": 0,
+                "slot": "54"
+              },
+              {
+                "label": "metadata",
+                "type": "t_struct(SubLoanMetadata)6204_storage",
+                "offset": 0,
+                "slot": "100"
+              },
+              {
+                "label": "__gap2",
+                "type": "t_array(t_uint256)49_storage",
+                "offset": 0,
+                "slot": "101"
+              },
+              {
+                "label": "operations",
+                "type": "t_mapping(t_uint256,t_struct(Operation)6474_storage)",
+                "offset": 0,
+                "slot": "150"
+              }
+            ],
+            "numberOfBytes": "4832"
+          },
+          "t_struct(SubLoanInception)6186_storage": {
+            "label": "struct ILendingMarketV2Types.SubLoanInception",
+            "members": [
+              {
+                "label": "borrowedAmount",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "addonAmount",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "0"
+              },
+              {
+                "label": "initialRemuneratoryRate",
+                "type": "t_uint32",
+                "offset": 16,
+                "slot": "0"
+              },
+              {
+                "label": "initialMoratoryRate",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "initialLateFeeRate",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "0"
+              },
+              {
+                "label": "initialGraceDiscountRate",
+                "type": "t_uint32",
+                "offset": 28,
+                "slot": "0"
+              },
+              {
+                "label": "initialDuration",
+                "type": "t_uint16",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "startTimestamp",
+                "type": "t_uint32",
+                "offset": 2,
+                "slot": "1"
+              },
+              {
+                "label": "programId",
+                "type": "t_uint24",
+                "offset": 6,
+                "slot": "1"
+              },
+              {
+                "label": "borrower",
+                "type": "t_address",
+                "offset": 9,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(SubLoanMetadata)6204_storage": {
+            "label": "struct ILendingMarketV2Types.SubLoanMetadata",
+            "members": [
+              {
+                "label": "subLoanIndex",
+                "type": "t_uint16",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "subLoanCount",
+                "type": "t_uint16",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "updateIndex",
+                "type": "t_uint24",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "pendingTimestamp",
+                "type": "t_uint32",
+                "offset": 7,
+                "slot": "0"
+              },
+              {
+                "label": "operationCount",
+                "type": "t_uint16",
+                "offset": 11,
+                "slot": "0"
+              },
+              {
+                "label": "earliestOperationId",
+                "type": "t_uint16",
+                "offset": 13,
+                "slot": "0"
+              },
+              {
+                "label": "recentOperationId",
+                "type": "t_uint16",
+                "offset": 15,
+                "slot": "0"
+              },
+              {
+                "label": "latestOperationId",
+                "type": "t_uint16",
+                "offset": 17,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(SubLoanState)6250_storage": {
+            "label": "struct ILendingMarketV2Types.SubLoanState",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(SubLoanStatus)6122",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "gracePeriodStatus",
+                "type": "t_enum(GracePeriodStatus)6126",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "duration",
+                "type": "t_uint16",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "freezeTimestamp",
+                "type": "t_uint32",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "trackedTimestamp",
+                "type": "t_uint32",
+                "offset": 8,
+                "slot": "0"
+              },
+              {
+                "label": "remuneratoryRate",
+                "type": "t_uint32",
+                "offset": 12,
+                "slot": "0"
+              },
+              {
+                "label": "moratoryRate",
+                "type": "t_uint32",
+                "offset": 16,
+                "slot": "0"
+              },
+              {
+                "label": "lateFeeRate",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "graceDiscountRate",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "0"
+              },
+              {
+                "label": "trackedPrincipal",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "trackedRemuneratoryInterest",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "1"
+              },
+              {
+                "label": "trackedMoratoryInterest",
+                "type": "t_uint64",
+                "offset": 16,
+                "slot": "1"
+              },
+              {
+                "label": "trackedLateFee",
+                "type": "t_uint64",
+                "offset": 24,
+                "slot": "1"
+              },
+              {
+                "label": "repaidPrincipal",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "repaidRemuneratoryInterest",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "2"
+              },
+              {
+                "label": "repaidMoratoryInterest",
+                "type": "t_uint64",
+                "offset": 16,
+                "slot": "2"
+              },
+              {
+                "label": "repaidLateFee",
+                "type": "t_uint64",
+                "offset": 24,
+                "slot": "2"
+              },
+              {
+                "label": "discountPrincipal",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "discountRemuneratoryInterest",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "3"
+              },
+              {
+                "label": "discountMoratoryInterest",
+                "type": "t_uint64",
+                "offset": 16,
+                "slot": "3"
+              },
+              {
+                "label": "discountLateFee",
+                "type": "t_uint64",
+                "offset": 24,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(Table)7075_storage": {
+            "label": "struct AddressBook.Table",
+            "members": [
+              {
+                "label": "idToAccount",
+                "type": "t_mapping(t_uint256,t_address)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "accountToId",
+                "type": "t_mapping(t_address,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "recordCount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint24": {
+            "label": "uint24",
+            "numberOfBytes": "3"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Pausable": [
+            {
+              "contract": "PausableUpgradeable",
+              "label": "_paused",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:21",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControlEnumerable": [
+            {
+              "contract": "AccessControlEnumerableUpgradeable",
+              "label": "_roleMembers",
+              "type": "t_mapping(t_bytes32,t_struct(AddressSet)3799_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol:20",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)27_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:62",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ],
+          "erc7201:cloudwalk.storage.LendingMarket": [
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "storageKind",
+              "type": "t_uint8",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:63",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "underlyingToken",
+              "type": "t_address",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:64",
+              "offset": 1,
+              "slot": "0"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "subLoanCounter",
+              "type": "t_uint64",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:65",
+              "offset": 21,
+              "slot": "0"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "programCounter",
+              "type": "t_uint24",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:66",
+              "offset": 29,
+              "slot": "0"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "engine",
+              "type": "t_address",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:70",
+              "offset": 0,
+              "slot": "1"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "subLoanAutoIdCounter",
+              "type": "t_uint64",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:71",
+              "offset": 20,
+              "slot": "1"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "subLoans",
+              "type": "t_mapping(t_uint256,t_struct(SubLoan)6278_storage)",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:75",
+              "offset": 0,
+              "slot": "2"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "programs",
+              "type": "t_mapping(t_uint256,t_struct(LendingProgram)6156_storage)",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:76",
+              "offset": 0,
+              "slot": "3"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "accountAddressBook",
+              "type": "t_struct(Table)7075_storage",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:78",
+              "offset": 0,
+              "slot": "4"
+            }
+          ]
+        }
+      }
+    },
+    "1541233b56545cb9b54d1eca2c0aec905674662cfd33f07ea9bdf91b203c953b": {
+      "address": "0x7e6e01aBcD0D4C84F7D6B9708D3f6dFef42Fdfad",
+      "txHash": "0x20e8c7b85eda5f0eb13e9c93ebd63858c36dab577cde244232e8241488112106",
+      "layout": {
+        "solcVersion": "0.8.30",
+        "storage": [],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_enum(BorrowingPolicy)5858": {
+            "label": "enum ICreditLineV2Types.BorrowingPolicy",
+            "members": [
+              "Prohibited",
+              "SingleActiveLoan",
+              "TotalActiveAmountLimit",
+              "UnlimitedActiveLoans"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(BorrowerConfig)5865_storage)": {
+            "label": "mapping(address => struct ICreditLineV2Types.BorrowerConfig)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(BorrowerState)5875_storage)": {
+            "label": "mapping(address => struct ICreditLineV2Types.BorrowerState)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(AddressSet)3799_storage)": {
+            "label": "mapping(bytes32 => struct EnumerableSet.AddressSet)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)27_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlEnumerableStorage)180_storage": {
+            "label": "struct AccessControlEnumerableUpgradeable.AccessControlEnumerableStorage",
+            "members": [
+              {
+                "label": "_roleMembers",
+                "type": "t_mapping(t_bytes32,t_struct(AddressSet)3799_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)37_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)27_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(AddressSet)3799_storage": {
+            "label": "struct EnumerableSet.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)3611_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(BorrowerConfig)5865_storage": {
+            "label": "struct ICreditLineV2Types.BorrowerConfig",
+            "members": [
+              {
+                "label": "borrowingPolicy",
+                "type": "t_enum(BorrowingPolicy)5858",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "maxBorrowedAmount",
+                "type": "t_uint64",
+                "offset": 1,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(BorrowerState)5875_storage": {
+            "label": "struct ICreditLineV2Types.BorrowerState",
+            "members": [
+              {
+                "label": "activeLoanCount",
+                "type": "t_uint16",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "closedLoanCount",
+                "type": "t_uint16",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "totalActiveLoanAmount",
+                "type": "t_uint64",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "totalClosedLoanAmount",
+                "type": "t_uint64",
+                "offset": 12,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(CreditLineStorage)7474_storage": {
+            "label": "struct CreditLineV2StorageLayout.CreditLineStorage",
+            "members": [
+              {
+                "label": "borrowerConfigs",
+                "type": "t_mapping(t_address,t_struct(BorrowerConfig)5865_storage)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "borrowerStates",
+                "type": "t_mapping(t_address,t_struct(BorrowerState)5875_storage)",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "linkedCreditLine",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(InitializableStorage)794_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(PausableStorage)309_storage": {
+            "label": "struct PausableUpgradeable.PausableStorage",
+            "members": [
+              {
+                "label": "_paused",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)27_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Set)3611_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_positions",
+                "type": "t_mapping(t_bytes32,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Pausable": [
+            {
+              "contract": "PausableUpgradeable",
+              "label": "_paused",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:21",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControlEnumerable": [
+            {
+              "contract": "AccessControlEnumerableUpgradeable",
+              "label": "_roleMembers",
+              "type": "t_mapping(t_bytes32,t_struct(AddressSet)3799_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol:20",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)27_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:62",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ],
+          "erc7201:cloudwalk.storage.LendingMarket": [
+            {
+              "contract": "CreditLineV2StorageLayout",
+              "label": "borrowerConfigs",
+              "type": "t_mapping(t_address,t_struct(BorrowerConfig)5865_storage)",
+              "src": "contracts/storage/CreditLineV2StorageLayout.sol:43",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "CreditLineV2StorageLayout",
+              "label": "borrowerStates",
+              "type": "t_mapping(t_address,t_struct(BorrowerState)5875_storage)",
+              "src": "contracts/storage/CreditLineV2StorageLayout.sol:44",
+              "offset": 0,
+              "slot": "1"
+            },
+            {
+              "contract": "CreditLineV2StorageLayout",
+              "label": "linkedCreditLine",
+              "type": "t_address",
+              "src": "contracts/storage/CreditLineV2StorageLayout.sol:48",
+              "offset": 0,
+              "slot": "2"
+            }
+          ]
+        }
+      }
+    },
+    "8fc0035b89d07d55d85f479a347d5f6409d29e84ff548579626926db3b3007a1": {
+      "address": "0x52b7D2f13b64568805C58F5970b6Da1a7FB07AC6",
+      "txHash": "0x7865856935bfb67a293091e6118fb3bcbd73233857e57b519ed02327c4ad1daa",
+      "layout": {
+        "solcVersion": "0.8.30",
+        "storage": [],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)46_storage": {
+            "label": "uint256[46]",
+            "numberOfBytes": "1472"
+          },
+          "t_array(t_uint256)48_storage": {
+            "label": "uint256[48]",
+            "numberOfBytes": "1536"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_enum(GracePeriodStatus)6126": {
+            "label": "enum ILendingMarketV2Types.GracePeriodStatus",
+            "members": [
+              "None",
+              "Active"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(LendingProgramStatus)6116": {
+            "label": "enum ILendingMarketV2Types.LendingProgramStatus",
+            "members": [
+              "Nonexistent",
+              "Active",
+              "Closed"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(OperationKind)6147": {
+            "label": "enum ILendingMarketV2Types.OperationKind",
+            "members": [
+              "Nonexistent",
+              "Repayment",
+              "Discount",
+              "Revocation",
+              "Freezing",
+              "Unfreezing",
+              "RemuneratoryRateSetting",
+              "MoratoryRateSetting",
+              "LateFeeRateSetting",
+              "GraceDiscountRateSetting",
+              "DurationSetting"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(OperationStatus)6134": {
+            "label": "enum ILendingMarketV2Types.OperationStatus",
+            "members": [
+              "Nonexistent",
+              "Pending",
+              "Applied",
+              "Skipped",
+              "Dismissed",
+              "Revoked"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(SubLoanStatus)6122": {
+            "label": "enum ILendingMarketV2Types.SubLoanStatus",
+            "members": [
+              "Nonexistent",
+              "Ongoing",
+              "Repaid",
+              "Revoked"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)27_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_address)": {
+            "label": "mapping(uint256 => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(LendingProgram)6156_storage)": {
+            "label": "mapping(uint256 => struct ILendingMarketV2Types.LendingProgram)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Operation)6474_storage)": {
+            "label": "mapping(uint256 => struct ILendingMarketV2Types.Operation)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(SubLoan)6278_storage)": {
+            "label": "mapping(uint256 => struct ILendingMarketV2Types.SubLoan)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)37_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)27_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(InitializableStorage)794_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(LendingMarketStorage)7532_storage": {
+            "label": "struct LendingMarketV2StorageLayout.LendingMarketStorage",
+            "members": [
+              {
+                "label": "storageKind",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "underlyingToken",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "subLoanCounter",
+                "type": "t_uint64",
+                "offset": 21,
+                "slot": "0"
+              },
+              {
+                "label": "programCounter",
+                "type": "t_uint24",
+                "offset": 29,
+                "slot": "0"
+              },
+              {
+                "label": "engine",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "subLoanAutoIdCounter",
+                "type": "t_uint64",
+                "offset": 20,
+                "slot": "1"
+              },
+              {
+                "label": "subLoans",
+                "type": "t_mapping(t_uint256,t_struct(SubLoan)6278_storage)",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "programs",
+                "type": "t_mapping(t_uint256,t_struct(LendingProgram)6156_storage)",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "accountAddressBook",
+                "type": "t_struct(Table)7075_storage",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_struct(LendingProgram)6156_storage": {
+            "label": "struct ILendingMarketV2Types.LendingProgram",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(LendingProgramStatus)6116",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "creditLine",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "liquidityPool",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Operation)6474_storage": {
+            "label": "struct ILendingMarketV2Types.Operation",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(OperationStatus)6134",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "kind",
+                "type": "t_enum(OperationKind)6147",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "nextOperationId",
+                "type": "t_uint16",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "prevOperationId",
+                "type": "t_uint16",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint32",
+                "offset": 6,
+                "slot": "0"
+              },
+              {
+                "label": "value",
+                "type": "t_uint64",
+                "offset": 10,
+                "slot": "0"
+              },
+              {
+                "label": "accountId",
+                "type": "t_uint64",
+                "offset": 18,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)27_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(SubLoan)6278_storage": {
+            "label": "struct ILendingMarketV2Types.SubLoan",
+            "members": [
+              {
+                "label": "inception",
+                "type": "t_struct(SubLoanInception)6186_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "__gap0",
+                "type": "t_array(t_uint256)48_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "state",
+                "type": "t_struct(SubLoanState)6250_storage",
+                "offset": 0,
+                "slot": "50"
+              },
+              {
+                "label": "__gap1",
+                "type": "t_array(t_uint256)46_storage",
+                "offset": 0,
+                "slot": "54"
+              },
+              {
+                "label": "metadata",
+                "type": "t_struct(SubLoanMetadata)6204_storage",
+                "offset": 0,
+                "slot": "100"
+              },
+              {
+                "label": "__gap2",
+                "type": "t_array(t_uint256)49_storage",
+                "offset": 0,
+                "slot": "101"
+              },
+              {
+                "label": "operations",
+                "type": "t_mapping(t_uint256,t_struct(Operation)6474_storage)",
+                "offset": 0,
+                "slot": "150"
+              }
+            ],
+            "numberOfBytes": "4832"
+          },
+          "t_struct(SubLoanInception)6186_storage": {
+            "label": "struct ILendingMarketV2Types.SubLoanInception",
+            "members": [
+              {
+                "label": "borrowedAmount",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "addonAmount",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "0"
+              },
+              {
+                "label": "initialRemuneratoryRate",
+                "type": "t_uint32",
+                "offset": 16,
+                "slot": "0"
+              },
+              {
+                "label": "initialMoratoryRate",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "initialLateFeeRate",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "0"
+              },
+              {
+                "label": "initialGraceDiscountRate",
+                "type": "t_uint32",
+                "offset": 28,
+                "slot": "0"
+              },
+              {
+                "label": "initialDuration",
+                "type": "t_uint16",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "startTimestamp",
+                "type": "t_uint32",
+                "offset": 2,
+                "slot": "1"
+              },
+              {
+                "label": "programId",
+                "type": "t_uint24",
+                "offset": 6,
+                "slot": "1"
+              },
+              {
+                "label": "borrower",
+                "type": "t_address",
+                "offset": 9,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(SubLoanMetadata)6204_storage": {
+            "label": "struct ILendingMarketV2Types.SubLoanMetadata",
+            "members": [
+              {
+                "label": "subLoanIndex",
+                "type": "t_uint16",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "subLoanCount",
+                "type": "t_uint16",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "updateIndex",
+                "type": "t_uint24",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "pendingTimestamp",
+                "type": "t_uint32",
+                "offset": 7,
+                "slot": "0"
+              },
+              {
+                "label": "operationCount",
+                "type": "t_uint16",
+                "offset": 11,
+                "slot": "0"
+              },
+              {
+                "label": "earliestOperationId",
+                "type": "t_uint16",
+                "offset": 13,
+                "slot": "0"
+              },
+              {
+                "label": "recentOperationId",
+                "type": "t_uint16",
+                "offset": 15,
+                "slot": "0"
+              },
+              {
+                "label": "latestOperationId",
+                "type": "t_uint16",
+                "offset": 17,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(SubLoanState)6250_storage": {
+            "label": "struct ILendingMarketV2Types.SubLoanState",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(SubLoanStatus)6122",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "gracePeriodStatus",
+                "type": "t_enum(GracePeriodStatus)6126",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "duration",
+                "type": "t_uint16",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "freezeTimestamp",
+                "type": "t_uint32",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "trackedTimestamp",
+                "type": "t_uint32",
+                "offset": 8,
+                "slot": "0"
+              },
+              {
+                "label": "remuneratoryRate",
+                "type": "t_uint32",
+                "offset": 12,
+                "slot": "0"
+              },
+              {
+                "label": "moratoryRate",
+                "type": "t_uint32",
+                "offset": 16,
+                "slot": "0"
+              },
+              {
+                "label": "lateFeeRate",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "graceDiscountRate",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "0"
+              },
+              {
+                "label": "trackedPrincipal",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "trackedRemuneratoryInterest",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "1"
+              },
+              {
+                "label": "trackedMoratoryInterest",
+                "type": "t_uint64",
+                "offset": 16,
+                "slot": "1"
+              },
+              {
+                "label": "trackedLateFee",
+                "type": "t_uint64",
+                "offset": 24,
+                "slot": "1"
+              },
+              {
+                "label": "repaidPrincipal",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "repaidRemuneratoryInterest",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "2"
+              },
+              {
+                "label": "repaidMoratoryInterest",
+                "type": "t_uint64",
+                "offset": 16,
+                "slot": "2"
+              },
+              {
+                "label": "repaidLateFee",
+                "type": "t_uint64",
+                "offset": 24,
+                "slot": "2"
+              },
+              {
+                "label": "discountPrincipal",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "discountRemuneratoryInterest",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "3"
+              },
+              {
+                "label": "discountMoratoryInterest",
+                "type": "t_uint64",
+                "offset": 16,
+                "slot": "3"
+              },
+              {
+                "label": "discountLateFee",
+                "type": "t_uint64",
+                "offset": 24,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(Table)7075_storage": {
+            "label": "struct AddressBook.Table",
+            "members": [
+              {
+                "label": "idToAccount",
+                "type": "t_mapping(t_uint256,t_address)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "accountToId",
+                "type": "t_mapping(t_address,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "recordCount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint24": {
+            "label": "uint24",
+            "numberOfBytes": "3"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:cloudwalk.storage.LendingMarket": [
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "storageKind",
+              "type": "t_uint8",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:64",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "underlyingToken",
+              "type": "t_address",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:65",
+              "offset": 1,
+              "slot": "0"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "subLoanCounter",
+              "type": "t_uint64",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:66",
+              "offset": 21,
+              "slot": "0"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "programCounter",
+              "type": "t_uint24",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:67",
+              "offset": 29,
+              "slot": "0"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "engine",
+              "type": "t_address",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:71",
+              "offset": 0,
+              "slot": "1"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "subLoanAutoIdCounter",
+              "type": "t_uint64",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:72",
+              "offset": 20,
+              "slot": "1"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "subLoans",
+              "type": "t_mapping(t_uint256,t_struct(SubLoan)6278_storage)",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:76",
+              "offset": 0,
+              "slot": "2"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "programs",
+              "type": "t_mapping(t_uint256,t_struct(LendingProgram)6156_storage)",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:77",
+              "offset": 0,
+              "slot": "3"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "accountAddressBook",
+              "type": "t_struct(Table)7075_storage",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:79",
+              "offset": 0,
+              "slot": "4"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)27_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:62",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "1b03c3af15214a9e375680130a17ac5d8eadec392519ea13c2d0542c718bdbe5": {
+      "address": "0x07E32E212ad42A9199D251B43f610C96Af5E2cf0",
+      "txHash": "0x4757ef1627feef32d6ef8a3200362fc6a44be31370b8ddd4465afd3bd3a179eb",
+      "layout": {
+        "solcVersion": "0.8.30",
+        "storage": [],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)46_storage": {
+            "label": "uint256[46]",
+            "numberOfBytes": "1472"
+          },
+          "t_array(t_uint256)48_storage": {
+            "label": "uint256[48]",
+            "numberOfBytes": "1536"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_enum(GracePeriodStatus)6126": {
+            "label": "enum ILendingMarketV2Types.GracePeriodStatus",
+            "members": [
+              "None",
+              "Active"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(LendingProgramStatus)6116": {
+            "label": "enum ILendingMarketV2Types.LendingProgramStatus",
+            "members": [
+              "Nonexistent",
+              "Active",
+              "Closed"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(OperationKind)6147": {
+            "label": "enum ILendingMarketV2Types.OperationKind",
+            "members": [
+              "Nonexistent",
+              "Repayment",
+              "Discount",
+              "Revocation",
+              "Freezing",
+              "Unfreezing",
+              "RemuneratoryRateSetting",
+              "MoratoryRateSetting",
+              "LateFeeRateSetting",
+              "GraceDiscountRateSetting",
+              "DurationSetting"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(OperationStatus)6134": {
+            "label": "enum ILendingMarketV2Types.OperationStatus",
+            "members": [
+              "Nonexistent",
+              "Pending",
+              "Applied",
+              "Skipped",
+              "Dismissed",
+              "Revoked"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(SubLoanStatus)6122": {
+            "label": "enum ILendingMarketV2Types.SubLoanStatus",
+            "members": [
+              "Nonexistent",
+              "Ongoing",
+              "Repaid",
+              "Revoked"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(AddressSet)3799_storage)": {
+            "label": "mapping(bytes32 => struct EnumerableSet.AddressSet)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)27_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_address)": {
+            "label": "mapping(uint256 => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(LendingProgram)6156_storage)": {
+            "label": "mapping(uint256 => struct ILendingMarketV2Types.LendingProgram)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Operation)6474_storage)": {
+            "label": "mapping(uint256 => struct ILendingMarketV2Types.Operation)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(SubLoan)6278_storage)": {
+            "label": "mapping(uint256 => struct ILendingMarketV2Types.SubLoan)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlEnumerableStorage)180_storage": {
+            "label": "struct AccessControlEnumerableUpgradeable.AccessControlEnumerableStorage",
+            "members": [
+              {
+                "label": "_roleMembers",
+                "type": "t_mapping(t_bytes32,t_struct(AddressSet)3799_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)37_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)27_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(AddressSet)3799_storage": {
+            "label": "struct EnumerableSet.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)3611_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(InitializableStorage)794_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(LendingMarketStorage)7532_storage": {
+            "label": "struct LendingMarketV2StorageLayout.LendingMarketStorage",
+            "members": [
+              {
+                "label": "storageKind",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "underlyingToken",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "subLoanCounter",
+                "type": "t_uint64",
+                "offset": 21,
+                "slot": "0"
+              },
+              {
+                "label": "programCounter",
+                "type": "t_uint24",
+                "offset": 29,
+                "slot": "0"
+              },
+              {
+                "label": "engine",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "subLoanAutoIdCounter",
+                "type": "t_uint64",
+                "offset": 20,
+                "slot": "1"
+              },
+              {
+                "label": "subLoans",
+                "type": "t_mapping(t_uint256,t_struct(SubLoan)6278_storage)",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "programs",
+                "type": "t_mapping(t_uint256,t_struct(LendingProgram)6156_storage)",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "accountAddressBook",
+                "type": "t_struct(Table)7075_storage",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_struct(LendingProgram)6156_storage": {
+            "label": "struct ILendingMarketV2Types.LendingProgram",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(LendingProgramStatus)6116",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "creditLine",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "liquidityPool",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Operation)6474_storage": {
+            "label": "struct ILendingMarketV2Types.Operation",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(OperationStatus)6134",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "kind",
+                "type": "t_enum(OperationKind)6147",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "nextOperationId",
+                "type": "t_uint16",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "prevOperationId",
+                "type": "t_uint16",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint32",
+                "offset": 6,
+                "slot": "0"
+              },
+              {
+                "label": "value",
+                "type": "t_uint64",
+                "offset": 10,
+                "slot": "0"
+              },
+              {
+                "label": "accountId",
+                "type": "t_uint64",
+                "offset": 18,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(PausableStorage)309_storage": {
+            "label": "struct PausableUpgradeable.PausableStorage",
+            "members": [
+              {
+                "label": "_paused",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)27_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Set)3611_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_positions",
+                "type": "t_mapping(t_bytes32,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(SubLoan)6278_storage": {
+            "label": "struct ILendingMarketV2Types.SubLoan",
+            "members": [
+              {
+                "label": "inception",
+                "type": "t_struct(SubLoanInception)6186_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "__gap0",
+                "type": "t_array(t_uint256)48_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "state",
+                "type": "t_struct(SubLoanState)6250_storage",
+                "offset": 0,
+                "slot": "50"
+              },
+              {
+                "label": "__gap1",
+                "type": "t_array(t_uint256)46_storage",
+                "offset": 0,
+                "slot": "54"
+              },
+              {
+                "label": "metadata",
+                "type": "t_struct(SubLoanMetadata)6204_storage",
+                "offset": 0,
+                "slot": "100"
+              },
+              {
+                "label": "__gap2",
+                "type": "t_array(t_uint256)49_storage",
+                "offset": 0,
+                "slot": "101"
+              },
+              {
+                "label": "operations",
+                "type": "t_mapping(t_uint256,t_struct(Operation)6474_storage)",
+                "offset": 0,
+                "slot": "150"
+              }
+            ],
+            "numberOfBytes": "4832"
+          },
+          "t_struct(SubLoanInception)6186_storage": {
+            "label": "struct ILendingMarketV2Types.SubLoanInception",
+            "members": [
+              {
+                "label": "borrowedAmount",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "addonAmount",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "0"
+              },
+              {
+                "label": "initialRemuneratoryRate",
+                "type": "t_uint32",
+                "offset": 16,
+                "slot": "0"
+              },
+              {
+                "label": "initialMoratoryRate",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "initialLateFeeRate",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "0"
+              },
+              {
+                "label": "initialGraceDiscountRate",
+                "type": "t_uint32",
+                "offset": 28,
+                "slot": "0"
+              },
+              {
+                "label": "initialDuration",
+                "type": "t_uint16",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "startTimestamp",
+                "type": "t_uint32",
+                "offset": 2,
+                "slot": "1"
+              },
+              {
+                "label": "programId",
+                "type": "t_uint24",
+                "offset": 6,
+                "slot": "1"
+              },
+              {
+                "label": "borrower",
+                "type": "t_address",
+                "offset": 9,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(SubLoanMetadata)6204_storage": {
+            "label": "struct ILendingMarketV2Types.SubLoanMetadata",
+            "members": [
+              {
+                "label": "subLoanIndex",
+                "type": "t_uint16",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "subLoanCount",
+                "type": "t_uint16",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "updateIndex",
+                "type": "t_uint24",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "pendingTimestamp",
+                "type": "t_uint32",
+                "offset": 7,
+                "slot": "0"
+              },
+              {
+                "label": "operationCount",
+                "type": "t_uint16",
+                "offset": 11,
+                "slot": "0"
+              },
+              {
+                "label": "earliestOperationId",
+                "type": "t_uint16",
+                "offset": 13,
+                "slot": "0"
+              },
+              {
+                "label": "recentOperationId",
+                "type": "t_uint16",
+                "offset": 15,
+                "slot": "0"
+              },
+              {
+                "label": "latestOperationId",
+                "type": "t_uint16",
+                "offset": 17,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(SubLoanState)6250_storage": {
+            "label": "struct ILendingMarketV2Types.SubLoanState",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(SubLoanStatus)6122",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "gracePeriodStatus",
+                "type": "t_enum(GracePeriodStatus)6126",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "duration",
+                "type": "t_uint16",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "freezeTimestamp",
+                "type": "t_uint32",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "trackedTimestamp",
+                "type": "t_uint32",
+                "offset": 8,
+                "slot": "0"
+              },
+              {
+                "label": "remuneratoryRate",
+                "type": "t_uint32",
+                "offset": 12,
+                "slot": "0"
+              },
+              {
+                "label": "moratoryRate",
+                "type": "t_uint32",
+                "offset": 16,
+                "slot": "0"
+              },
+              {
+                "label": "lateFeeRate",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "graceDiscountRate",
+                "type": "t_uint32",
+                "offset": 24,
+                "slot": "0"
+              },
+              {
+                "label": "trackedPrincipal",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "trackedRemuneratoryInterest",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "1"
+              },
+              {
+                "label": "trackedMoratoryInterest",
+                "type": "t_uint64",
+                "offset": 16,
+                "slot": "1"
+              },
+              {
+                "label": "trackedLateFee",
+                "type": "t_uint64",
+                "offset": 24,
+                "slot": "1"
+              },
+              {
+                "label": "repaidPrincipal",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "repaidRemuneratoryInterest",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "2"
+              },
+              {
+                "label": "repaidMoratoryInterest",
+                "type": "t_uint64",
+                "offset": 16,
+                "slot": "2"
+              },
+              {
+                "label": "repaidLateFee",
+                "type": "t_uint64",
+                "offset": 24,
+                "slot": "2"
+              },
+              {
+                "label": "discountPrincipal",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "discountRemuneratoryInterest",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "3"
+              },
+              {
+                "label": "discountMoratoryInterest",
+                "type": "t_uint64",
+                "offset": 16,
+                "slot": "3"
+              },
+              {
+                "label": "discountLateFee",
+                "type": "t_uint64",
+                "offset": 24,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(Table)7075_storage": {
+            "label": "struct AddressBook.Table",
+            "members": [
+              {
+                "label": "idToAccount",
+                "type": "t_mapping(t_uint256,t_address)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "accountToId",
+                "type": "t_mapping(t_address,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "recordCount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint24": {
+            "label": "uint24",
+            "numberOfBytes": "3"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Pausable": [
+            {
+              "contract": "PausableUpgradeable",
+              "label": "_paused",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:21",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControlEnumerable": [
+            {
+              "contract": "AccessControlEnumerableUpgradeable",
+              "label": "_roleMembers",
+              "type": "t_mapping(t_bytes32,t_struct(AddressSet)3799_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol:20",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)27_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:62",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ],
+          "erc7201:cloudwalk.storage.LendingMarket": [
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "storageKind",
+              "type": "t_uint8",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:64",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "underlyingToken",
+              "type": "t_address",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:65",
+              "offset": 1,
+              "slot": "0"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "subLoanCounter",
+              "type": "t_uint64",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:66",
+              "offset": 21,
+              "slot": "0"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "programCounter",
+              "type": "t_uint24",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:67",
+              "offset": 29,
+              "slot": "0"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "engine",
+              "type": "t_address",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:71",
+              "offset": 0,
+              "slot": "1"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "subLoanAutoIdCounter",
+              "type": "t_uint64",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:72",
+              "offset": 20,
+              "slot": "1"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "subLoans",
+              "type": "t_mapping(t_uint256,t_struct(SubLoan)6278_storage)",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:76",
+              "offset": 0,
+              "slot": "2"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "programs",
+              "type": "t_mapping(t_uint256,t_struct(LendingProgram)6156_storage)",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:77",
+              "offset": 0,
+              "slot": "3"
+            },
+            {
+              "contract": "LendingMarketV2StorageLayout",
+              "label": "accountAddressBook",
+              "type": "t_struct(Table)7075_storage",
+              "src": "contracts/storage/LendingMarketV2StorageLayout.sol:79",
+              "offset": 0,
+              "slot": "4"
+            }
+          ]
+        }
+      }
+    },
+    "b1cc866e6764a997638a1c0b8ff95d7882e8d637ffebe7057b801a2ebc179146": {
+      "address": "0x43cE9acCfFb46D2444C87D50614412f3C8574087",
+      "txHash": "0x0556ae229f45b6304796f4416f6b7f48969715cf76a2c6e0a42e71d69dffed6e",
+      "layout": {
+        "solcVersion": "0.8.30",
+        "storage": [],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_enum(BorrowingPolicy)5858": {
+            "label": "enum ICreditLineV2Types.BorrowingPolicy",
+            "members": [
+              "Prohibited",
+              "SingleActiveLoan",
+              "TotalActiveAmountLimit",
+              "UnlimitedActiveLoans"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(BorrowerConfig)5865_storage)": {
+            "label": "mapping(address => struct ICreditLineV2Types.BorrowerConfig)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(BorrowerState)5875_storage)": {
+            "label": "mapping(address => struct ICreditLineV2Types.BorrowerState)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(AddressSet)3799_storage)": {
+            "label": "mapping(bytes32 => struct EnumerableSet.AddressSet)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)27_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlEnumerableStorage)180_storage": {
+            "label": "struct AccessControlEnumerableUpgradeable.AccessControlEnumerableStorage",
+            "members": [
+              {
+                "label": "_roleMembers",
+                "type": "t_mapping(t_bytes32,t_struct(AddressSet)3799_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)37_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)27_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(AddressSet)3799_storage": {
+            "label": "struct EnumerableSet.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)3611_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(BorrowerConfig)5865_storage": {
+            "label": "struct ICreditLineV2Types.BorrowerConfig",
+            "members": [
+              {
+                "label": "borrowingPolicy",
+                "type": "t_enum(BorrowingPolicy)5858",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "maxBorrowedAmount",
+                "type": "t_uint64",
+                "offset": 1,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(BorrowerState)5875_storage": {
+            "label": "struct ICreditLineV2Types.BorrowerState",
+            "members": [
+              {
+                "label": "activeLoanCount",
+                "type": "t_uint16",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "closedLoanCount",
+                "type": "t_uint16",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "totalActiveLoanAmount",
+                "type": "t_uint64",
+                "offset": 4,
+                "slot": "0"
+              },
+              {
+                "label": "totalClosedLoanAmount",
+                "type": "t_uint64",
+                "offset": 12,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(CreditLineStorage)7474_storage": {
+            "label": "struct CreditLineV2StorageLayout.CreditLineStorage",
+            "members": [
+              {
+                "label": "borrowerConfigs",
+                "type": "t_mapping(t_address,t_struct(BorrowerConfig)5865_storage)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "borrowerStates",
+                "type": "t_mapping(t_address,t_struct(BorrowerState)5875_storage)",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "linkedCreditLine",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(InitializableStorage)794_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(PausableStorage)309_storage": {
+            "label": "struct PausableUpgradeable.PausableStorage",
+            "members": [
+              {
+                "label": "_paused",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)27_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Set)3611_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_positions",
+                "type": "t_mapping(t_bytes32,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Pausable": [
+            {
+              "contract": "PausableUpgradeable",
+              "label": "_paused",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:21",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControlEnumerable": [
+            {
+              "contract": "AccessControlEnumerableUpgradeable",
+              "label": "_roleMembers",
+              "type": "t_mapping(t_bytes32,t_struct(AddressSet)3799_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol:20",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)27_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:62",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ],
+          "erc7201:cloudwalk.storage.CreditLine": [
+            {
+              "contract": "CreditLineV2StorageLayout",
+              "label": "borrowerConfigs",
+              "type": "t_mapping(t_address,t_struct(BorrowerConfig)5865_storage)",
+              "src": "contracts/storage/CreditLineV2StorageLayout.sol:44",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "CreditLineV2StorageLayout",
+              "label": "borrowerStates",
+              "type": "t_mapping(t_address,t_struct(BorrowerState)5875_storage)",
+              "src": "contracts/storage/CreditLineV2StorageLayout.sol:45",
+              "offset": 0,
+              "slot": "1"
+            },
+            {
+              "contract": "CreditLineV2StorageLayout",
+              "label": "linkedCreditLine",
+              "type": "t_address",
+              "src": "contracts/storage/CreditLineV2StorageLayout.sol:49",
+              "offset": 0,
+              "slot": "2"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

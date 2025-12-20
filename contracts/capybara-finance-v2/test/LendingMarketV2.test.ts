@@ -192,10 +192,12 @@ interface SubLoanPreview {
   repaidRemuneratoryInterest: bigint;
   repaidMoratoryInterest: bigint;
   repaidLateFee: bigint;
+  repaidAmount: bigint;
   discountPrincipal: bigint;
   discountRemuneratoryInterest: bigint;
   discountMoratoryInterest: bigint;
   discountLateFee: bigint;
+  discountAmount: bigint;
 
   [key: string]: bigint | number | string;
 }
@@ -220,10 +222,12 @@ interface LoanPreview {
   totalRepaidRemuneratoryInterest: bigint;
   totalRepaidMoratoryInterest: bigint;
   totalRepaidLateFee: bigint;
+  totalRepaidAmount: bigint;
   totalDiscountPrincipal: bigint;
   totalDiscountRemuneratoryInterest: bigint;
   totalDiscountMoratoryInterest: bigint;
   totalDiscountLateFee: bigint;
+  totalDiscountAmount: bigint;
 
   [key: string]: bigint | number | string;
 }
@@ -618,17 +622,34 @@ function defineInitialLoan(
 }
 
 function calculateOutstandingBalance(subLoan: SubLoan): bigint {
-  return (
-    roundToAccuracyFactor(subLoan.state.trackedPrincipal) +
-    roundToAccuracyFactor(subLoan.state.trackedRemuneratoryInterest) +
-    roundToAccuracyFactor(subLoan.state.trackedMoratoryInterest) +
-    roundToAccuracyFactor(subLoan.state.trackedLateFee)
+  return roundToAccuracyFactor(
+    subLoan.state.trackedPrincipal +
+    subLoan.state.trackedRemuneratoryInterest +
+    subLoan.state.trackedMoratoryInterest +
+    subLoan.state.trackedLateFee,
+  );
+}
+
+function calculateRepaidAmount(subLoan: SubLoan): bigint {
+  return roundToAccuracyFactor(
+    subLoan.state.repaidPrincipal +
+    subLoan.state.repaidRemuneratoryInterest +
+    subLoan.state.repaidMoratoryInterest +
+    subLoan.state.repaidLateFee,
+  );
+}
+
+function calculateDiscountAmount(subLoan: SubLoan): bigint {
+  return roundToAccuracyFactor(
+    subLoan.state.discountPrincipal +
+    subLoan.state.discountRemuneratoryInterest +
+    subLoan.state.discountMoratoryInterest +
+    subLoan.state.discountLateFee,
   );
 }
 
 function defineExpectedSubLoanPreview(subLoan: SubLoan): SubLoanPreview {
   const firstSubLoanId = subLoan.id - BigInt(subLoan.metadata.subLoanIndex);
-  const outstandingBalance = calculateOutstandingBalance(subLoan);
 
   return {
     day: dayIndex(subLoan.state.trackedTimestamp),
@@ -658,15 +679,17 @@ function defineExpectedSubLoanPreview(subLoan: SubLoan): SubLoanPreview {
     trackedRemuneratoryInterest: subLoan.state.trackedRemuneratoryInterest,
     trackedMoratoryInterest: subLoan.state.trackedMoratoryInterest,
     trackedLateFee: subLoan.state.trackedLateFee,
-    outstandingBalance,
+    outstandingBalance: calculateOutstandingBalance(subLoan),
     repaidPrincipal: subLoan.state.repaidPrincipal,
     repaidRemuneratoryInterest: subLoan.state.repaidRemuneratoryInterest,
     repaidMoratoryInterest: subLoan.state.repaidMoratoryInterest,
     repaidLateFee: subLoan.state.repaidLateFee,
+    repaidAmount: calculateRepaidAmount(subLoan),
     discountPrincipal: subLoan.state.discountPrincipal,
     discountRemuneratoryInterest: subLoan.state.discountRemuneratoryInterest,
     discountMoratoryInterest: subLoan.state.discountMoratoryInterest,
     discountLateFee: subLoan.state.discountLateFee,
+    discountAmount: calculateDiscountAmount(subLoan),
   };
 }
 
@@ -691,10 +714,12 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
   let totalRepaidRemuneratoryInterest = 0n;
   let totalRepaidMoratoryInterest = 0n;
   let totalRepaidLateFee = 0n;
+  let totalRepaidAmount = 0n;
   let totalDiscountPrincipal = 0n;
   let totalDiscountRemuneratoryInterest = 0n;
   let totalDiscountMoratoryInterest = 0n;
   let totalDiscountLateFee = 0n;
+  let totalDiscountAmount = 0n;
 
   for (const preview of subLoanPreviews) {
     if (preview.status === SubLoanStatus.Ongoing) {
@@ -716,10 +741,12 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
     totalRepaidRemuneratoryInterest += preview.repaidRemuneratoryInterest;
     totalRepaidMoratoryInterest += preview.repaidMoratoryInterest;
     totalRepaidLateFee += preview.repaidLateFee;
+    totalRepaidAmount += preview.repaidAmount;
     totalDiscountPrincipal += preview.discountPrincipal;
     totalDiscountRemuneratoryInterest += preview.discountRemuneratoryInterest;
     totalDiscountMoratoryInterest += preview.discountMoratoryInterest;
     totalDiscountLateFee += preview.discountLateFee;
+    totalDiscountAmount += preview.discountAmount;
   }
 
   const lastPreview = subLoanPreviews[subLoanPreviews.length - 1];
@@ -744,10 +771,12 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
     totalRepaidRemuneratoryInterest,
     totalRepaidMoratoryInterest,
     totalRepaidLateFee,
+    totalRepaidAmount,
     totalDiscountPrincipal,
     totalDiscountRemuneratoryInterest,
     totalDiscountMoratoryInterest,
     totalDiscountLateFee,
+    totalDiscountAmount,
   };
 }
 
@@ -926,25 +955,25 @@ function registerSingleOperationInMetadata(subLoan: SubLoan, operationId: number
 
 function applySubLoanRepayment(subLoan: SubLoan, timestamp: number, amount: bigint, operationId: number) {
   accrueRemuneratoryInterest(subLoan, timestamp);
-  const roundedRemuneratoryInterest = roundToAccuracyFactor(subLoan.state.trackedRemuneratoryInterest);
-  if (roundedRemuneratoryInterest > amount) {
-    subLoan.state.trackedRemuneratoryInterest -= amount;
+
+  if (subLoan.state.trackedRemuneratoryInterest > amount) {
     subLoan.state.repaidRemuneratoryInterest += amount;
+    subLoan.state.trackedRemuneratoryInterest -= amount;
     amount = 0n;
   } else {
+    amount -= subLoan.state.trackedRemuneratoryInterest;
+    subLoan.state.repaidRemuneratoryInterest += subLoan.state.trackedRemuneratoryInterest;
     subLoan.state.trackedRemuneratoryInterest = 0n;
-    subLoan.state.repaidRemuneratoryInterest += roundedRemuneratoryInterest;
-    amount -= roundedRemuneratoryInterest;
   }
 
   if (subLoan.state.trackedPrincipal >= amount) {
-    subLoan.state.trackedPrincipal -= amount;
     subLoan.state.repaidPrincipal += amount;
+    subLoan.state.trackedPrincipal -= amount;
+    amount = 0n;
   } else {
-    throw new Error(
-      `The remaining repayment amount is greater than the tracked principal of the sub-loan.` +
-      `Sub-loan ID: ${subLoan.id}. Amount: ${amount}. Tracked principal: ${subLoan.state.trackedPrincipal}`,
-    );
+    amount -= subLoan.state.trackedPrincipal;
+    subLoan.state.repaidPrincipal += subLoan.state.trackedPrincipal;
+    subLoan.state.trackedPrincipal = 0n;
   }
 
   subLoan.state.trackedTimestamp = timestamp;
@@ -954,25 +983,25 @@ function applySubLoanRepayment(subLoan: SubLoan, timestamp: number, amount: bigi
 
 function applySubLoanDiscount(subLoan: SubLoan, timestamp: number, amount: bigint, operationId: number) {
   accrueRemuneratoryInterest(subLoan, timestamp);
-  const roundedRemuneratoryInterest = roundToAccuracyFactor(subLoan.state.trackedRemuneratoryInterest);
-  if (roundedRemuneratoryInterest > amount) {
-    subLoan.state.trackedRemuneratoryInterest -= amount;
+
+  if (subLoan.state.trackedRemuneratoryInterest >= amount) {
     subLoan.state.discountRemuneratoryInterest += amount;
+    subLoan.state.trackedRemuneratoryInterest -= amount;
     amount = 0n;
   } else {
+    amount -= subLoan.state.trackedRemuneratoryInterest;
+    subLoan.state.discountRemuneratoryInterest += subLoan.state.trackedRemuneratoryInterest;
     subLoan.state.trackedRemuneratoryInterest = 0n;
-    subLoan.state.discountRemuneratoryInterest += roundedRemuneratoryInterest;
-    amount -= roundedRemuneratoryInterest;
   }
 
   if (subLoan.state.trackedPrincipal >= amount) {
     subLoan.state.trackedPrincipal -= amount;
     subLoan.state.discountPrincipal += amount;
+    amount = 0n;
   } else {
-    throw new Error(
-      `The remaining discount amount is greater than the tracked principal of the sub-loan.` +
-      `Sub-loan ID: ${subLoan.id}. Amount: ${amount}. Tracked principal: ${subLoan.state.trackedPrincipal}`,
-    );
+    amount -= subLoan.state.trackedPrincipal;
+    subLoan.state.discountPrincipal += subLoan.state.trackedPrincipal;
+    subLoan.state.trackedPrincipal = 0n;
   }
 
   subLoan.state.trackedTimestamp = timestamp;

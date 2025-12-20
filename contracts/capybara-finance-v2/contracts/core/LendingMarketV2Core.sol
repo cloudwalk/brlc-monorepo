@@ -42,6 +42,17 @@ abstract contract LendingMarketV2Core is
     }
 
     /**
+     * @dev Calculates the total tracked balance of a sub-loan by summing all tracked components.
+     */
+    function _calculateTrackedBalance(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
+        return
+            subLoan.trackedPrincipal +
+            subLoan.trackedRemuneratoryInterest +
+            subLoan.trackedMoratoryInterest +
+            subLoan.trackedLateFee;
+    }
+
+    /**
      * @dev Calculates the day index that corresponds the specified timestamp.
      */
     function _dayIndex(uint256 timestamp) internal pure returns (uint256) {
@@ -56,7 +67,7 @@ abstract contract LendingMarketV2Core is
     /**
      * @dev Rounds a value to the nearest multiple of the accuracy factor according to mathematical rules.
      */
-    function _roundMath(uint256 value) internal pure returns (uint256) {
+    function _roundFinance(uint256 value) internal pure returns (uint256) {
         return ((value + ACCURACY_FACTOR / 2) / ACCURACY_FACTOR) * ACCURACY_FACTOR;
     }
 }

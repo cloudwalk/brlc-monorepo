@@ -768,16 +768,8 @@ contract LendingEngineV2 is
             }
             subLoan.recentOperationId = recentOperationId;
 
-            {
-                if (
-                    subLoan.trackedPrincipal == 0 &&
-                    subLoan.trackedRemuneratoryInterest == 0 &&
-                    subLoan.trackedMoratoryInterest == 0 &&
-                    subLoan.trackedLateFee == 0 &&
-                    subLoan.status == uint256(SubLoanStatus.Ongoing)
-                ) {
-                    subLoan.status = uint256(SubLoanStatus.Repaid);
-                }
+            if (0 == _calculateTrackedBalance(subLoan) && subLoan.status == uint256(SubLoanStatus.Ongoing)) {
+                subLoan.status = uint256(SubLoanStatus.Repaid);
             }
 
             // If after applying operations the grace period status has changed reapply operations again
@@ -921,37 +913,6 @@ contract LendingEngineV2 is
     }
 
     /**
-     * @dev Partially repays or discounts a tracked amount, returning updated values for all components.
-     */
-    // prettier-ignore
-    function _repayOrDiscountPartial(
-        uint256 changeAmount,
-        uint256 trackedPartAmount,
-        uint256 repaidOrDiscountPartAmount
-    ) internal pure returns (
-        uint256 newRepaymentAmount,
-        uint256 newTrackedPartAmount,
-        uint256 newRepaidOrDiscountPartAmount
-    ) {
-        uint256 roundedTrackedPartAmount = _roundMath(trackedPartAmount);
-        if (roundedTrackedPartAmount <= changeAmount) {
-            unchecked {
-                changeAmount -= roundedTrackedPartAmount;
-                repaidOrDiscountPartAmount += roundedTrackedPartAmount;
-                trackedPartAmount = 0;
-            }
-        } else {
-            unchecked {
-                trackedPartAmount -= changeAmount;
-                repaidOrDiscountPartAmount += changeAmount;
-                changeAmount = 0;
-            }
-        }
-
-        return (changeAmount, trackedPartAmount, repaidOrDiscountPartAmount);
-    }
-
-    /**
      * @dev Accrues remuneratory interest using compound interest, applying grace discount if active.
      */
     function _accrueRemuneratoryInterest(ProcessingSubLoan memory subLoan, uint256 dayCount) internal pure {
@@ -989,7 +950,7 @@ contract LendingEngineV2 is
                 ++result;
             }
         }
-        subLoan.trackedLateFee = uint64(_roundMath(result)); // Safe cast due to prior checks
+        subLoan.trackedLateFee = result;
     }
 
     /**
@@ -1012,6 +973,8 @@ contract LendingEngineV2 is
 
         // Update storage with the unchecked type conversion is used for all stored values due to prior checks
         // All type cast operations are safe due to prior checks
+
+        // TODO: Check overflows for some fields, e.g. repayments, discounts, trackedInterests.
 
         // State fields, slot 1
         storedSubLoan.state.status = SubLoanStatus(subLoan.status);
@@ -1086,38 +1049,20 @@ contract LendingEngineV2 is
      */
     function _applyRepayment(ProcessingSubLoan memory subLoan, Operation storage operation) internal view {
         uint256 amount = operation.value;
-
-        if (amount != 0) {
-            (amount, subLoan.trackedMoratoryInterest, subLoan.repaidMoratoryInterest) = _repayOrDiscountPartial(
-                amount,
-                subLoan.trackedMoratoryInterest,
-                subLoan.repaidMoratoryInterest
-            );
-        }
-        if (amount != 0) {
-            (amount, subLoan.trackedLateFee, subLoan.repaidLateFee) = _repayOrDiscountPartial(
-                amount,
-                subLoan.trackedLateFee,
-                subLoan.repaidLateFee
-            );
-        }
-        if (amount != 0) {
-            (amount, subLoan.trackedRemuneratoryInterest, subLoan.repaidRemuneratoryInterest) = _repayOrDiscountPartial(
-                amount,
-                subLoan.trackedRemuneratoryInterest,
-                subLoan.repaidRemuneratoryInterest
-            );
-        }
-        if (amount != 0) {
-            (amount, subLoan.trackedPrincipal, subLoan.repaidPrincipal) = _repayOrDiscountPartial(
-                amount,
-                subLoan.trackedPrincipal,
-                subLoan.repaidPrincipal
-            );
-        }
-        if (amount > 0) {
+        uint256 trackedBalance = _calculateTrackedBalance(subLoan);
+        uint256 roundedTrackedBalance = _roundFinance(trackedBalance);
+        if (amount > roundedTrackedBalance) {
             revert LendingMarketV2_SubLoanRepaymentExcess();
         }
+        // Since rounding may occur downwards (e.g. 1.004 => 1.00), adjust the amount in case of a full repayment.
+        if (amount == roundedTrackedBalance) {
+            amount = trackedBalance;
+        }
+
+        amount = _repayRemuneratoryInterest(subLoan, amount);
+        amount = _repayMoratoryInterest(subLoan, amount);
+        amount = _repayLateFee(subLoan, amount);
+        amount = _repayPrincipal(subLoan, amount);
     }
 
     /**
@@ -1125,43 +1070,20 @@ contract LendingEngineV2 is
      */
     function _applyDiscount(ProcessingSubLoan memory subLoan, Operation storage operation) internal view {
         uint256 amount = operation.value;
-
-        if (amount != 0) {
-            (amount, subLoan.trackedMoratoryInterest, subLoan.discountMoratoryInterest) = _repayOrDiscountPartial(
-                amount,
-                subLoan.trackedMoratoryInterest,
-                subLoan.discountMoratoryInterest
-            );
+        uint256 trackedBalance = _calculateTrackedBalance(subLoan);
+        uint256 roundedTrackedBalance = _roundFinance(trackedBalance);
+        if (amount > roundedTrackedBalance) {
+            revert LendingMarketV2_SubLoanRepaymentExcess();
         }
-        if (amount != 0) {
-            (amount, subLoan.trackedLateFee, subLoan.discountLateFee) = _repayOrDiscountPartial(
-                amount,
-                subLoan.trackedLateFee,
-                subLoan.discountLateFee
-            );
-        }
-        if (amount != 0) {
-            (
-                amount,
-                subLoan.trackedRemuneratoryInterest,
-                subLoan.discountRemuneratoryInterest
-            ) = _repayOrDiscountPartial(
-                amount,
-                subLoan.trackedRemuneratoryInterest,
-                subLoan.discountRemuneratoryInterest
-            );
-        }
-        if (amount != 0) {
-            (amount, subLoan.trackedPrincipal, subLoan.discountPrincipal) = _repayOrDiscountPartial(
-                amount,
-                subLoan.trackedPrincipal,
-                subLoan.discountPrincipal
-            );
+        // Since rounding may occur downwards (e.g. 1.004 => 1.00), adjust the amount in case of a full discount.
+        if (amount == roundedTrackedBalance) {
+            amount = trackedBalance;
         }
 
-        if (amount > 0) {
-            revert LendingMarketV2_SubLoanDiscountExcess();
-        }
+        amount = _discountRemuneratoryInterest(subLoan, amount);
+        amount = _discountMoratoryInterest(subLoan, amount);
+        amount = _discountLateFee(subLoan, amount);
+        amount = _discountPrincipal(subLoan, amount);
     }
 
     /**
@@ -1205,6 +1127,167 @@ contract LendingEngineV2 is
         }
 
         subLoan.freezeTimestamp = 0;
+    }
+
+    /**
+     * @dev Repays principal, returning the remaining amount.
+     */
+    function _repayPrincipal(ProcessingSubLoan memory subLoan, uint256 amount) internal pure returns (uint256) {
+        uint256 changeAmount = subLoan.trackedPrincipal;
+        if (changeAmount > amount) {
+            changeAmount = amount;
+        }
+        if (changeAmount == 0) {
+            return amount;
+        }
+        unchecked {
+            amount -= changeAmount;
+            subLoan.trackedPrincipal -= changeAmount;
+        }
+        subLoan.repaidPrincipal += changeAmount;
+        return amount;
+    }
+
+    /**
+     * @dev Repays remuneratory interest, returning the remaining amount.
+     */
+    function _repayRemuneratoryInterest(
+        ProcessingSubLoan memory subLoan,
+        uint256 amount
+    ) internal pure returns (uint256) {
+        uint256 changeAmount = subLoan.trackedRemuneratoryInterest;
+        if (changeAmount > amount) {
+            changeAmount = amount;
+        }
+        if (changeAmount == 0) {
+            return amount;
+        }
+        unchecked {
+            amount -= changeAmount;
+            subLoan.trackedRemuneratoryInterest -= changeAmount;
+        }
+        subLoan.repaidRemuneratoryInterest += changeAmount;
+        return amount;
+    }
+
+    /**
+     * @dev Repays moratory interest, returning the remaining amount.
+     */
+    function _repayMoratoryInterest(ProcessingSubLoan memory subLoan, uint256 amount) internal pure returns (uint256) {
+        uint256 changeAmount = subLoan.trackedMoratoryInterest;
+        if (changeAmount > amount) {
+            changeAmount = amount;
+        }
+        if (changeAmount == 0) {
+            return amount;
+        }
+        unchecked {
+            amount -= changeAmount;
+            subLoan.trackedMoratoryInterest -= changeAmount;
+        }
+        subLoan.repaidMoratoryInterest += changeAmount;
+        return amount;
+    }
+
+    /**
+     * @dev Repays fee, returning the remaining amount.
+     */
+    function _repayLateFee(ProcessingSubLoan memory subLoan, uint256 amount) internal pure returns (uint256) {
+        uint256 changeAmount = subLoan.trackedLateFee;
+        if (changeAmount > amount) {
+            changeAmount = amount;
+        }
+        if (changeAmount == 0) {
+            return amount;
+        }
+        unchecked {
+            amount -= changeAmount;
+            subLoan.trackedLateFee -= changeAmount;
+        }
+        subLoan.repaidLateFee += changeAmount;
+        return amount;
+    }
+
+    /**
+     * @dev Discounts principal, returning the remaining amount.
+     */
+    function _discountPrincipal(ProcessingSubLoan memory subLoan, uint256 amount) internal pure returns (uint256) {
+        uint256 changeAmount = subLoan.trackedPrincipal;
+        if (changeAmount > amount) {
+            changeAmount = amount;
+        }
+        if (changeAmount == 0) {
+            return amount;
+        }
+        unchecked {
+            amount -= changeAmount;
+            subLoan.trackedPrincipal -= changeAmount;
+        }
+        subLoan.discountPrincipal += changeAmount;
+        return amount;
+    }
+
+    /**
+     * @dev Discounts remuneratory interest, returning the remaining amount.
+     */
+    function _discountRemuneratoryInterest(
+        ProcessingSubLoan memory subLoan,
+        uint256 amount
+    ) internal pure returns (uint256) {
+        uint256 changeAmount = subLoan.trackedRemuneratoryInterest;
+        if (changeAmount > amount) {
+            changeAmount = amount;
+        }
+        if (changeAmount == 0) {
+            return amount;
+        }
+        unchecked {
+            amount -= changeAmount;
+            subLoan.trackedRemuneratoryInterest -= changeAmount;
+        }
+        subLoan.discountRemuneratoryInterest += changeAmount;
+        return amount;
+    }
+
+    /**
+     * @dev Discounts moratory interest, returning the remaining amount.
+     */
+    function _discountMoratoryInterest(
+        ProcessingSubLoan memory subLoan,
+        uint256 amount
+    ) internal pure returns (uint256) {
+        uint256 changeAmount = subLoan.trackedMoratoryInterest;
+        if (changeAmount > amount) {
+            changeAmount = amount;
+        }
+        if (changeAmount == 0) {
+            return amount;
+        }
+        unchecked {
+            amount -= changeAmount;
+            subLoan.trackedMoratoryInterest -= changeAmount;
+        }
+        subLoan.discountMoratoryInterest += changeAmount;
+        return amount;
+    }
+
+    /**
+     * @dev Discounts fee, returning the remaining amount.
+     */
+    function _discountLateFee(ProcessingSubLoan memory subLoan, uint256 amount) internal pure returns (uint256) {
+        uint256 changeAmount = subLoan.trackedLateFee;
+        if (changeAmount > amount) {
+            changeAmount = amount;
+        }
+        if (changeAmount == 0) {
+            return amount;
+        }
+        unchecked {
+            amount -= changeAmount;
+            subLoan.trackedLateFee -= changeAmount;
+        }
+        subLoan.discountLateFee += changeAmount;
+        return amount;
     }
 
     /**
@@ -1321,13 +1404,13 @@ contract LendingEngineV2 is
         if (
             borrowedAmount == 0 || // Tools: prevent Prettier one-liner
             borrowedAmount > type(uint64).max ||
-            borrowedAmount != _roundMath(borrowedAmount)
+            borrowedAmount != _roundFinance(borrowedAmount)
         ) {
             revert LendingMarketV2_LoanBorrowedAmountInvalid();
         }
         if (
             addonAmount > type(uint64).max || // Tools: prevent Prettier one-liner
-            addonAmount != _roundMath(addonAmount)
+            addonAmount != _roundFinance(addonAmount)
         ) {
             revert LendingMarketV2_AddonAmountInvalid();
         }
@@ -1427,7 +1510,7 @@ contract LendingEngineV2 is
         ) {
             // The unrounded value is prohibited.
             // No special value for a full repayment or discount.
-            if (value != _roundMath(value)) {
+            if (value != _roundFinance(value)) {
                 revert LendingMarketV2_SubLoanRepaymentOrDiscountAmountUnrounded();
             }
 

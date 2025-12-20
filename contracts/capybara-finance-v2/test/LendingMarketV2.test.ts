@@ -192,12 +192,10 @@ interface SubLoanPreview {
   repaidRemuneratoryInterest: bigint;
   repaidMoratoryInterest: bigint;
   repaidLateFee: bigint;
-  repaidAmount: bigint;
   discountPrincipal: bigint;
   discountRemuneratoryInterest: bigint;
   discountMoratoryInterest: bigint;
   discountLateFee: bigint;
-  discountAmount: bigint;
 
   [key: string]: bigint | number | string;
 }
@@ -222,12 +220,10 @@ interface LoanPreview {
   totalRepaidRemuneratoryInterest: bigint;
   totalRepaidMoratoryInterest: bigint;
   totalRepaidLateFee: bigint;
-  totalRepaidAmount: bigint;
   totalDiscountPrincipal: bigint;
   totalDiscountRemuneratoryInterest: bigint;
   totalDiscountMoratoryInterest: bigint;
   totalDiscountLateFee: bigint;
-  totalDiscountAmount: bigint;
 
   [key: string]: bigint | number | string;
 }
@@ -635,24 +631,6 @@ function calculateOutstandingBalance(subLoan: SubLoan): bigint {
   );
 }
 
-function calculateRepaidAmount(subLoan: SubLoan): bigint {
-  return roundToAccuracyFactor(
-    subLoan.state.repaidPrincipal +
-    subLoan.state.repaidRemuneratoryInterest +
-    subLoan.state.repaidMoratoryInterest +
-    subLoan.state.repaidLateFee,
-  );
-}
-
-function calculateDiscountAmount(subLoan: SubLoan): bigint {
-  return roundToAccuracyFactor(
-    subLoan.state.discountPrincipal +
-    subLoan.state.discountRemuneratoryInterest +
-    subLoan.state.discountMoratoryInterest +
-    subLoan.state.discountLateFee,
-  );
-}
-
 function defineExpectedSubLoanPreview(subLoan: SubLoan): SubLoanPreview {
   const firstSubLoanId = subLoan.id - BigInt(subLoan.metadata.subLoanIndex);
 
@@ -689,12 +667,10 @@ function defineExpectedSubLoanPreview(subLoan: SubLoan): SubLoanPreview {
     repaidRemuneratoryInterest: subLoan.state.repaidRemuneratoryInterest,
     repaidMoratoryInterest: subLoan.state.repaidMoratoryInterest,
     repaidLateFee: subLoan.state.repaidLateFee,
-    repaidAmount: calculateRepaidAmount(subLoan),
     discountPrincipal: subLoan.state.discountPrincipal,
     discountRemuneratoryInterest: subLoan.state.discountRemuneratoryInterest,
     discountMoratoryInterest: subLoan.state.discountMoratoryInterest,
     discountLateFee: subLoan.state.discountLateFee,
-    discountAmount: calculateDiscountAmount(subLoan),
   };
 }
 
@@ -719,12 +695,10 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
   let totalRepaidRemuneratoryInterest = 0n;
   let totalRepaidMoratoryInterest = 0n;
   let totalRepaidLateFee = 0n;
-  let totalRepaidAmount = 0n;
   let totalDiscountPrincipal = 0n;
   let totalDiscountRemuneratoryInterest = 0n;
   let totalDiscountMoratoryInterest = 0n;
   let totalDiscountLateFee = 0n;
-  let totalDiscountAmount = 0n;
 
   for (const preview of subLoanPreviews) {
     if (preview.status === SubLoanStatus.Ongoing) {
@@ -746,12 +720,10 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
     totalRepaidRemuneratoryInterest += preview.repaidRemuneratoryInterest;
     totalRepaidMoratoryInterest += preview.repaidMoratoryInterest;
     totalRepaidLateFee += preview.repaidLateFee;
-    totalRepaidAmount += preview.repaidAmount;
     totalDiscountPrincipal += preview.discountPrincipal;
     totalDiscountRemuneratoryInterest += preview.discountRemuneratoryInterest;
     totalDiscountMoratoryInterest += preview.discountMoratoryInterest;
     totalDiscountLateFee += preview.discountLateFee;
-    totalDiscountAmount += preview.discountAmount;
   }
 
   const lastPreview = subLoanPreviews[subLoanPreviews.length - 1];
@@ -776,12 +748,10 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
     totalRepaidRemuneratoryInterest,
     totalRepaidMoratoryInterest,
     totalRepaidLateFee,
-    totalRepaidAmount,
     totalDiscountPrincipal,
     totalDiscountRemuneratoryInterest,
     totalDiscountMoratoryInterest,
     totalDiscountLateFee,
-    totalDiscountAmount,
   };
 }
 

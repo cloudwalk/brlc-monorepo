@@ -4,14 +4,9 @@
 
 1. Rounding approach for the sub-loan fields has changed.
    Tracked, repaid and discount fields are no longer rounded to cents individually, maintaining precise internal values.
-   Rounding is now applied only when calculating the outstanding balance, repaid amount or discount amount by summing all related parts first, then rounding the result.
-2. New fields of the preview structures have been introduced:
-   * `SubLoanPreview.repaidAmount` -- The repaid amount of the sub-loan. It is calculated as the sum of individual repaid parts, then financial rounding applied.
-   * `SubLoanPreview.discountAmount` -- The discount amount of the sub-loan. It is calculated as the sum of individual discounted components, then financial rounding applied.
-   * `LoanPreview.totalRepaidAmount` -- The total repaid amount of the loan over all sub-loans.
-   * `LoanPreview.totalDiscountAmount` -- The total discount amount of the loan over all sub-loans.
-3. The number of bits per rate in the packed rates fields of events has been changed from 64 bits per rate to 32 bits per rate.
-4. The `SubLoanTaken` event has been changed.
+   Rounding is now applied only when calculating the outstanding balance by summing all related parts first, then rounding the result.
+2. The number of bits per rate in the packed rates fields of events has been changed from 64 bits per rate to 32 bits per rate.
+3. The `SubLoanTaken` event has been changed.
 
 # 2.0.0
 

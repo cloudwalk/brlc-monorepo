@@ -486,21 +486,19 @@ interface ILendingMarketV2Types {
      * - moratoryRate ------------------ The moratory rate of the sub-loan.
      * - lateFeeRate ------------------- The late fee rate of the sub-loan.
      * - graceDiscountRate ------------- The grace discount rate of the sub-loan.
-     * - trackedPrincipal -------------- The tracked principal of the sub-loan, remaining to be repaid. Unrounded.
-     * - trackedRemuneratoryInterest --- The tracked remuneratory interest of the sub-loan, remaining to be repaid. Unrounded.
-     * - trackedMoratoryInterest ------- The tracked moratory interest of the sub-loan, remaining to be repaid. Unrounded.
-     * - trackedLateFee ---------------- The tracked late fee of the sub-loan, remaining to be repaid. Unrounded.
+     * - trackedPrincipal -------------- The tracked principal of the sub-loan, remaining to be repaid.
+     * - trackedRemuneratoryInterest --- The tracked remuneratory interest of the sub-loan, remaining to be repaid.
+     * - trackedMoratoryInterest ------- The tracked moratory interest of the sub-loan, remaining to be repaid.
+     * - trackedLateFee ---------------- The tracked late fee of the sub-loan, remaining to be repaid.
      * - outstandingBalance ------------ The outstanding balance of the sub-loan, see notes below.
-     * - repaidPrincipal --------------- The repaid principal of the sub-loan. Unrounded.
-     * - repaidRemuneratoryInterest ---- The repaid remuneratory interest of the sub-loan. Unrounded.
-     * - repaidMoratoryInterest -------- The repaid moratory interest of the sub-loan. Unrounded.
-     * - repaidLateFee ----------------- The repaid late fee of the sub-loan. Unrounded.
-     * - repaidAmount ------------------ The repaid amount of the sub-loan, see notes below. Rounded.
-     * - discountPrincipal ------------- The discount principal of the sub-loan. Unrounded.
-     * - discountRemuneratoryInterest -- The discount remuneratory interest of the sub-loan. Unrounded.
-     * - discountMoratoryInterest ------ The discount moratory interest of the sub-loan. Unrounded.
-     * - discountLateFee --------------- The discount late fee of the sub-loan. Unrounded.
-     * - discountAmount ---------------- The discount amount of the sub-loan, see notes below. Rounded.
+     * - repaidPrincipal --------------- The repaid principal of the sub-loan.
+     * - repaidRemuneratoryInterest ---- The repaid remuneratory interest of the sub-loan.
+     * - repaidMoratoryInterest -------- The repaid moratory interest of the sub-loan.
+     * - repaidLateFee ----------------- The repaid late fee of the sub-loan.
+     * - discountPrincipal ------------- The discount principal of the sub-loan.
+     * - discountRemuneratoryInterest -- The discount remuneratory interest of the sub-loan.
+     * - discountMoratoryInterest ------ The discount moratory interest of the sub-loan.
+     * - discountLateFee --------------- The discount late fee of the sub-loan.
      *
      * Notes:
      *
@@ -510,13 +508,10 @@ interface ILendingMarketV2Types {
      *    roundFinance(trackedPrincipal + trackedRemuneratoryInterest + trackedMoratoryInterest + trackedLateFee),
      *    where the `roundFinance()` function returns an integer rounded according to `ACCURACY_FACTOR`
      *    (see the `Constants` contract) using the standard mathematical rules.
-     * 3. The repaid amount is calculated as: repaidAmount =
-     *    roundFinance(repaidPrincipal + repaidRemuneratoryInterest + repaidMoratoryInterest + repaidLateFee),
-     *    where the `roundFinance()` function is defined above.
-     * 4. The discount amount is calculated as: discountAmount =
-     *    roundFinance(discountPrincipal + discountRemuneratoryInterest + discountMoratoryInterest + discountLateFee),
-     *    where the `roundFinance()` function is defined above.
-     * 5. See also notes for the appropriate fields in comments for the storage sub-loan structures above:
+     * 3. The `outstandingBalance` fields is financially rounded according to the ACCURACY_FACTOR,
+     *    see the `Constants` contract.
+     *    All other fields related to tracked, repaid, and discount amounts are not financially rounded.
+     * 4. See also notes for the appropriate fields in comments for the storage sub-loan structures above:
      *    `SubLoanInception`, `SubLoanState`, `SubLoanMetadata`.
      *
      */
@@ -560,13 +555,11 @@ interface ILendingMarketV2Types {
         uint256 repaidRemuneratoryInterest;
         uint256 repaidMoratoryInterest;
         uint256 repaidLateFee;
-        uint256 repaidAmount;
 
         uint256 discountPrincipal;
         uint256 discountRemuneratoryInterest;
         uint256 discountMoratoryInterest;
         uint256 discountLateFee;
-        uint256 discountAmount;
     }
 
     /**
@@ -586,26 +579,25 @@ interface ILendingMarketV2Types {
      * - borrower --------------------------- The address of the borrower.
      * - totalBorrowedAmount ---------------- The total borrowed amount of the loan over all sub-loans.
      * - totalAddonAmount ------------------- The total addon amount of the loan over all sub-loans.
-     * - totalTrackedPrincipal -------------- The total tracked principal of the loan over all sub-loans. Unrounded.
-     * - totalTrackedRemuneratoryInterest --- The total tracked remuneratory interest of the loan over all sub-loans. Unrounded.
-     * - totalTrackedMoratoryInterest ------- The total tracked moratory interest of the loan over all sub-loans. Unrounded.
-     * - totalTrackedLateFee ---------------- The total tracked late fee of the loan over all sub-loans. Unrounded.
-     * - totalOutstandingBalance ------------ The total outstanding balance of the loan over all sub-loans. Rounded.
-     * - totalRepaidPrincipal --------------- The total repaid principal of the loan over all sub-loans. Unrounded.
-     * - totalRepaidRemuneratoryInterest ---- The total repaid remuneratory interest of the loan over all sub-loans. Unrounded.
-     * - totalRepaidMoratoryInterest -------- The total repaid moratory interest of the loan over all sub-loans. Unrounded.
-     * - totalRepaidLateFee ----------------- The total repaid late fee of the loan over all sub-loans. Unrounded.
-     * - totalRepaidAmount ------------------ The total repaid amount of the loan over all sub-loans. Rounded.
-     * - totalDiscountPrincipal ------------- The total discount principal of the loan over all sub-loans. Unrounded.
-     * - totalDiscountRemuneratoryInterest -- The total discount remuneratory interest of the loan over all sub-loans. Unrounded.
-     * - totalDiscountMoratoryInterest ------ The total discount moratory interest of the loan over all sub-loans. Unrounded.
-     * - totalDiscountLateFee --------------- The total discount late fee of the loan over all sub-loans. Unrounded.
-     * - totalDiscountAmount ---------------- The total discount amount of the loan over all sub-loans. Rounded.
+     * - totalTrackedPrincipal -------------- The total tracked principal of the loan over all sub-loans.
+     * - totalTrackedRemuneratoryInterest --- The total tracked remuneratory interest of the loan over all sub-loans.
+     * - totalTrackedMoratoryInterest ------- The total tracked moratory interest of the loan over all sub-loans.
+     * - totalTrackedLateFee ---------------- The total tracked late fee of the loan over all sub-loans.
+     * - totalOutstandingBalance ------------ The total outstanding balance of the loan over all sub-loans.
+     * - totalRepaidPrincipal --------------- The total repaid principal of the loan over all sub-loans.
+     * - totalRepaidRemuneratoryInterest ---- The total repaid remuneratory interest of the loan over all sub-loans.
+     * - totalRepaidMoratoryInterest -------- The total repaid moratory interest of the loan over all sub-loans.
+     * - totalRepaidLateFee ----------------- The total repaid late fee of the loan over all sub-loans.
+     * - totalDiscountPrincipal ------------- The total discount principal of the loan over all sub-loans.
+     * - totalDiscountRemuneratoryInterest -- The total discount remuneratory interest of the loan over all sub-loans.
+     * - totalDiscountMoratoryInterest ------ The total discount moratory interest of the loan over all sub-loans.
+     * - totalDiscountLateFee --------------- The total discount late fee of the loan over all sub-loans.
      *
      * Notes:
      *
-     * 1. See notes about the outstanding balance, repaid amount and discount amount in the comments for the `SubLoanPreview` structure.
-     * 2. See also notes for the appropriate fields in comments for the storage sub-loan structures above:
+     * 1. All `total...` fields are calculated as the sum of the corresponding fields of all sub-loans in the loan.
+     * 2. See notes about the outstanding balance in the comments for the `SubLoanPreview` structure.
+     * 3. See also notes for the appropriate fields in comments for the storage sub-loan structures above:
      *    `SubLoanInception`, `SubLoanState`, `SubLoanMetadata`.
      */
     // The comment below is to keep gaps between fields for better readability
@@ -633,13 +625,11 @@ interface ILendingMarketV2Types {
         uint256 totalRepaidRemuneratoryInterest;
         uint256 totalRepaidMoratoryInterest;
         uint256 totalRepaidLateFee;
-        uint256 totalRepaidAmount;
 
         uint256 totalDiscountPrincipal;
         uint256 totalDiscountRemuneratoryInterest;
         uint256 totalDiscountMoratoryInterest;
         uint256 totalDiscountLateFee;
-        uint256 totalDiscountAmount;
     }
 
     /**

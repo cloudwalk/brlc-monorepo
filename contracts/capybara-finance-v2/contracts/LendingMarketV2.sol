@@ -559,12 +559,10 @@ contract LendingMarketV2 is
         preview.repaidRemuneratoryInterest = subLoan.repaidRemuneratoryInterest;
         preview.repaidMoratoryInterest = subLoan.repaidMoratoryInterest;
         preview.repaidLateFee = subLoan.repaidLateFee;
-        preview.repaidAmount = _calculateRepaidAmount(subLoan);
         preview.discountPrincipal = subLoan.discountPrincipal;
         preview.discountRemuneratoryInterest = subLoan.discountRemuneratoryInterest;
         preview.discountMoratoryInterest = subLoan.discountMoratoryInterest;
         preview.discountLateFee = subLoan.discountLateFee;
-        preview.discountAmount = _calculateDiscountAmount(subLoan);
         return preview;
     }
 
@@ -634,12 +632,10 @@ contract LendingMarketV2 is
             preview.totalRepaidRemuneratoryInterest += singleLoanPreview.repaidRemuneratoryInterest;
             preview.totalRepaidMoratoryInterest += singleLoanPreview.repaidMoratoryInterest;
             preview.totalRepaidLateFee += singleLoanPreview.repaidLateFee;
-            preview.totalRepaidAmount += singleLoanPreview.repaidAmount;
             preview.totalDiscountPrincipal += singleLoanPreview.discountPrincipal;
             preview.totalDiscountRemuneratoryInterest += singleLoanPreview.discountRemuneratoryInterest;
             preview.totalDiscountMoratoryInterest += singleLoanPreview.discountMoratoryInterest;
             preview.totalDiscountLateFee += singleLoanPreview.discountLateFee;
-            preview.totalDiscountAmount += singleLoanPreview.discountAmount;
             unchecked {
                 ++subLoanId;
             }
@@ -686,32 +682,6 @@ contract LendingMarketV2 is
      */
     function _calculateOutstandingBalance(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
         return _roundFinance(_calculateTrackedBalance(subLoan));
-    }
-
-    /**
-     * @dev Calculates the repaid amount of a sub-loan by summing all repaid components and rounding the result.
-     */
-    function _calculateRepaidAmount(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
-        return
-            _roundFinance(
-                subLoan.repaidPrincipal +
-                    subLoan.repaidRemuneratoryInterest +
-                    subLoan.repaidMoratoryInterest +
-                    subLoan.repaidLateFee
-            );
-    }
-
-    /**
-     * @dev Calculates the discount amount of a sub-loan by summing all discount components and rounding the result.
-     */
-    function _calculateDiscountAmount(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
-        return
-            _roundFinance(
-                subLoan.discountPrincipal +
-                    subLoan.discountRemuneratoryInterest +
-                    subLoan.discountMoratoryInterest +
-                    subLoan.discountLateFee
-            );
     }
 
     /**

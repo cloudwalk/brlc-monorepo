@@ -306,8 +306,8 @@ interface ILendingMarketV2Types {
      * 4. The initial late fee imposed just after the due date can be calculated as:
      *   `initialLateFee = trackedLateFee + repaidLateFee + discountLateFee`.
      * 5. All rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
-     * 6. All fields related to tracked, repaid, and discount amounts are not rounded to the ACCURACY_FACTOR,
-     *    see the `Constants` contract.
+     * 6. All fields related to tracked, repaid, and discount amounts are not financially rounded
+     *    according to the ACCURACY_FACTOR, see the `Constants` contract.
      */
     struct SubLoanState {
         // Slot 1 -- Frequently used data for reading and writing
@@ -419,6 +419,8 @@ interface ILendingMarketV2Types {
      * See notes for the appropriate fields in comments for the storage sub-loan structures above:
      * `SubLoanInception`, `SubLoanState`, `SubLoanMetadata`.
      */
+    // The comment below is to keep gaps between fields for better readability
+    // prettier-ignore
     struct ProcessingSubLoan {
         uint256 id;
         uint256 earliestOperationId;
@@ -426,23 +428,28 @@ interface ILendingMarketV2Types {
         uint256 flags;
         uint256 status;
         uint256 gracePeriodStatus;
+
         uint256 startTimestamp;
         uint256 freezeTimestamp;
         uint256 trackedTimestamp;
         uint256 pendingTimestamp;
         uint256 duration;
+
         uint256 remuneratoryRate;
         uint256 moratoryRate;
         uint256 lateFeeRate;
         uint256 graceDiscountRate;
+
         uint256 trackedPrincipal;
         uint256 trackedRemuneratoryInterest;
         uint256 trackedMoratoryInterest;
         uint256 trackedLateFee;
+
         uint256 repaidPrincipal;
         uint256 repaidRemuneratoryInterest;
         uint256 repaidMoratoryInterest;
         uint256 repaidLateFee;
+
         uint256 discountPrincipal;
         uint256 discountRemuneratoryInterest;
         uint256 discountMoratoryInterest;
@@ -513,6 +520,8 @@ interface ILendingMarketV2Types {
      *    `SubLoanInception`, `SubLoanState`, `SubLoanMetadata`.
      *
      */
+    // The comment below is to keep gaps between fields for better readability
+    // prettier-ignore
     struct SubLoanPreview {
         uint256 day;
         uint256 id;
@@ -524,29 +533,35 @@ interface ILendingMarketV2Types {
         uint256 latestOperationId;
         uint256 status;
         uint256 gracePeriodStatus;
+
         uint256 programId;
         address borrower;
         uint256 borrowedAmount;
         uint256 addonAmount;
+
         uint256 startTimestamp;
         uint256 freezeTimestamp;
         uint256 trackedTimestamp;
         uint256 pendingTimestamp;
         uint256 duration;
+
         uint256 remuneratoryRate;
         uint256 moratoryRate;
         uint256 lateFeeRate;
         uint256 graceDiscountRate;
+
         uint256 trackedPrincipal;
         uint256 trackedRemuneratoryInterest;
         uint256 trackedMoratoryInterest;
         uint256 trackedLateFee;
         uint256 outstandingBalance;
+
         uint256 repaidPrincipal;
         uint256 repaidRemuneratoryInterest;
         uint256 repaidMoratoryInterest;
         uint256 repaidLateFee;
         uint256 repaidAmount;
+
         uint256 discountPrincipal;
         uint256 discountRemuneratoryInterest;
         uint256 discountMoratoryInterest;
@@ -593,6 +608,8 @@ interface ILendingMarketV2Types {
      * 2. See also notes for the appropriate fields in comments for the storage sub-loan structures above:
      *    `SubLoanInception`, `SubLoanState`, `SubLoanMetadata`.
      */
+    // The comment below is to keep gaps between fields for better readability
+    // prettier-ignore
     struct LoanPreview {
         uint256 day;
         uint256 firstSubLoanId;
@@ -600,20 +617,24 @@ interface ILendingMarketV2Types {
         uint256 ongoingSubLoanCount;
         uint256 repaidSubLoanCount;
         uint256 revokedSubLoanCount;
+
         uint256 programId;
         address borrower;
         uint256 totalBorrowedAmount;
         uint256 totalAddonAmount;
+
         uint256 totalTrackedPrincipal;
         uint256 totalTrackedRemuneratoryInterest;
         uint256 totalTrackedMoratoryInterest;
         uint256 totalTrackedLateFee;
         uint256 totalOutstandingBalance;
+
         uint256 totalRepaidPrincipal;
         uint256 totalRepaidRemuneratoryInterest;
         uint256 totalRepaidMoratoryInterest;
         uint256 totalRepaidLateFee;
         uint256 totalRepaidAmount;
+
         uint256 totalDiscountPrincipal;
         uint256 totalDiscountRemuneratoryInterest;
         uint256 totalDiscountMoratoryInterest;

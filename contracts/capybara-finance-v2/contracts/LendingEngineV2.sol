@@ -1065,7 +1065,7 @@ contract LendingEngineV2 is
     function _applyRepayment(ProcessingSubLoan memory subLoan, Operation storage operation) internal view {
         uint256 amount = operation.value;
         uint256 trackedBalance = _calculateTrackedBalance(subLoan);
-        uint256 roundedTrackedBalance = _roundFinance(trackedBalance);
+        uint256 roundedTrackedBalance = _roundFinancially(trackedBalance);
         if (amount > roundedTrackedBalance) {
             revert LendingMarketV2_SubLoanRepaymentExcess();
         }
@@ -1086,7 +1086,7 @@ contract LendingEngineV2 is
     function _applyDiscount(ProcessingSubLoan memory subLoan, Operation storage operation) internal view {
         uint256 amount = operation.value;
         uint256 trackedBalance = _calculateTrackedBalance(subLoan);
-        uint256 roundedTrackedBalance = _roundFinance(trackedBalance);
+        uint256 roundedTrackedBalance = _roundFinancially(trackedBalance);
         if (amount > roundedTrackedBalance) {
             revert LendingMarketV2_SubLoanRepaymentExcess();
         }
@@ -1419,13 +1419,13 @@ contract LendingEngineV2 is
         if (
             borrowedAmount == 0 || // Tools: prevent Prettier one-liner
             borrowedAmount > type(uint64).max ||
-            borrowedAmount != _roundFinance(borrowedAmount)
+            borrowedAmount != _roundFinancially(borrowedAmount)
         ) {
             revert LendingMarketV2_LoanBorrowedAmountInvalid();
         }
         if (
             addonAmount > type(uint64).max || // Tools: prevent Prettier one-liner
-            addonAmount != _roundFinance(addonAmount)
+            addonAmount != _roundFinancially(addonAmount)
         ) {
             revert LendingMarketV2_AddonAmountInvalid();
         }
@@ -1525,7 +1525,7 @@ contract LendingEngineV2 is
         ) {
             // The unrounded value is prohibited.
             // No special value for a full repayment or discount.
-            if (value != _roundFinance(value)) {
+            if (value != _roundFinancially(value)) {
                 revert LendingMarketV2_SubLoanRepaymentOrDiscountAmountUnrounded();
             }
 

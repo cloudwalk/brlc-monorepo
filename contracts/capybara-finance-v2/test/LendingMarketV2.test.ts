@@ -623,7 +623,7 @@ function defineInitialLoan(
 }
 
 function calculateOutstandingBalance(subLoan: SubLoan): bigint {
-  return roundToAccuracyFactor(
+  return roundFinancially(
     subLoan.state.trackedPrincipal +
     subLoan.state.trackedRemuneratoryInterest +
     subLoan.state.trackedMoratoryInterest +
@@ -915,8 +915,12 @@ function accrueRemuneratoryInterest(subLoan: SubLoan, timestamp: number) {
   subLoan.state.trackedRemuneratoryInterest += newTrackedBalance - oldTrackedBalance;
 }
 
-function roundToAccuracyFactor(amount: bigint) {
-  return ((amount + ACCURACY_FACTOR / 2n) / ACCURACY_FACTOR) * ACCURACY_FACTOR;
+function roundFinancially(amount: bigint) {
+  const roundedValue = ((amount + ACCURACY_FACTOR / 2n) / ACCURACY_FACTOR) * ACCURACY_FACTOR;
+  if (roundedValue === 0n && amount !== 0n) {
+    return ACCURACY_FACTOR;
+  }
+  return roundedValue;
 }
 
 function registerSingleOperationInMetadata(subLoan: SubLoan, operationId: number) {

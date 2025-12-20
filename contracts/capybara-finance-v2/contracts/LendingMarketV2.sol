@@ -681,7 +681,7 @@ contract LendingMarketV2 is
      * @dev Calculates the total outstanding balance of a sub-loan by summing all tracked components.
      */
     function _calculateOutstandingBalance(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
-        return _roundFinance(_calculateTrackedBalance(subLoan));
+        return _roundFinancially(_calculateTrackedBalance(subLoan));
     }
 
     /**

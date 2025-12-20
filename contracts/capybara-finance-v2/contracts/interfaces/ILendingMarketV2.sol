@@ -505,9 +505,11 @@ interface ILendingMarketV2Types {
      * 1. The day index is calculated taking into account the day boundary offset, see the `dayBoundaryOffset()`
      *    function and the `NEGATIVE_DAY_BOUNDARY_OFFSET` constant in the `Constants` contract.
      * 2. The outstanding balance is calculated as: outstandingBalance =
-     *    roundFinance(trackedPrincipal + trackedRemuneratoryInterest + trackedMoratoryInterest + trackedLateFee),
-     *    where the `roundFinance()` function returns an integer rounded according to `ACCURACY_FACTOR`
-     *    (see the `Constants` contract) using the standard mathematical rules.
+     *    roundFinancially(trackedPrincipal + trackedRemuneratoryInterest + trackedMoratoryInterest + trackedLateFee),
+     *    where the `roundFinancially()` function returns an integer rounded according to `ACCURACY_FACTOR`
+     *    (see the `Constants` contract) using the standard mathematical rules and the following rule:
+     *    if the initial value for rounding is not zero and the rounded value is zero,
+     *    then the rounded value is set to the ACCURACY_FACTOR. See rounding examples in the `docs/description.md` file.
      * 3. The `outstandingBalance` fields is financially rounded according to the ACCURACY_FACTOR,
      *    see the `Constants` contract.
      *    All other fields related to tracked, repaid, and discount amounts are not financially rounded.

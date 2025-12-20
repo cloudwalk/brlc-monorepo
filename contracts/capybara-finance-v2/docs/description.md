@@ -265,7 +265,18 @@
 10. There is currently no special amount for full sub-loan repayment. In V1 you could pass `type(uint256).max`; in V2 only explicit repayment and discount amounts are supported. If a special amount is added in the future, it must be converted to the outstanding balance when the operation is added, not when it is processed.
 11. Batch view functions that return arrays of structs are no longer exposed. This keeps the ABI forward-compatible when structs gain new fields: returning a single struct remains backward compatible, whereas returning an array forces an ABI update and couples smart contracts to backend updates. To keep backend reads consistent, call the individual view functions against the same block number (not `latest`) and aggregate the results. Most blockchain libraries also let you batch JSON-RPC calls; for example, see https://docs.ethers.org/v6/api/providers/jsonrpc/#JsonRpcApiProviderOptions.
 12. All rates are expressed as multiplied by `INTEREST_RATE_FACTOR = 10^9` (see the `Constants` contract).
-13. The tracked, repaid and discount parts of sub-loans are not rounded financially (according to the accuracy factor) as well as fees, they are stored in the contract in the raw form. Only their sums are rounded when calculating the outstanding balance, repaid amount and discount amount of a sub-loan. Those rounded values are exposed by the separate fields of the preview structures returned by the view functions.
+13. The tracked, repaid and discount parts of sub-loans are not rounded financially (according to the accuracy factor) as well as fees, they are stored in the contract in the raw form. Only the sum of tracked parts are rounded when calculating the outstanding balance of a sub-loan. That rounded value is exposed by the separate field of the preview structures returned by the view functions.
+14. The financially rounded values are calculated using the standard mathematical rules and the following rule: if the initial value for rounding is not zero and the rounded value is zero, then the rounded value is set to the accuracy factor. Examples of rounding for BRLC (6 decimals, accuracy factor = 10_000):
+    * 1.009999 => 1.01,
+    * 1.005000 => 1.01,
+    * 1.004999 => 1.00,
+    * 1.000001 => 1.00,
+    * 1.000000 => 1.00,
+    * 0.009999 => 0.01,
+    * 0.005000 => 0.01,
+    * 0.004999 => 0.01,
+    * 0.000001 => 0.01,
+    * 0.000000 => 0.00.
 
 
 ## Credit Line V2

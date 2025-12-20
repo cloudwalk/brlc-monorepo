@@ -674,6 +674,8 @@ contract LendingEngineV2 is
             return;
         }
 
+        subLoan.flags |= SUB_LOAN_FLAG_GRACE_PERIOD_BY_LAST_OPERATION_TIMESTAMP;
+
         // After applying, the tracked balance and tracked timestamp match the time of the last applied operation.
         (uint256 earliestPendingOperation, uint256 pendingOperationCount) = _applyOperations(subLoan, timestamp);
         _processPendingOperations(subLoan, earliestPendingOperation, pendingOperationCount);
@@ -726,6 +728,7 @@ contract LendingEngineV2 is
 
         SubLoan storage storedSubLoan = _getSubLoan(subLoan.id);
         uint256 operationId;
+        uint256 lastAppliedOperationTimestamp = subLoan.startTimestamp;
         uint256 gracePeriodStatus = subLoan.gracePeriodStatus; // To detect changes in grace period status
 
         do {
@@ -755,6 +758,7 @@ contract LendingEngineV2 is
                     operationStatus == uint256(OperationStatus.Applied) || // Tools: prevent Prettier one-liner
                     operationStatus == uint256(OperationStatus.Pending)
                 ) {
+                    lastAppliedOperationTimestamp = operation.timestamp;
                     _applySingleOperation(subLoan, operation);
                     if (operationStatus == uint256(OperationStatus.Pending)) {
                         // TODO: Rename pendingOperationCount => newlyAppliedOperationCount
@@ -775,7 +779,11 @@ contract LendingEngineV2 is
             }
 
             // If after applying operations the grace period status has changed reapply operations again
-            gracePeriodStatus = _determineGracePeriodStatus(subLoan, timestamp);
+            if (_isFlagSet(subLoan.flags, SUB_LOAN_FLAG_GRACE_PERIOD_BY_LAST_OPERATION_TIMESTAMP)) {
+                gracePeriodStatus = _determineGracePeriodStatus(subLoan, lastAppliedOperationTimestamp);
+            } else {
+                gracePeriodStatus = _determineGracePeriodStatus(subLoan, timestamp);
+            }
         } while (gracePeriodStatus != subLoan.gracePeriodStatus);
 
         subLoan.pendingTimestamp = _findNextActiveOperationTimestamp(storedSubLoan, operationId);

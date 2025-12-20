@@ -854,10 +854,12 @@ interface ILendingMarketV2PrimaryEvents is ILendingMarketV2Types {
      * @param duration The duration of the sub-loan in days.
      * @param packedRates The packed rates of the sub-loan. A bitfield with the following bits:
      *
-     * - 64 bits from 0 to 63: the remuneratory interest rate.
-     * - 64 bits from 64 to 127: the moratory interest rate.
-     * - 64 bits from 128 to 191: the late fee rate.
-     * - 64 bits from 192 to 255: the grace interest rate.
+     * - 32  bits from   0 to  31: the remuneratory interest rate.
+     * - 32  bits from  32 to  63: the moratory interest rate.
+     * - 32  bits from  64 to  95: the late fee rate.
+     * - 32  bits from  96 to 127: the grace interest rate.
+     * - 128 bits from 128 to 255: reserved for future usage.
+     *
      */
     event SubLoanTaken(
         uint256 indexed subLoanId, // Tools: prevent Prettier one-liner
@@ -878,25 +880,29 @@ interface ILendingMarketV2PrimaryEvents is ILendingMarketV2Types {
      *
      * 1. The `packedParameters` value is a bitfield with the following bits (see the `_emitUpdateEvent()` function):
      *
-     * - 08 bits from 000 to 007: the sub-loan current status.
-     * - 08 bits from 008 to 015: the reserve for future usage.
-     * - 16 bits from 016 to 031: the current duration in days.
-     * - 32 bits from 032 to 063: the remuneratory interest rate.
-     * - 32 bits from 064 to 095: the moratory interest rate.
-     * - 32 bits from 096 to 127: the late fee rate.
-     * - 32 bits from 128 to 159: the grace interest rate.
-     * - 32 bits from 160 to 191: the stored tracked timestamp.
-     * - 32 bits from 192 to 223: the stored freeze timestamp.
-     * - 32 bits from 224 to 256: the earliest unprocessed operation timestamp or zero if none.
+     * - 8  bits from   0 to   7: the sub-loan current status.
+     * - 8  bits from   8 to  15: the reserve for future usage.
+     * - 16 bits from  16 to  31: the current duration in days.
+     * - 32 bits from  32 to  63: the start timestamp.
+     * - 32 bits from  64 to  95: the tracked timestamp.
+     * - 32 bits from  96 to 127: the freeze timestamp.
+     * - 32 bits from 128 to 159: the pending timestamp.
+     * - 16 bits from 160 to 175: the operation count.
+     * - 16 bits from 176 to 191: the earliest operation ID.
+     * - 16 bits from 192 to 207: the recent operation ID.
+     * - 16 bits from 208 to 223: the latest operation ID.
+     * - 32 bits from 224 to 255: reserved for future usage.
      *
-     * 2. Any `...packed...Parts` value is a bitfield with the following bits:
+     * 2. The `packedRates` value is a bitfield described in the comments for the `SubLoanTaken` event.
      *
-     * - 64 bits from 0 to 63: related to the principal.
-     * - 64 bits from 64 to 127: related to the remuneratory interest.
+     * 3. Any `...packed...Parts` value is a bitfield with the following bits:
+     *
+     * - 64 bits from   0 to  63: related to the principal.
+     * - 64 bits from  64 to 127: related to the remuneratory interest.
      * - 64 bits from 128 to 191: related to the moratory interest.
      * - 64 bits from 192 to 255: related to the late fee.
      *
-     * 3. The cumulative unrounded value of any packed parts can be calculated using the following function:
+     * 4. The cumulative unrounded value of any packed parts can be calculated using the following function:
      *     ```
      *     function _calculateSumAmountByParts(uint256 packedParts) {
      *         return
@@ -907,7 +913,7 @@ interface ILendingMarketV2PrimaryEvents is ILendingMarketV2Types {
      *     }
      *     ```
      *
-     * 4. The cumulative rounded value of any packed parts can be calculated using the following function:
+     * 5. The cumulative rounded value of any packed parts can be calculated using the following function:
      *     ```
      *     function _calculateRoundedSumAmountByParts(uint256 packedParts) {
      *         return
@@ -918,29 +924,24 @@ interface ILendingMarketV2PrimaryEvents is ILendingMarketV2Types {
      *     }
      *     ```
      *
-     * 5. The `storedPackedTrackedParts` and `currentPackedTrackedParts` are equal when an operation is submitted at
-     *    the end of the operation list. They differ when revoking or submitting an operation in the past:
-     *    - `storedPackedTrackedParts` corresponds to the timestamp of the latest applied operation.
-     *    - `currentPackedTrackedParts` corresponds to the timestamp of the changing operation.
-     *
      * 6. The update index is incremented by one for each update event of the sub-loan.
      *
      * @param subLoanId The unique identifier of the sub-loan.
      * @param updateIndex The sequence index of the update event for the sub-loan.
      * @param packedParameters The packed parameters of the sub-loan, see notes above.
+     * @param packedRates The packed rates of the sub-loan, see notes above.
      * @param packedRepaidParts The packed repaid parts of the sub-loan, see notes above.
      * @param packedDiscountParts The packed discount parts of the sub-loan, see notes above.
-     * @param storedPackedTrackedParts The packed tracked parts of the sub-loan at the stored tracked timestamp.
-     * @param currentPackedTrackedParts The packed tracked parts of the sub-loan at the current timestamp.
+     * @param packedTrackedParts The packed tracked parts of the sub-loan at the stored tracked timestamp.
      */
     event SubLoanUpdated(
         uint256 indexed subLoanId, // Tools: prevent Prettier one-liner
         uint256 indexed updateIndex,
         bytes32 packedParameters,
+        bytes32 packedRates,
         bytes32 packedRepaidParts,
         bytes32 packedDiscountParts,
-        bytes32 storedPackedTrackedParts,
-        bytes32 currentPackedTrackedParts
+        bytes32 packedTrackedParts
     );
 
     /**

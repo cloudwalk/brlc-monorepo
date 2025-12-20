@@ -10,6 +10,8 @@
    * `SubLoanPreview.discountAmount` -- The discount amount of the sub-loan. It is calculated as the sum of individual discounted components, then financial rounding applied.
    * `LoanPreview.totalRepaidAmount` -- The total repaid amount of the loan over all sub-loans.
    * `LoanPreview.totalDiscountAmount` -- The total discount amount of the loan over all sub-loans.
+3. The number of bits per rate in the packed rates fields of events has been changed from 64 bits per rate to 32 bits per rate.
+4. The `SubLoanTaken` event has been changed.
 
 # 2.0.0
 

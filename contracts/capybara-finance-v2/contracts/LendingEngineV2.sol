@@ -757,7 +757,9 @@ contract LendingEngineV2 is
                 ) {
                     _applySingleOperation(subLoan, operation);
                     if (operationStatus == uint256(OperationStatus.Pending)) {
+                        // TODO: Rename pendingOperationCount => newlyAppliedOperationCount
                         ++pendingOperationCount;
+                        // TODO: Rename earliestPendingOperationId => earliestNewlyAppliedOperationId
                         if (earliestPendingOperationId == 0) {
                             earliestPendingOperationId = operationId;
                         }
@@ -1020,24 +1022,29 @@ contract LendingEngineV2 is
         uint256 packedParameters = ((uint256(subLoan.status) & type(uint8).max) << 0) +
             ((uint256(0) & type(uint8).max) << 8) + // reserve for future usage
             ((uint256(subLoan.duration) & type(uint16).max) << 16) +
-            ((uint256(subLoan.remuneratoryRate) & type(uint32).max) << 32) +
-            ((uint256(subLoan.moratoryRate) & type(uint32).max) << 64) +
-            ((uint256(subLoan.lateFeeRate) & type(uint32).max) << 96) +
-            ((uint256(subLoan.graceDiscountRate) & type(uint32).max) << 128) +
-            ((uint256(subLoan.trackedTimestamp) & type(uint32).max) << 160) +
-            ((uint256(subLoan.freezeTimestamp) & type(uint32).max) << 192) +
-            ((uint256(subLoan.pendingTimestamp) & type(uint32).max) << 224);
-
-        _accrueInterest(subLoan, _blockTimestamp());
+            ((uint256(subLoan.startTimestamp) & type(uint32).max) << 32) +
+            ((uint256(subLoan.trackedTimestamp) & type(uint32).max) << 64) +
+            ((uint256(subLoan.freezeTimestamp) & type(uint32).max) << 96) +
+            ((uint256(subLoan.pendingTimestamp) & type(uint32).max) << 128) +
+            ((uint256(storedSubLoan.metadata.operationCount) & type(uint16).max) << 160) +
+            ((uint256(storedSubLoan.metadata.earliestOperationId) & type(uint16).max) << 176) +
+            ((uint256(storedSubLoan.metadata.recentOperationId) & type(uint16).max) << 192) +
+            ((uint256(storedSubLoan.metadata.latestOperationId) & type(uint16).max) << 208);
+        uint256 packedRates = _packRates(
+            subLoan.remuneratoryRate,
+            subLoan.moratoryRate,
+            subLoan.lateFeeRate,
+            subLoan.graceDiscountRate
+        );
 
         emit SubLoanUpdated(
             subLoan.id,
             storedSubLoan.metadata.updateIndex,
             bytes32(packedParameters),
+            bytes32(packedRates),
             bytes32(_packRepaidParts(subLoan)),
             bytes32(_packDiscountParts(subLoan)),
-            bytes32(storedPackedTrackedParts),
-            bytes32(_packTrackedParts(subLoan))
+            bytes32(storedPackedTrackedParts)
         );
 
         // No custom error is introduced because index overflow is not possible due to the overall contract logic
@@ -1762,10 +1769,11 @@ contract LendingEngineV2 is
      *
      * The packed rates is a bitfield with the following bits:
      *
-     * - 64 bits from 0 to 63: the remuneratory interest rate.
-     * - 64 bits from 64 to 127: the moratory interest rate.
-     * - 64 bits from 128 to 191: the late fee rate.
-     * - 64 bits from 192 to 255: the grace period discount rate.
+     * - 32  bits from   0 to  31: the remuneratory interest rate.
+     * - 32  bits from  32 to  63: the moratory interest rate.
+     * - 32  bits from  64 to  95: the late fee rate.
+     * - 32  bits from  96 to 127: the grace period discount rate.
+     * - 128 bits from 128 to 255: reserved for future usage.
      */
     function _packRates(
         uint256 remuneratoryRate,
@@ -1774,10 +1782,10 @@ contract LendingEngineV2 is
         uint256 graceDiscountRate
     ) internal pure returns (uint256) {
         return
-            (remuneratoryRate & type(uint64).max) |
-            ((moratoryRate & type(uint64).max) << 64) |
-            ((lateFeeRate & type(uint64).max) << 128) |
-            ((graceDiscountRate & type(uint64).max) << 192);
+            (remuneratoryRate & type(uint32).max) |
+            ((moratoryRate & type(uint32).max) << 32) |
+            ((lateFeeRate & type(uint32).max) << 64) |
+            ((graceDiscountRate & type(uint32).max) << 96);
     }
 
     /**

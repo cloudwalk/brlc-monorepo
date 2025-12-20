@@ -469,17 +469,18 @@ async function deployAndConfigureContractsForLoanTaking(): Promise<Fixture> {
   return fixture;
 }
 
-function packAmountParts(part1: bigint, part2: bigint, part3: bigint, part4: bigint): bigint {
+function packAmountParts(onePartBitShift: bigint, part1: bigint, part2: bigint, part3: bigint, part4: bigint): bigint {
   return (
-    (part1 & MASK_UINT64) +
-    ((part2 & MASK_UINT64) << 64n) +
-    ((part3 & MASK_UINT64) << 128n) +
-    ((part4 & MASK_UINT64) << 192n)
+    ((part1 & MASK_UINT64) << (onePartBitShift * 0n)) +
+    ((part2 & MASK_UINT64) << (onePartBitShift * 1n)) +
+    ((part3 & MASK_UINT64) << (onePartBitShift * 2n)) +
+    ((part4 & MASK_UINT64) << (onePartBitShift * 3n))
   );
 }
 
 function packRates(subLoan: SubLoan): bigint {
   return packAmountParts(
+    32n,
     BigInt(subLoan.state.remuneratoryRate),
     BigInt(subLoan.state.moratoryRate),
     BigInt(subLoan.state.lateFeeRate),
@@ -492,18 +493,20 @@ function packSubLoanParameters(subLoan: SubLoan): bigint {
     ((BigInt(subLoan.state.status) & MASK_UINT8) << 0n) +
     ((0n & MASK_UINT8) << 8n) +
     ((BigInt(subLoan.state.duration) & MASK_UINT16) << 16n) +
-    ((BigInt(subLoan.state.remuneratoryRate) & MASK_UINT32) << 32n) +
-    ((BigInt(subLoan.state.moratoryRate) & MASK_UINT32) << 64n) +
-    ((BigInt(subLoan.state.lateFeeRate) & MASK_UINT32) << 96n) +
-    ((BigInt(subLoan.state.graceDiscountRate) & MASK_UINT32) << 128n) +
-    ((BigInt(subLoan.state.trackedTimestamp) & MASK_UINT32) << 160n) +
-    ((BigInt(subLoan.state.freezeTimestamp) & MASK_UINT32) << 192n) +
-    ((BigInt(subLoan.metadata.pendingTimestamp ?? 0) & MASK_UINT32) << 224n)
+    ((BigInt(subLoan.inception.startTimestamp) & MASK_UINT32) << 32n) +
+    ((BigInt(subLoan.state.trackedTimestamp) & MASK_UINT32) << 64n) +
+    ((BigInt(subLoan.state.freezeTimestamp) & MASK_UINT32) << 96n) +
+    ((BigInt(subLoan.metadata.pendingTimestamp ?? 0) & MASK_UINT32) << 128n) +
+    ((BigInt(subLoan.metadata.operationCount) & MASK_UINT16) << 160n) +
+    ((BigInt(subLoan.metadata.earliestOperationId) & MASK_UINT16) << 176n) +
+    ((BigInt(subLoan.metadata.recentOperationId) & MASK_UINT16) << 192n) +
+    ((BigInt(subLoan.metadata.latestOperationId) & MASK_UINT16) << 208n)
   );
 }
 
 function packSubLoanRepaidParts(subLoan: SubLoan): bigint {
   return packAmountParts(
+    64n,
     subLoan.state.repaidPrincipal,
     subLoan.state.repaidRemuneratoryInterest,
     subLoan.state.repaidMoratoryInterest,
@@ -513,6 +516,7 @@ function packSubLoanRepaidParts(subLoan: SubLoan): bigint {
 
 function packSubLoanDiscountParts(subLoan: SubLoan): bigint {
   return packAmountParts(
+    64n,
     subLoan.state.discountPrincipal,
     subLoan.state.discountRemuneratoryInterest,
     subLoan.state.discountMoratoryInterest,
@@ -522,6 +526,7 @@ function packSubLoanDiscountParts(subLoan: SubLoan): bigint {
 
 function packSubLoanTrackedParts(subLoan: SubLoan): bigint {
   return packAmountParts(
+    64n,
     subLoan.state.trackedPrincipal,
     subLoan.state.trackedRemuneratoryInterest,
     subLoan.state.trackedMoratoryInterest,
@@ -969,9 +974,7 @@ function applySubLoanRepayment(subLoan: SubLoan, timestamp: number, amount: bigi
   if (subLoan.state.trackedPrincipal >= amount) {
     subLoan.state.repaidPrincipal += amount;
     subLoan.state.trackedPrincipal -= amount;
-    amount = 0n;
   } else {
-    amount -= subLoan.state.trackedPrincipal;
     subLoan.state.repaidPrincipal += subLoan.state.trackedPrincipal;
     subLoan.state.trackedPrincipal = 0n;
   }
@@ -997,9 +1000,7 @@ function applySubLoanDiscount(subLoan: SubLoan, timestamp: number, amount: bigin
   if (subLoan.state.trackedPrincipal >= amount) {
     subLoan.state.trackedPrincipal -= amount;
     subLoan.state.discountPrincipal += amount;
-    amount = 0n;
   } else {
-    amount -= subLoan.state.trackedPrincipal;
     subLoan.state.discountPrincipal += subLoan.state.trackedPrincipal;
     subLoan.state.trackedPrincipal = 0n;
   }
@@ -1893,10 +1894,10 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
+              toBytes32(packRates(subLoan)),
               toBytes32(packSubLoanRepaidParts(subLoan)),
               toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packSubLoanTrackedParts(subLoan)),
             );
         }
 
@@ -2144,10 +2145,10 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
+              toBytes32(packRates(subLoan)),
               toBytes32(packSubLoanRepaidParts(subLoan)),
               toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packSubLoanTrackedParts(subLoan)),
             );
         });
 
@@ -2174,7 +2175,6 @@ describe("Contract 'LendingMarket'", () => {
       describe("A single repayment operation from the borrower in the past, and does the following:", () => {
         let operation: Operation;
         let tx: Promise<ContractTransactionResponse>;
-        let txTimestamp: number;
 
         beforeEach(async () => {
           const operationRequest = {
@@ -2184,7 +2184,7 @@ describe("Contract 'LendingMarket'", () => {
             value: (subLoan.inception.borrowedAmount / 10n),
             account: borrower.address,
           };
-          ({ tx, txTimestamp, operation } = await prepareOperation(operationRequest));
+          ({ tx, operation } = await prepareOperation(operationRequest));
         });
 
         it("registers the expected operation", async () => {
@@ -2233,10 +2233,6 @@ describe("Contract 'LendingMarket'", () => {
             operation.value,
             operation.id,
           );
-          const storedPackedTrackedParts = packSubLoanTrackedParts(subLoan);
-
-          // Calculate the expected state at the transaction timestamp
-          accrueRemuneratoryInterest(subLoan, txTimestamp);
 
           await expect(tx)
             .to.emit(market, EVENT_NAME_SUB_LOAN_UPDATED)
@@ -2244,10 +2240,10 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
+              toBytes32(packRates(subLoan)),
               toBytes32(packSubLoanRepaidParts(subLoan)),
               toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(storedPackedTrackedParts),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packSubLoanTrackedParts(subLoan)),
             );
         });
 
@@ -2326,10 +2322,10 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
+              toBytes32(packRates(subLoan)),
               toBytes32(packSubLoanRepaidParts(subLoan)),
               toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packSubLoanTrackedParts(subLoan)),
             );
         });
 
@@ -2399,10 +2395,10 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
+              toBytes32(packRates(subLoan)),
               toBytes32(packSubLoanRepaidParts(subLoan)),
               toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packSubLoanTrackedParts(subLoan)),
             );
         });
 
@@ -2537,10 +2533,10 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
+              toBytes32(packRates(subLoan)),
               toBytes32(packSubLoanRepaidParts(subLoan)),
               toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packSubLoanTrackedParts(subLoan)),
             );
         });
 
@@ -2675,10 +2671,10 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
+              toBytes32(packRates(subLoan)),
               toBytes32(packSubLoanRepaidParts(subLoan)),
               toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packSubLoanTrackedParts(subLoan)),
             );
         });
 
@@ -2813,10 +2809,10 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
+              toBytes32(packRates(subLoan)),
               toBytes32(packSubLoanRepaidParts(subLoan)),
               toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packSubLoanTrackedParts(subLoan)),
             );
         });
 
@@ -2951,10 +2947,10 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
+              toBytes32(packRates(subLoan)),
               toBytes32(packSubLoanRepaidParts(subLoan)),
               toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packSubLoanTrackedParts(subLoan)),
             );
         });
 
@@ -3089,10 +3085,10 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
+              toBytes32(packRates(subLoan)),
               toBytes32(packSubLoanRepaidParts(subLoan)),
               toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packSubLoanTrackedParts(subLoan)),
             );
 
           await expect(tx).not.to.emit(market, EVENT_NAME_OPERATION_PENDED);
@@ -3272,6 +3268,12 @@ describe("Contract 'LendingMarket'", () => {
           }
 
           accrueRemuneratoryInterest(subLoan, txTimestamp);
+          subLoan.metadata.pendingTimestamp = orderedOperations[orderedOperations.length - 1].timestamp;
+          subLoan.metadata.operationCount += operations.length;
+          subLoan.metadata.earliestOperationId = orderedOperations[0].id;
+          subLoan.metadata.recentOperationId = lastAppliedOperation.id;
+          subLoan.metadata.latestOperationId = orderedOperations[orderedOperations.length - 1].id;
+
           subLoan.state.trackedTimestamp = txTimestamp;
           subLoan.state.duration = Number(lastAppliedOperation.value);
           subLoan.metadata.pendingTimestamp = orderedOperations[orderedOperations.length - 1].timestamp;
@@ -3282,10 +3284,10 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               subLoan.metadata.updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
+              toBytes32(packRates(subLoan)),
               toBytes32(packSubLoanRepaidParts(subLoan)),
               toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packSubLoanTrackedParts(subLoan)),
             );
         });
 
@@ -3495,21 +3497,16 @@ describe("Contract 'LendingMarket'", () => {
           const updateIndex = subLoan.metadata.updateIndex;
           voidSubLoanSingleRepaymentOperation(subLoan);
 
-          const storedPackedTrackedParts = packSubLoanTrackedParts(subLoan);
-
-          // Calculate the expected state at the transaction timestamp
-          accrueRemuneratoryInterest(subLoan, txTimestamp);
-
           await expect(tx)
             .to.emit(market, EVENT_NAME_SUB_LOAN_UPDATED)
             .withArgs(
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
+              toBytes32(packRates(subLoan)),
               toBytes32(packSubLoanRepaidParts(subLoan)),
               toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(storedPackedTrackedParts), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packSubLoanTrackedParts(subLoan)),
             );
         });
 

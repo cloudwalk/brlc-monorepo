@@ -128,18 +128,19 @@ interface SubLoanState {
   graceDiscountRate: number;
 
   trackedPrincipal: bigint;
-  trackedRemuneratoryInterest: bigint;
-  trackedMoratoryInterest: bigint;
-  trackedLateFee: bigint;
-
   repaidPrincipal: bigint;
-  repaidRemuneratoryInterest: bigint;
-  repaidMoratoryInterest: bigint;
-  repaidLateFee: bigint;
-
   discountPrincipal: bigint;
+
+  trackedRemuneratoryInterest: bigint;
+  repaidRemuneratoryInterest: bigint;
   discountRemuneratoryInterest: bigint;
+
+  trackedMoratoryInterest: bigint;
+  repaidMoratoryInterest: bigint;
   discountMoratoryInterest: bigint;
+
+  trackedLateFee: bigint;
+  repaidLateFee: bigint;
   discountLateFee: bigint;
 
   [key: string]: bigint | number; // Index signature
@@ -184,19 +185,24 @@ interface SubLoanPreview {
   moratoryRate: number;
   lateFeeRate: number;
   graceDiscountRate: number;
+
   trackedPrincipal: bigint;
-  trackedRemuneratoryInterest: bigint;
-  trackedMoratoryInterest: bigint;
-  trackedLateFee: bigint;
-  outstandingBalance: bigint;
   repaidPrincipal: bigint;
-  repaidRemuneratoryInterest: bigint;
-  repaidMoratoryInterest: bigint;
-  repaidLateFee: bigint;
   discountPrincipal: bigint;
+
+  trackedRemuneratoryInterest: bigint;
+  repaidRemuneratoryInterest: bigint;
   discountRemuneratoryInterest: bigint;
+
+  trackedMoratoryInterest: bigint;
+  repaidMoratoryInterest: bigint;
   discountMoratoryInterest: bigint;
+
+  trackedLateFee: bigint;
+  repaidLateFee: bigint;
   discountLateFee: bigint;
+
+  outstandingBalance: bigint;
 
   [key: string]: bigint | number | string;
 }
@@ -213,22 +219,28 @@ interface LoanPreview {
   borrower: string;
   totalBorrowedAmount: bigint;
   totalAddonAmount: bigint;
+
   totalTrackedPrincipal: bigint;
-  totalTrackedLegalPrincipal: bigint;
-  totalTrackedRemuneratoryInterest: bigint;
-  totalTrackedMoratoryInterest: bigint;
-  totalTrackedLateFee: bigint;
-  totalOutstandingBalance: bigint;
   totalRepaidPrincipal: bigint;
-  totalRepaidLegalPrincipal: bigint;
-  totalRepaidRemuneratoryInterest: bigint;
-  totalRepaidMoratoryInterest: bigint;
-  totalRepaidLateFee: bigint;
   totalDiscountPrincipal: bigint;
+
+  totalTrackedLegalPrincipal: bigint;
+  totalRepaidLegalPrincipal: bigint;
   totalDiscountLegalPrincipal: bigint;
+
+  totalTrackedRemuneratoryInterest: bigint;
+  totalRepaidRemuneratoryInterest: bigint;
   totalDiscountRemuneratoryInterest: bigint;
+
+  totalTrackedMoratoryInterest: bigint;
+  totalRepaidMoratoryInterest: bigint;
   totalDiscountMoratoryInterest: bigint;
+
+  totalTrackedLateFee: bigint;
+  totalRepaidLateFee: bigint;
   totalDiscountLateFee: bigint;
+
+  totalOutstandingBalance: bigint;
 
   [key: string]: bigint | number | string;
 }
@@ -408,7 +420,7 @@ async function deployLiquidityPoolMock(): Promise<Contracts.LiquidityPoolMock> {
 }
 
 async function deployContracts(): Promise<Fixture> {
-  const tokenMockDeployment = (await tokenMockFactory.deploy());
+  const tokenMockDeployment = await tokenMockFactory.deploy();
   await tokenMockDeployment.waitForDeployment();
   const tokenMock = tokenMockDeployment.connect(deployer);
 
@@ -470,7 +482,13 @@ async function deployAndConfigureContractsForLoanTaking(): Promise<Fixture> {
   return fixture;
 }
 
-function packAmountParts(onePartBitShift: bigint, part1: bigint, part2: bigint, part3: bigint, part4: bigint): bigint {
+function packAmountParts(
+  onePartBitShift: bigint,
+  part1: bigint,
+  part2: bigint,
+  part3: bigint,
+  part4: bigint,
+): bigint {
   return (
     ((part1 & MASK_UINT64) << (onePartBitShift * 0n)) +
     ((part2 & MASK_UINT64) << (onePartBitShift * 1n)) +
@@ -505,33 +523,43 @@ function packSubLoanParameters(subLoan: SubLoan): bigint {
   );
 }
 
-function packSubLoanRepaidParts(subLoan: SubLoan): bigint {
-  return packAmountParts(
-    64n,
-    subLoan.state.repaidPrincipal,
-    subLoan.state.repaidRemuneratoryInterest,
-    subLoan.state.repaidMoratoryInterest,
-    subLoan.state.repaidLateFee,
-  );
-}
-
-function packSubLoanDiscountParts(subLoan: SubLoan): bigint {
-  return packAmountParts(
-    64n,
-    subLoan.state.discountPrincipal,
-    subLoan.state.discountRemuneratoryInterest,
-    subLoan.state.discountMoratoryInterest,
-    subLoan.state.discountLateFee,
-  );
-}
-
-function packSubLoanTrackedParts(subLoan: SubLoan): bigint {
+function packSubLoanPrincipalParts(subLoan: SubLoan): bigint {
   return packAmountParts(
     64n,
     subLoan.state.trackedPrincipal,
+    subLoan.state.repaidPrincipal,
+    subLoan.state.discountPrincipal,
+    0n,
+  );
+}
+
+function packSubLoanRemuneratoryInterestParts(subLoan: SubLoan): bigint {
+  return packAmountParts(
+    64n,
     subLoan.state.trackedRemuneratoryInterest,
+    subLoan.state.repaidRemuneratoryInterest,
+    subLoan.state.discountRemuneratoryInterest,
+    0n,
+  );
+}
+
+function packSubLoanMoratoryInterestParts(subLoan: SubLoan): bigint {
+  return packAmountParts(
+    64n,
     subLoan.state.trackedMoratoryInterest,
+    subLoan.state.repaidMoratoryInterest,
+    subLoan.state.discountMoratoryInterest,
+    0n,
+  );
+}
+
+function packSubLoanLateFeeParts(subLoan: SubLoan): bigint {
+  return packAmountParts(
+    64n,
     subLoan.state.trackedLateFee,
+    subLoan.state.repaidLateFee,
+    subLoan.state.discountLateFee,
+    0n,
   );
 }
 
@@ -583,18 +611,19 @@ function defineInitialSubLoan(
     graceDiscountRate: inception.initialGraceDiscountRate,
 
     trackedPrincipal: inception.borrowedAmount + inception.addonAmount,
-    trackedRemuneratoryInterest: 0n,
-    trackedMoratoryInterest: 0n,
-    trackedLateFee: 0n,
-
     repaidPrincipal: 0n,
-    repaidRemuneratoryInterest: 0n,
-    repaidMoratoryInterest: 0n,
-    repaidLateFee: 0n,
-
     discountPrincipal: 0n,
+
+    trackedRemuneratoryInterest: 0n,
+    repaidRemuneratoryInterest: 0n,
     discountRemuneratoryInterest: 0n,
+
+    trackedMoratoryInterest: 0n,
+    repaidMoratoryInterest: 0n,
     discountMoratoryInterest: 0n,
+
+    trackedLateFee: 0n,
+    repaidLateFee: 0n,
     discountLateFee: 0n,
   };
 
@@ -664,19 +693,24 @@ function defineExpectedSubLoanPreview(subLoan: SubLoan): SubLoanPreview {
     moratoryRate: subLoan.state.moratoryRate,
     lateFeeRate: subLoan.state.lateFeeRate,
     graceDiscountRate: subLoan.state.graceDiscountRate,
+
     trackedPrincipal: subLoan.state.trackedPrincipal,
-    trackedRemuneratoryInterest: subLoan.state.trackedRemuneratoryInterest,
-    trackedMoratoryInterest: subLoan.state.trackedMoratoryInterest,
-    trackedLateFee: subLoan.state.trackedLateFee,
-    outstandingBalance: calculateOutstandingBalance(subLoan),
     repaidPrincipal: subLoan.state.repaidPrincipal,
-    repaidRemuneratoryInterest: subLoan.state.repaidRemuneratoryInterest,
-    repaidMoratoryInterest: subLoan.state.repaidMoratoryInterest,
-    repaidLateFee: subLoan.state.repaidLateFee,
     discountPrincipal: subLoan.state.discountPrincipal,
+
+    trackedRemuneratoryInterest: subLoan.state.trackedRemuneratoryInterest,
+    repaidRemuneratoryInterest: subLoan.state.repaidRemuneratoryInterest,
     discountRemuneratoryInterest: subLoan.state.discountRemuneratoryInterest,
+
+    trackedMoratoryInterest: subLoan.state.trackedMoratoryInterest,
+    repaidMoratoryInterest: subLoan.state.repaidMoratoryInterest,
     discountMoratoryInterest: subLoan.state.discountMoratoryInterest,
+
+    trackedLateFee: subLoan.state.trackedLateFee,
+    repaidLateFee: subLoan.state.repaidLateFee,
     discountLateFee: subLoan.state.discountLateFee,
+
+    outstandingBalance: calculateOutstandingBalance(subLoan),
   };
 }
 
@@ -693,22 +727,28 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
 
   let totalBorrowedAmount = 0n;
   let totalAddonAmount = 0n;
+
   let totalTrackedPrincipal = 0n;
-  let totalTrackedLegalPrincipal = 0n;
-  let totalTrackedRemuneratoryInterest = 0n;
-  let totalTrackedMoratoryInterest = 0n;
-  let totalTrackedLateFee = 0n;
-  let totalOutstandingBalance = 0n;
   let totalRepaidPrincipal = 0n;
-  let totalRepaidLegalPrincipal = 0n;
-  let totalRepaidRemuneratoryInterest = 0n;
-  let totalRepaidMoratoryInterest = 0n;
-  let totalRepaidLateFee = 0n;
   let totalDiscountPrincipal = 0n;
+
+  let totalTrackedLegalPrincipal = 0n;
+  let totalRepaidLegalPrincipal = 0n;
   let totalDiscountLegalPrincipal = 0n;
+
+  let totalTrackedRemuneratoryInterest = 0n;
+  let totalRepaidRemuneratoryInterest = 0n;
   let totalDiscountRemuneratoryInterest = 0n;
+
+  let totalTrackedMoratoryInterest = 0n;
+  let totalRepaidMoratoryInterest = 0n;
   let totalDiscountMoratoryInterest = 0n;
+
+  let totalTrackedLateFee = 0n;
+  let totalRepaidLateFee = 0n;
   let totalDiscountLateFee = 0n;
+
+  let totalOutstandingBalance = 0n;
 
   for (const preview of subLoanPreviews) {
     if (preview.status === SubLoanStatus.Ongoing) {
@@ -724,31 +764,29 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
 
     totalBorrowedAmount += preview.borrowedAmount;
     totalAddonAmount += preview.addonAmount;
+
     if (preview.overdueStatus !== 0) {
       totalTrackedLegalPrincipal += preview.trackedPrincipal;
-    } else {
-      totalTrackedPrincipal += preview.trackedPrincipal;
-    }
-    totalTrackedRemuneratoryInterest += preview.trackedRemuneratoryInterest;
-    totalTrackedMoratoryInterest += preview.trackedMoratoryInterest;
-    totalTrackedLateFee += preview.trackedLateFee;
-    totalOutstandingBalance += preview.outstandingBalance;
-    if (preview.overdueStatus !== 0) {
       totalRepaidLegalPrincipal += preview.repaidPrincipal;
-    } else {
-      totalRepaidPrincipal += preview.repaidPrincipal;
-    }
-    totalRepaidRemuneratoryInterest += preview.repaidRemuneratoryInterest;
-    totalRepaidMoratoryInterest += preview.repaidMoratoryInterest;
-    totalRepaidLateFee += preview.repaidLateFee;
-    if (preview.overdueStatus !== 0) {
       totalDiscountLegalPrincipal += preview.discountPrincipal;
     } else {
+      totalTrackedPrincipal += preview.trackedPrincipal;
+      totalRepaidPrincipal += preview.repaidPrincipal;
       totalDiscountPrincipal += preview.discountPrincipal;
     }
+    totalTrackedRemuneratoryInterest += preview.trackedRemuneratoryInterest;
+    totalRepaidRemuneratoryInterest += preview.repaidRemuneratoryInterest;
     totalDiscountRemuneratoryInterest += preview.discountRemuneratoryInterest;
+
+    totalTrackedMoratoryInterest += preview.trackedMoratoryInterest;
+    totalRepaidMoratoryInterest += preview.repaidMoratoryInterest;
     totalDiscountMoratoryInterest += preview.discountMoratoryInterest;
+
+    totalTrackedLateFee += preview.trackedLateFee;
+    totalRepaidLateFee += preview.repaidLateFee;
     totalDiscountLateFee += preview.discountLateFee;
+
+    totalOutstandingBalance += preview.outstandingBalance;
   }
 
   const lastPreview = subLoanPreviews[subLoanPreviews.length - 1];
@@ -765,22 +803,28 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
     borrower: lastPreview.borrower,
     totalBorrowedAmount,
     totalAddonAmount,
+
     totalTrackedPrincipal,
-    totalTrackedLegalPrincipal,
-    totalTrackedRemuneratoryInterest,
-    totalTrackedMoratoryInterest,
-    totalTrackedLateFee,
-    totalOutstandingBalance,
     totalRepaidPrincipal,
-    totalRepaidLegalPrincipal,
-    totalRepaidRemuneratoryInterest,
-    totalRepaidMoratoryInterest,
-    totalRepaidLateFee,
     totalDiscountPrincipal,
+
+    totalTrackedLegalPrincipal,
+    totalRepaidLegalPrincipal,
     totalDiscountLegalPrincipal,
+
+    totalTrackedRemuneratoryInterest,
+    totalRepaidRemuneratoryInterest,
     totalDiscountRemuneratoryInterest,
+
+    totalTrackedMoratoryInterest,
+    totalRepaidMoratoryInterest,
     totalDiscountMoratoryInterest,
+
+    totalTrackedLateFee,
+    totalRepaidLateFee,
     totalDiscountLateFee,
+
+    totalOutstandingBalance,
   };
 }
 
@@ -792,10 +836,26 @@ async function checkSubLoanInContract(
   const inception = await market.getSubLoanInception(subLoanId);
   const metadata = await market.getSubLoanMetadata(subLoanId);
   const state = await market.getSubLoanState(subLoanId);
-  const preview = await market.getSubLoanPreview(subLoanId, TIMESTAMP_SPECIAL_VALUE_TRACKED, VIEW_FLAGS_DEFAULT);
-  checkEquality(resultToObject(inception), expectedSubLoan.inception, expectedSubLoan.indexInLoan);
-  checkEquality(resultToObject(metadata), expectedSubLoan.metadata, expectedSubLoan.indexInLoan);
-  checkEquality(resultToObject(state), expectedSubLoan.state, expectedSubLoan.indexInLoan);
+  const preview = await market.getSubLoanPreview(
+    subLoanId,
+    TIMESTAMP_SPECIAL_VALUE_TRACKED,
+    VIEW_FLAGS_DEFAULT,
+  );
+  checkEquality(
+    resultToObject(inception),
+    expectedSubLoan.inception,
+    expectedSubLoan.indexInLoan,
+  );
+  checkEquality(
+    resultToObject(metadata),
+    expectedSubLoan.metadata,
+    expectedSubLoan.indexInLoan,
+  );
+  checkEquality(
+    resultToObject(state),
+    expectedSubLoan.state,
+    expectedSubLoan.indexInLoan,
+  );
   checkEquality(
     resultToObject(preview),
     defineExpectedSubLoanPreview(expectedSubLoan),
@@ -803,15 +863,25 @@ async function checkSubLoanInContract(
   );
 }
 
-async function checkLoanInContract(market: Contracts.LendingMarketV2Testable, expectedLoan: Loan) {
+async function checkLoanInContract(
+  market: Contracts.LendingMarketV2Testable,
+  expectedLoan: Loan,
+) {
   const subLoanCount = expectedLoan.subLoans.length;
   for (let i = 0; i < subLoanCount; ++i) {
     await checkSubLoanInContract(market, expectedLoan.subLoans[i]);
   }
 
   const firstSubLoan = expectedLoan.subLoans[0];
-  const loanPreview = await market.getLoanPreview(firstSubLoan.id, TIMESTAMP_SPECIAL_VALUE_TRACKED, VIEW_FLAGS_DEFAULT);
-  checkEquality(resultToObject(loanPreview), defineExpectedLoanPreview(expectedLoan));
+  const loanPreview = await market.getLoanPreview(
+    firstSubLoan.id,
+    TIMESTAMP_SPECIAL_VALUE_TRACKED,
+    VIEW_FLAGS_DEFAULT,
+  );
+  checkEquality(
+    resultToObject(loanPreview),
+    defineExpectedLoanPreview(expectedLoan),
+  );
 }
 
 function applySubLoanRevocation(subLoan: SubLoan, txTimestamp: number) {
@@ -844,20 +914,19 @@ function createTypicalLoanTakingRequest(fixture: Fixture): LoanTakingRequest {
   };
 }
 
-function createTypicalSubLoanTakingRequests(subLoanCount: number): SubLoanTakingRequest[] {
+function createTypicalSubLoanTakingRequests(
+  subLoanCount: number,
+): SubLoanTakingRequest[] {
   const onePercentRate = INTEREST_RATE_FACTOR / 100;
-  return Array.from(
-    { length: subLoanCount },
-    (_, i) => ({
-      borrowedAmount: 1000n * BigInt(i + 1) * 10n ** TOKEN_DECIMALS,
-      addonAmount: 100n * BigInt(i + 1) * 10n ** TOKEN_DECIMALS,
-      duration: 30 * (i + 1),
-      remuneratoryRate: REMUNERATORY_RATE + onePercentRate * (i + 1),
-      moratoryRate: MORATORY_RATE + onePercentRate * (i + 1),
-      lateFeeRate: LATE_FEE_RATE + onePercentRate * (i + 1),
-      graceDiscountRate: GRACE_DISCOUNT_RATE + onePercentRate * (i + 1),
-    }),
-  );
+  return Array.from({ length: subLoanCount }, (_, i) => ({
+    borrowedAmount: 1000n * BigInt(i + 1) * 10n ** TOKEN_DECIMALS,
+    addonAmount: 100n * BigInt(i + 1) * 10n ** TOKEN_DECIMALS,
+    duration: 30 * (i + 1),
+    remuneratoryRate: REMUNERATORY_RATE + onePercentRate * (i + 1),
+    moratoryRate: MORATORY_RATE + onePercentRate * (i + 1),
+    lateFeeRate: LATE_FEE_RATE + onePercentRate * (i + 1),
+    graceDiscountRate: GRACE_DISCOUNT_RATE + onePercentRate * (i + 1),
+  }));
 }
 
 async function takeTypicalLoan(
@@ -1903,9 +1972,10 @@ describe("Contract 'LendingMarket'", () => {
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
               toBytes32(packRates(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanRemuneratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
             );
         }
 
@@ -2154,9 +2224,10 @@ describe("Contract 'LendingMarket'", () => {
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
               toBytes32(packRates(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanRemuneratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
             );
         });
 
@@ -2249,9 +2320,10 @@ describe("Contract 'LendingMarket'", () => {
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
               toBytes32(packRates(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanRemuneratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
             );
         });
 
@@ -2331,9 +2403,10 @@ describe("Contract 'LendingMarket'", () => {
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
               toBytes32(packRates(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanRemuneratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
             );
         });
 
@@ -2404,9 +2477,10 @@ describe("Contract 'LendingMarket'", () => {
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
               toBytes32(packRates(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanRemuneratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
             );
         });
 
@@ -2542,9 +2616,10 @@ describe("Contract 'LendingMarket'", () => {
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
               toBytes32(packRates(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanRemuneratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
             );
         });
 
@@ -2680,9 +2755,10 @@ describe("Contract 'LendingMarket'", () => {
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
               toBytes32(packRates(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanRemuneratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
             );
         });
 
@@ -2818,9 +2894,10 @@ describe("Contract 'LendingMarket'", () => {
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
               toBytes32(packRates(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanRemuneratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
             );
         });
 
@@ -2956,9 +3033,10 @@ describe("Contract 'LendingMarket'", () => {
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
               toBytes32(packRates(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanRemuneratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
             );
         });
 
@@ -3094,9 +3172,10 @@ describe("Contract 'LendingMarket'", () => {
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
               toBytes32(packRates(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanRemuneratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
             );
 
           await expect(tx).not.to.emit(market, EVENT_NAME_OPERATION_PENDED);
@@ -3293,9 +3372,10 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.metadata.updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
               toBytes32(packRates(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanRemuneratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
             );
         });
 
@@ -3512,9 +3592,10 @@ describe("Contract 'LendingMarket'", () => {
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
               toBytes32(packRates(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanRemuneratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
             );
         });
 

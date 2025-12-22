@@ -551,19 +551,25 @@ contract LendingMarketV2 is
         preview.moratoryRate = subLoan.moratoryRate;
         preview.lateFeeRate = subLoan.lateFeeRate;
         preview.graceDiscountRate = subLoan.graceDiscountRate;
+
         preview.trackedPrincipal = subLoan.trackedPrincipal;
-        preview.trackedRemuneratoryInterest = subLoan.trackedRemuneratoryInterest;
-        preview.trackedMoratoryInterest = subLoan.trackedMoratoryInterest;
-        preview.trackedLateFee = subLoan.trackedLateFee;
-        preview.outstandingBalance = _calculateOutstandingBalance(subLoan);
         preview.repaidPrincipal = subLoan.repaidPrincipal;
-        preview.repaidRemuneratoryInterest = subLoan.repaidRemuneratoryInterest;
-        preview.repaidMoratoryInterest = subLoan.repaidMoratoryInterest;
-        preview.repaidLateFee = subLoan.repaidLateFee;
         preview.discountPrincipal = subLoan.discountPrincipal;
+
+        preview.trackedRemuneratoryInterest = subLoan.trackedRemuneratoryInterest;
+        preview.repaidRemuneratoryInterest = subLoan.repaidRemuneratoryInterest;
         preview.discountRemuneratoryInterest = subLoan.discountRemuneratoryInterest;
+
+        preview.trackedMoratoryInterest = subLoan.trackedMoratoryInterest;
+        preview.repaidMoratoryInterest = subLoan.repaidMoratoryInterest;
         preview.discountMoratoryInterest = subLoan.discountMoratoryInterest;
+
+        preview.trackedLateFee = subLoan.trackedLateFee;
+        preview.repaidLateFee = subLoan.repaidLateFee;
         preview.discountLateFee = subLoan.discountLateFee;
+
+        preview.outstandingBalance = _calculateOutstandingBalance(subLoan);
+
         return preview;
     }
 
@@ -627,31 +633,31 @@ contract LendingMarketV2 is
             }
             preview.totalBorrowedAmount += singleLoanPreview.borrowedAmount;
             preview.totalAddonAmount += singleLoanPreview.addonAmount;
+
             if (singleLoanPreview.overdueStatus != 0) {
                 preview.totalTrackedLegalPrincipal += singleLoanPreview.trackedPrincipal;
-            } else {
-                preview.totalTrackedPrincipal += singleLoanPreview.trackedPrincipal;
-            }
-            preview.totalTrackedRemuneratoryInterest += singleLoanPreview.trackedRemuneratoryInterest;
-            preview.totalTrackedMoratoryInterest += singleLoanPreview.trackedMoratoryInterest;
-            preview.totalTrackedLateFee += singleLoanPreview.trackedLateFee;
-            preview.totalOutstandingBalance += singleLoanPreview.outstandingBalance;
-            if (singleLoanPreview.overdueStatus != 0) {
                 preview.totalRepaidLegalPrincipal += singleLoanPreview.repaidPrincipal;
-            } else {
-                preview.totalRepaidPrincipal += singleLoanPreview.repaidPrincipal;
-            }
-            preview.totalRepaidRemuneratoryInterest += singleLoanPreview.repaidRemuneratoryInterest;
-            preview.totalRepaidMoratoryInterest += singleLoanPreview.repaidMoratoryInterest;
-            preview.totalRepaidLateFee += singleLoanPreview.repaidLateFee;
-            if (singleLoanPreview.overdueStatus != 0) {
                 preview.totalDiscountLegalPrincipal += singleLoanPreview.discountPrincipal;
             } else {
+                preview.totalTrackedPrincipal += singleLoanPreview.trackedPrincipal;
+                preview.totalRepaidPrincipal += singleLoanPreview.repaidPrincipal;
                 preview.totalDiscountPrincipal += singleLoanPreview.discountPrincipal;
             }
+
+            preview.totalTrackedRemuneratoryInterest += singleLoanPreview.trackedRemuneratoryInterest;
+            preview.totalRepaidRemuneratoryInterest += singleLoanPreview.repaidRemuneratoryInterest;
             preview.totalDiscountRemuneratoryInterest += singleLoanPreview.discountRemuneratoryInterest;
+
+            preview.totalTrackedMoratoryInterest += singleLoanPreview.trackedMoratoryInterest;
+            preview.totalRepaidMoratoryInterest += singleLoanPreview.repaidMoratoryInterest;
             preview.totalDiscountMoratoryInterest += singleLoanPreview.discountMoratoryInterest;
+
+            preview.totalTrackedLateFee += singleLoanPreview.trackedLateFee;
+            preview.totalRepaidLateFee += singleLoanPreview.repaidLateFee;
             preview.totalDiscountLateFee += singleLoanPreview.discountLateFee;
+
+            preview.totalOutstandingBalance += singleLoanPreview.outstandingBalance;
+
             unchecked {
                 ++subLoanId;
             }

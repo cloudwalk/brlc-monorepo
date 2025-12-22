@@ -19,6 +19,11 @@
    The structure now includes `totalTrackedLegalPrincipal`, `totalRepaidLegalPrincipal`, and `totalDiscountLegalPrincipal` fields.
    For overdue sub-loans (when `overdueStatus != 0`), principal amounts are tracked in the legal principal fields instead of the regular principal fields.
    Legal principal represents the principal after the due date, which includes the initial principal plus the remuneratory interest that was capitalized into principal at the due date.
+7. The sub-loan parts have been regrouped in storage slots, view structures and event packed fields as follows:
+   - principal: `trackedPrincipal`, `repaidPrincipal`, `discountPrincipal`;
+   - remuneratory interest: `trackedRemuneratoryInterest`, `repaidRemuneratoryInterest`, `discountRemuneratoryInterest`;
+   - moratory interest: `trackedMoratoryInterest`, `repaidMoratoryInterest`, `discountMoratoryInterest`;
+   - late fee: `trackedLateFee`, `repaidLateFee`, `discountLateFee`.
 
 # 2.0.0
 

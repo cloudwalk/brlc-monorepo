@@ -353,21 +353,27 @@ contract LendingEngineV2 is
 
             // State fields, slot 2
             subLoan.state.trackedPrincipal = uint64(principal);
-            // subLoan.state.trackedRemuneratoryInterest= 0;
-            // subLoan.state.trackedMoratoryInterest= 0;
-            // subLoan.state.trackedLateFee= 0;
+            // subLoan.state.repaidPrincipal = 0;
+            // subLoan.state.discountPrincipal = 0;
+            // subLoan.state._reserved1 = 0;
 
             // State fields, slot 3
-            // subLoan.state.repaidPrincipal= 0;
-            // subLoan.state.repaidRemuneratoryInterest= 0;
-            // subLoan.state.repaidMoratoryInterest= 0;
-            // subLoan.state.repaidLateFee= 0;
+            // subLoan.state.trackedRemuneratoryInterest = 0;
+            // subLoan.state.repaidRemuneratoryInterest = 0;
+            // subLoan.state.discountRemuneratoryInterest = 0;
+            // subLoan.state._reserved2 = 0;
 
             // State fields, slot 4
-            // subLoan.state.discountPrincipal= 0;
-            // subLoan.state.discountRemuneratoryInterest= 0;
-            // subLoan.state.discountMoratoryInterest= 0;
-            // subLoan.state.discountLateFee= 0;
+            // subLoan.state.trackedMoratoryInterest = 0;
+            // subLoan.state.repaidMoratoryInterest = 0;
+            // subLoan.state.discountMoratoryInterest = 0;
+            // subLoan.state._reserved3 = 0;
+
+            // State fields, slot 5
+            // subLoan.state.trackedLateFee = 0;
+            // subLoan.state.repaidLateFee = 0;
+            // subLoan.state.discountLateFee = 0;
+            // subLoan.state._reserved4 = 0;
 
             // Metadata fields
             // subLoan.metadata.subLoanIndex = 0;
@@ -868,17 +874,23 @@ contract LendingEngineV2 is
         subLoan.moratoryRate = storedSubLoan.inception.initialMoratoryRate;
         subLoan.lateFeeRate = storedSubLoan.inception.initialLateFeeRate;
         subLoan.graceDiscountRate = storedSubLoan.inception.initialGraceDiscountRate;
+
         subLoan.trackedPrincipal = storedSubLoan.inception.borrowedAmount + storedSubLoan.inception.addonAmount;
-        subLoan.trackedRemuneratoryInterest = 0;
-        subLoan.trackedMoratoryInterest = 0;
-        subLoan.trackedLateFee = 0;
         subLoan.repaidPrincipal = 0;
+        subLoan.discountPrincipal = 0;
+
+        subLoan.trackedRemuneratoryInterest = 0;
         subLoan.repaidRemuneratoryInterest = 0;
-        subLoan.repaidMoratoryInterest = 0;
-        subLoan.repaidLateFee = 0;
         subLoan.discountRemuneratoryInterest = 0;
+
+        subLoan.trackedMoratoryInterest = 0;
+        subLoan.repaidMoratoryInterest = 0;
         subLoan.discountMoratoryInterest = 0;
+
+        subLoan.trackedLateFee = 0;
+        subLoan.repaidLateFee = 0;
         subLoan.discountLateFee = 0;
+
         subLoan.trackedTimestamp = subLoan.startTimestamp;
         subLoan.freezeTimestamp = 0;
 
@@ -1043,8 +1055,6 @@ contract LendingEngineV2 is
      * @dev Emits a sub-loan update event with packed parameters and increments the update index.
      */
     function _emitUpdateEvent(ProcessingSubLoan memory subLoan, SubLoan storage storedSubLoan) internal {
-        uint256 storedPackedTrackedParts = _packTrackedParts(subLoan);
-
         uint256 packedParameters = ((uint256(subLoan.status) & type(uint8).max) << 0) +
             ((uint256(0) & type(uint8).max) << 8) + // reserve for future usage
             ((uint256(subLoan.duration) & type(uint16).max) << 16) +
@@ -1056,6 +1066,7 @@ contract LendingEngineV2 is
             ((uint256(storedSubLoan.metadata.earliestOperationId) & type(uint16).max) << 176) +
             ((uint256(storedSubLoan.metadata.recentOperationId) & type(uint16).max) << 192) +
             ((uint256(storedSubLoan.metadata.latestOperationId) & type(uint16).max) << 208);
+
         uint256 packedRates = _packRates(
             subLoan.remuneratoryRate,
             subLoan.moratoryRate,
@@ -1068,9 +1079,10 @@ contract LendingEngineV2 is
             storedSubLoan.metadata.updateIndex,
             bytes32(packedParameters),
             bytes32(packedRates),
-            bytes32(_packRepaidParts(subLoan)),
-            bytes32(_packDiscountParts(subLoan)),
-            bytes32(storedPackedTrackedParts)
+            bytes32(_packPrincipalParts(subLoan)),
+            bytes32(_packRemuneratoryInterestParts(subLoan)),
+            bytes32(_packMoratoryInterestParts(subLoan)),
+            bytes32(_packLateFeeParts(subLoan))
         );
 
         // No custom error is introduced because index overflow is not possible due to the overall contract logic
@@ -1729,64 +1741,71 @@ contract LendingEngineV2 is
     }
 
     /**
-     * @dev Packs four 64-bit amount parts into a single 256-bit value.
+     * @dev Packs three 64-bit amount parts into a single 256-bit value.
      *
      * The packed amount parts of a sub-loan is a bitfield with the following bits:
      *
-     * - 64 bits from 0 to 63: the principal.
-     * - 64 bits from 64 to 127: the remuneratory interest.
-     * - 64 bits from 128 to 191: the moratory interest.
-     * - 64 bits from 192 to 255: the late fee.
+     * - 64 bits from   0 to  63: the tracked amount of the part
+     * - 64 bits from  64 to 127: the repaid amount of the part
+     * - 64 bits from 128 to 191: the discount amount of the part
+     * - 64 bits from 192 to 255: reserved for future usage
      */
     function _packAmountParts(
-        uint256 part1,
-        uint256 part2,
-        uint256 part3,
-        uint256 part4
+        uint256 partTracked,
+        uint256 partRepaid,
+        uint256 partDiscount
     ) internal pure returns (uint256) {
         return
-            (part1 & type(uint64).max) |
-            ((part2 & type(uint64).max) << 64) |
-            ((part3 & type(uint64).max) << 128) |
-            ((part4 & type(uint64).max) << 192);
+            (partTracked & type(uint64).max) |
+            ((partRepaid & type(uint64).max) << 64) |
+            ((partDiscount & type(uint64).max) << 128);
     }
 
     /**
-     * @dev Packs the repaid amount parts (principal, remuneratory, moratory, late fee) into a single value.
+     * @dev Packs the principal parts (tracked, repaid, discount) into a single value.
      */
-    function _packRepaidParts(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
+    function _packPrincipalParts(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
         return
             _packAmountParts(
+                subLoan.trackedPrincipal, // Tools: prevent Prettier one-liner
                 subLoan.repaidPrincipal,
-                subLoan.repaidRemuneratoryInterest,
-                subLoan.repaidMoratoryInterest,
-                subLoan.repaidLateFee
+                subLoan.discountPrincipal
             );
     }
 
     /**
-     * @dev Packs the discount amount parts (principal, remuneratory, moratory, late fee) into a single value.
+     * @dev Packs the remuneratory interest parts (tracked, repaid, discount) into a single value.
      */
-    function _packDiscountParts(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
+    function _packRemuneratoryInterestParts(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
         return
             _packAmountParts(
-                subLoan.discountPrincipal,
-                subLoan.discountRemuneratoryInterest,
-                subLoan.discountMoratoryInterest,
-                subLoan.discountLateFee
-            );
-    }
-
-    /**
-     * @dev Packs the tracked amount parts (principal, remuneratory, moratory, late fee) into a single value.
-     */
-    function _packTrackedParts(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
-        return
-            _packAmountParts(
-                subLoan.trackedPrincipal,
                 subLoan.trackedRemuneratoryInterest,
+                subLoan.repaidRemuneratoryInterest,
+                subLoan.discountRemuneratoryInterest
+            );
+    }
+
+    /**
+     * @dev Packs the moratory interest parts (tracked, repaid, discount) into a single value.
+     */
+    function _packMoratoryInterestParts(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
+        return
+            _packAmountParts(
                 subLoan.trackedMoratoryInterest,
-                subLoan.trackedLateFee
+                subLoan.repaidMoratoryInterest,
+                subLoan.discountMoratoryInterest
+            );
+    }
+
+    /**
+     * @dev Packs the late fee parts (tracked, repaid, discount) into a single value.
+     */
+    function _packLateFeeParts(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
+        return
+            _packAmountParts(
+                subLoan.trackedLateFee, // Tools: prevent Prettier one-liner
+                subLoan.repaidLateFee,
+                subLoan.discountLateFee
             );
     }
 

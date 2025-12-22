@@ -280,17 +280,21 @@ interface ILendingMarketV2Types {
      * - lateFeeRate ------------------- The late fee rate of the sub-loan.
      * - graceDiscountRate ------------- The grace discount rate of the sub-loan.
      * - trackedPrincipal -------------- The tracked principal of the sub-loan, remaining to be repaid.
-     * - trackedRemuneratoryInterest --- The tracked remuneratory interest of the sub-loan, remaining to be repaid.
-     * - trackedMoratoryInterest ------- The tracked moratory interest of the sub-loan, remaining to be repaid.
-     * - trackedLateFee ---------------- The tracked late fee of the sub-loan, remaining to be repaid.
      * - repaidPrincipal --------------- The repaid principal of the sub-loan.
-     * - repaidRemuneratoryInterest ---- The repaid remuneratory interest of the sub-loan.
-     * - repaidMoratoryInterest -------- The repaid moratory interest of the sub-loan.
-     * - repaidLateFee ----------------- The repaid late fee of the sub-loan.
      * - discountPrincipal ------------- The discount principal of the sub-loan.
+     * - _reserved1 -------------------- Reserved for future use.
+     * - trackedRemuneratoryInterest --- The tracked remuneratory interest of the sub-loan, remaining to be repaid.
+     * - repaidRemuneratoryInterest ---- The repaid remuneratory interest of the sub-loan.
      * - discountRemuneratoryInterest -- The discount remuneratory interest of the sub-loan.
+     * - _reserved2 -------------------- Reserved for future use.
+     * - trackedMoratoryInterest ------- The tracked moratory interest of the sub-loan, remaining to be repaid.
+     * - repaidMoratoryInterest -------- The repaid moratory interest of the sub-loan.
      * - discountMoratoryInterest ------ The discount moratory interest of the sub-loan.
+     * - _reserved3 -------------------- Reserved for future use.
+     * - trackedLateFee ---------------- The tracked late fee of the sub-loan, remaining to be repaid.
+     * - repaidLateFee ----------------- The repaid late fee of the sub-loan.
      * - discountLateFee --------------- The discount late fee of the sub-loan.
+     * - _reserved4 -------------------- Reserved for future use.
      *
      * Notes:
      *
@@ -341,25 +345,32 @@ interface ILendingMarketV2Types {
         uint32 graceDiscountRate;
         // uint32 __reserved; // Reserved until the end of the storage slot
 
-        // Slot 2 -- Forms the tracked balance
+        // Slot 2 -- The principal related parts
         uint64 trackedPrincipal;
-        uint64 trackedRemuneratoryInterest;
-        uint64 trackedMoratoryInterest;
-        uint64 trackedLateFee;
-        // No reserve until the end of the storage slot
-
-        // Slot 3 -- Forms the repaid amount
         uint64 repaidPrincipal;
-        uint64 repaidRemuneratoryInterest;
-        uint64 repaidMoratoryInterest;
-        uint64 repaidLateFee;
+        uint64 discountPrincipal;
+        uint64 _reserved1;
         // No reserve until the end of the storage slot
 
-        // Slot 4 -- Forms the discount amount
-        uint64 discountPrincipal;
+        // Slot 3 -- The remuneratory interest related parts
+        uint64 trackedRemuneratoryInterest;
+        uint64 repaidRemuneratoryInterest;
         uint64 discountRemuneratoryInterest;
+        uint64 _reserved2;
+        // No reserve until the end of the storage slot
+
+        // Slot 4 -- The moratory interest related parts
+        uint64 trackedMoratoryInterest;
+        uint64 repaidMoratoryInterest;
         uint64 discountMoratoryInterest;
+        uint64 _reserved3;
+        // No reserve until the end of the storage slot
+
+        // Slot 5 -- The late fee related parts
+        uint64 trackedLateFee;
+        uint64 repaidLateFee;
         uint64 discountLateFee;
+        uint64 _reserved4;
         // No reserve until the end of the storage slot
     }
 
@@ -423,16 +434,16 @@ interface ILendingMarketV2Types {
      * - lateFeeRate ------------------- The late fee rate of the sub-loan.
      * - graceDiscountRate ------------- The grace discount rate of the sub-loan.
      * - trackedPrincipal -------------- The tracked principal of the sub-loan, remaining to be repaid.
-     * - trackedRemuneratoryInterest --- The tracked remuneratory interest of the sub-loan, remaining to be repaid.
-     * - trackedMoratoryInterest ------- The tracked moratory interest of the sub-loan, remaining to be repaid.
-     * - trackedLateFee ---------------- The tracked late fee of the sub-loan, remaining to be repaid.
      * - repaidPrincipal --------------- The repaid principal of the sub-loan.
-     * - repaidRemuneratoryInterest ---- The repaid remuneratory interest of the sub-loan.
-     * - repaidMoratoryInterest -------- The repaid moratory interest of the sub-loan.
-     * - repaidLateFee ----------------- The repaid late fee of the sub-loan.
      * - discountPrincipal ------------- The discount principal of the sub-loan.
+     * - trackedRemuneratoryInterest --- The tracked remuneratory interest of the sub-loan, remaining to be repaid.
      * - discountRemuneratoryInterest -- The discount remuneratory interest of the sub-loan.
+     * - repaidRemuneratoryInterest ---- The repaid remuneratory interest of the sub-loan.
+     * - trackedMoratoryInterest ------- The tracked moratory interest of the sub-loan, remaining to be repaid.
+     * - repaidMoratoryInterest -------- The repaid moratory interest of the sub-loan.
      * - discountMoratoryInterest ------ The discount moratory interest of the sub-loan.
+     * - trackedLateFee ---------------- The tracked late fee of the sub-loan, remaining to be repaid`.
+     * - repaidLateFee ----------------- The repaid late fee of the sub-loan.
      * - discountLateFee --------------- The discount late fee of the sub-loan.
      * 
      * See notes for the appropriate fields in comments for the storage sub-loan structures above:
@@ -460,18 +471,19 @@ interface ILendingMarketV2Types {
         uint256 graceDiscountRate;
 
         uint256 trackedPrincipal;
-        uint256 trackedRemuneratoryInterest;
-        uint256 trackedMoratoryInterest;
-        uint256 trackedLateFee;
-
         uint256 repaidPrincipal;
-        uint256 repaidRemuneratoryInterest;
-        uint256 repaidMoratoryInterest;
-        uint256 repaidLateFee;
-
         uint256 discountPrincipal;
+
+        uint256 trackedRemuneratoryInterest;
+        uint256 repaidRemuneratoryInterest;
         uint256 discountRemuneratoryInterest;
+
+        uint256 trackedMoratoryInterest;
+        uint256 repaidMoratoryInterest;
         uint256 discountMoratoryInterest;
+
+        uint256 trackedLateFee;
+        uint256 repaidLateFee;
         uint256 discountLateFee;
     }
 
@@ -507,18 +519,18 @@ interface ILendingMarketV2Types {
      * - lateFeeRate ------------------- The late fee rate of the sub-loan.
      * - graceDiscountRate ------------- The grace discount rate of the sub-loan.
      * - trackedPrincipal -------------- The tracked principal of the sub-loan, remaining to be repaid.
-     * - trackedRemuneratoryInterest --- The tracked remuneratory interest of the sub-loan, remaining to be repaid.
-     * - trackedMoratoryInterest ------- The tracked moratory interest of the sub-loan, remaining to be repaid.
-     * - trackedLateFee ---------------- The tracked late fee of the sub-loan, remaining to be repaid.
-     * - outstandingBalance ------------ The outstanding balance of the sub-loan, see notes below.
      * - repaidPrincipal --------------- The repaid principal of the sub-loan.
-     * - repaidRemuneratoryInterest ---- The repaid remuneratory interest of the sub-loan.
-     * - repaidMoratoryInterest -------- The repaid moratory interest of the sub-loan.
-     * - repaidLateFee ----------------- The repaid late fee of the sub-loan.
      * - discountPrincipal ------------- The discount principal of the sub-loan.
+     * - trackedRemuneratoryInterest --- The tracked remuneratory interest of the sub-loan, remaining to be repaid.
+     * - repaidRemuneratoryInterest ---- The repaid remuneratory interest of the sub-loan.
      * - discountRemuneratoryInterest -- The discount remuneratory interest of the sub-loan.
+     * - trackedMoratoryInterest ------- The tracked moratory interest of the sub-loan, remaining to be repaid.
+     * - repaidMoratoryInterest -------- The repaid moratory interest of the sub-loan.
      * - discountMoratoryInterest ------ The discount moratory interest of the sub-loan.
+     * - trackedLateFee ---------------- The tracked late fee of the sub-loan, remaining to be repaid.
+     * - repaidLateFee ----------------- The repaid late fee of the sub-loan.
      * - discountLateFee --------------- The discount late fee of the sub-loan.
+     * - outstandingBalance ------------ The outstanding balance of the sub-loan, see notes below.
      *
      * Notes:
      *
@@ -553,6 +565,7 @@ interface ILendingMarketV2Types {
         uint256 latestOperationId;
         uint256 status;
         uint256 gracePeriodStatus;
+        // TODO: Consider removing this field
         uint256 overdueStatus;
 
         uint256 programId;
@@ -572,20 +585,22 @@ interface ILendingMarketV2Types {
         uint256 graceDiscountRate;
 
         uint256 trackedPrincipal;
-        uint256 trackedRemuneratoryInterest;
-        uint256 trackedMoratoryInterest;
-        uint256 trackedLateFee;
-        uint256 outstandingBalance;
-
         uint256 repaidPrincipal;
-        uint256 repaidRemuneratoryInterest;
-        uint256 repaidMoratoryInterest;
-        uint256 repaidLateFee;
-
         uint256 discountPrincipal;
+
+        uint256 trackedRemuneratoryInterest;
+        uint256 repaidRemuneratoryInterest;
         uint256 discountRemuneratoryInterest;
+
+        uint256 trackedMoratoryInterest;
+        uint256 repaidMoratoryInterest;
         uint256 discountMoratoryInterest;
+
+        uint256 trackedLateFee;
+        uint256 repaidLateFee;
         uint256 discountLateFee;
+
+        uint256 outstandingBalance;
     }
 
     /**
@@ -607,21 +622,21 @@ interface ILendingMarketV2Types {
      * - totalBorrowedAmount ---------------- The total borrowed amount of the loan over all sub-loans.
      * - totalAddonAmount ------------------- The total addon amount of the loan over all sub-loans.
      * - totalTrackedPrincipal -------------- The total tracked principal of the loan over all sub-loans.
-     * - totalTrackedLegalPrincipal --------- The total tracked legal principal of the loan over all sub-loans.
-     * - totalTrackedRemuneratoryInterest --- The total tracked remuneratory interest of the loan over all sub-loans.
-     * - totalTrackedMoratoryInterest ------- The total tracked moratory interest of the loan over all sub-loans.
-     * - totalTrackedLateFee ---------------- The total tracked late fee of the loan over all sub-loans.
-     * - totalOutstandingBalance ------------ The total outstanding balance of the loan over all sub-loans.
      * - totalRepaidPrincipal --------------- The total repaid principal of the loan over all sub-loans.
-     * - totalRepaidLegalPrincipal ----------- The total repaid legal principal of the loan over all sub-loans.
-     * - totalRepaidRemuneratoryInterest ---- The total repaid remuneratory interest of the loan over all sub-loans.
-     * - totalRepaidMoratoryInterest -------- The total repaid moratory interest of the loan over all sub-loans.
-     * - totalRepaidLateFee ----------------- The total repaid late fee of the loan over all sub-loans.
      * - totalDiscountPrincipal ------------- The total discount principal of the loan over all sub-loans.
+     * - totalTrackedLegalPrincipal --------- The total tracked legal principal of the loan over all sub-loans.
+     * - totalRepaidLegalPrincipal ----------- The total repaid legal principal of the loan over all sub-loans.
      * - totalDiscountLegalPrincipal --------- The total discount legal principal of the loan over all sub-loans.
+     * - totalTrackedRemuneratoryInterest --- The total tracked remuneratory interest of the loan over all sub-loans.
+     * - totalRepaidRemuneratoryInterest ---- The total repaid remuneratory interest of the loan over all sub-loans.
      * - totalDiscountRemuneratoryInterest -- The total discount remuneratory interest of the loan over all sub-loans.
+     * - totalTrackedMoratoryInterest ------- The total tracked moratory interest of the loan over all sub-loans.
+     * - totalRepaidMoratoryInterest -------- The total repaid moratory interest of the loan over all sub-loans.
      * - totalDiscountMoratoryInterest ------ The total discount moratory interest of the loan over all sub-loans.
+     * - totalTrackedLateFee ---------------- The total tracked late fee of the loan over all sub-loans.
+     * - totalRepaidLateFee ----------------- The total repaid late fee of the loan over all sub-loans.
      * - totalDiscountLateFee --------------- The total discount late fee of the loan over all sub-loans.
+     * - totalOutstandingBalance ------------ The total outstanding balance of the loan over all sub-loans.
      *
      * Notes:
      *
@@ -657,23 +672,26 @@ interface ILendingMarketV2Types {
         uint256 totalAddonAmount;
 
         uint256 totalTrackedPrincipal;
-        uint256 totalTrackedLegalPrincipal;
-        uint256 totalTrackedRemuneratoryInterest;
-        uint256 totalTrackedMoratoryInterest;
-        uint256 totalTrackedLateFee;
-        uint256 totalOutstandingBalance;
-
         uint256 totalRepaidPrincipal;
-        uint256 totalRepaidLegalPrincipal;
-        uint256 totalRepaidRemuneratoryInterest;
-        uint256 totalRepaidMoratoryInterest;
-        uint256 totalRepaidLateFee;
-
         uint256 totalDiscountPrincipal;
+
+        uint256 totalTrackedLegalPrincipal;
+        uint256 totalRepaidLegalPrincipal;
         uint256 totalDiscountLegalPrincipal;
+
+        uint256 totalTrackedRemuneratoryInterest;
+        uint256 totalRepaidRemuneratoryInterest;
         uint256 totalDiscountRemuneratoryInterest;
+
+        uint256 totalTrackedMoratoryInterest;
+        uint256 totalRepaidMoratoryInterest;
         uint256 totalDiscountMoratoryInterest;
+
+        uint256 totalTrackedLateFee;
+        uint256 totalRepaidLateFee;
         uint256 totalDiscountLateFee;
+
+        uint256 totalOutstandingBalance;
     }
 
     /**
@@ -950,53 +968,34 @@ interface ILendingMarketV2PrimaryEvents is ILendingMarketV2Types {
      *
      * 2. The `packedRates` value is a bitfield described in the comments for the `SubLoanTaken` event.
      *
-     * 3. Any `...packed...Parts` value is a bitfield with the following bits:
+     * 3. Any `packed<Name>Parts` value is a bitfield of the `<Name>` part of the sub-loan with the following bits:
      *
-     * - 64 bits from   0 to  63: related to the principal.
-     * - 64 bits from  64 to 127: related to the remuneratory interest.
-     * - 64 bits from 128 to 191: related to the moratory interest.
-     * - 64 bits from 192 to 255: related to the late fee.
+     * - 64 bits from   0 to  63: related to the tracked amount of the part
+     * - 64 bits from  64 to 127: related to the repaid amount of the part
+     * - 64 bits from 128 to 191: related to the discount amount of the part
+     * - 64 bits from 192 to 255: reserved for future usage
      *
-     * 4. The cumulative unrounded value of any packed parts can be calculated using the following function:
-     *     ```
-     *     function _calculateSumAmountByParts(uint256 packedParts) {
-     *         return
-     *             ((packedParts >>   0) & type(uint64).max) +
-     *             ((packedParts >>  64) & type(uint64).max) +
-     *             ((packedParts >> 128) & type(uint64).max) +
-     *             ((packedParts >> 192) & type(uint64).max)
-     *     }
-     *     ```
-     *
-     * 5. The cumulative rounded value of any packed parts can be calculated using the following function:
-     *     ```
-     *     function _calculateRoundedSumAmountByParts(uint256 packedParts) {
-     *         return
-     *             round((packedParts >>   0) & type(uint64).max) +
-     *             round((packedParts >>  64) & type(uint64).max) +
-     *             round((packedParts >> 128) & type(uint64).max) +
-     *             round((packedParts >> 192) & type(uint64).max)
-     *     }
-     *     ```
-     *
-     * 6. The update index is incremented by one for each update event of the sub-loan.
+     * 4. The update index is incremented by one for each update event of the sub-loan.
      *
      * @param subLoanId The unique identifier of the sub-loan.
      * @param updateIndex The sequence index of the update event for the sub-loan.
      * @param packedParameters The packed parameters of the sub-loan, see notes above.
      * @param packedRates The packed rates of the sub-loan, see notes above.
-     * @param packedRepaidParts The packed repaid parts of the sub-loan, see notes above.
-     * @param packedDiscountParts The packed discount parts of the sub-loan, see notes above.
-     * @param packedTrackedParts The packed tracked parts of the sub-loan at the stored tracked timestamp.
+     * @param packedPrincipalParts The packed principal parts at the stored tracked timestamp, see notes above.
+     * @param packedRemuneratoryInterestParts The packed remuneratory interest parts at the stored tracked timestamp.
+     * @param packedMoratoryInterestParts The packed moratory interest parts at the stored tracked timestamp.
+     * @param packedLateFeeParts The packed late fee parts at the stored tracked timestamp.
      */
+    // TODO: add the overdue status to the packedParameters
     event SubLoanUpdated(
         uint256 indexed subLoanId, // Tools: prevent Prettier one-liner
         uint256 indexed updateIndex,
         bytes32 packedParameters,
         bytes32 packedRates,
-        bytes32 packedRepaidParts,
-        bytes32 packedDiscountParts,
-        bytes32 packedTrackedParts
+        bytes32 packedPrincipalParts,
+        bytes32 packedRemuneratoryInterestParts,
+        bytes32 packedMoratoryInterestParts,
+        bytes32 packedLateFeeParts
     );
 
     /**

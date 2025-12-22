@@ -277,6 +277,7 @@
     * 0.004999 => 0.01,
     * 0.000001 => 0.01,
     * 0.000000 => 0.00.
+15. When a sub-loan becomes overdue (after its due date), the remuneratory interest accrued before the due date is automatically capitalized into the principal, converting it to a "legal principal". This capitalization occurs automatically during sub-loan processing when the due date is crossed. The capitalization process transfers all remuneratory interest amounts (tracked, repaid, and discounted) to the corresponding principal parts, then resets the remuneratory interest tracking to zero to start tracking only new interest accrued after the due date. After capitalization, for overdue sub-loans, the principal fields represent the legal principal (original principal plus capitalized interest), while the remuneratory interest fields track only interest accrued after the due date. For non-overdue sub-loans, principal and interest continue to be tracked separately. The loan preview structure provides separate aggregation totals for legal principal (overdue sub-loans) and standard principal (non-overdue sub-loans) to enable accurate reporting of both loan states.
 
 
 ## Credit Line V2

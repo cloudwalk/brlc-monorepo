@@ -308,6 +308,25 @@ interface ILendingMarketV2Types {
      * 5. All rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
      * 6. All fields related to tracked, repaid, and discount amounts are not financially rounded
      *    according to the ACCURACY_FACTOR, see the `Constants` contract.
+     * 7. Just after the due date the remuneratory interest is capitalized into the legal principal:
+     *    - the remuneratory interest parts are added to the principal parts:
+     *      trackedPrincipal += trackedRemuneratoryInterest,
+     *      repaidPrincipal += repaidRemuneratoryInterest,
+     *      discountPrincipal += discountRemuneratoryInterest,
+     *    - the remuneratory interest parts are reset to 0 to track the them after the due date,
+     *      trackedRemuneratoryInterest = 0,
+     *      repaidRemuneratoryInterest = 0,
+     *      discountRemuneratoryInterest = 0.
+     * 8. The logic from the previous point changes the meaning of the principal and remuneratory interest parts
+     *    as follows after the due date:
+     *    - `trackedPrincipal` corresponds to the legal principal remaining to be repaid,
+     *      that includes the initial principal and the remuneratory interest remaining to be repaid at the end of the due date;
+     *    - `repaidPrincipal` corresponds to the legal principal that is repaid only after the due date;
+     *    - `discountPrincipal` corresponds to the legal principal that is discounted only after the due date;
+     *    - `trackedRemuneratoryInterest` corresponds to the remuneratory interest that is accrued and
+     *       remaining to be repaid after the due date;
+     *    - `repaidRemuneratoryInterest` corresponds to the remuneratory interest that is repaid only after the due date;
+     *    - `discountRemuneratoryInterest` corresponds to the remuneratory interest that is discounted only after the due date.
      */
     struct SubLoanState {
         // Slot 1 -- Frequently used data for reading and writing
@@ -382,7 +401,7 @@ interface ILendingMarketV2Types {
 
     /**
     /**
-     * @dev Defines the data of a sub-loan, used during the sub-loan processing and previewing.
+     * @dev Defines the data of a sub-loan, used internally during the sub-loan processing and previewing.
      * 
      * This structure is intended for in-memory use only.
      * 
@@ -473,6 +492,7 @@ interface ILendingMarketV2Types {
      * - latestOperationId ------------- The ID of the latest submitted operation of the sub-loan.
      * - status ------------------------ The status of the sub-loan.
      * - gracePeriodStatus ------------- The status of the grace period of the sub-loan.
+     * - overdueStatus ----------------- The overdue status of the sub-loan: 0 -- not overdue, 1 -- overdue.
      * - programId --------------------- The ID of the lending program used to take the sub-loan.
      * - borrower ---------------------- The address of the borrower.
      * - borrowedAmount ---------------- The borrowed amount of the sub-loan.
@@ -513,7 +533,10 @@ interface ILendingMarketV2Types {
      * 3. The `outstandingBalance` fields is financially rounded according to the ACCURACY_FACTOR,
      *    see the `Constants` contract.
      *    All other fields related to tracked, repaid, and discount amounts are not financially rounded.
-     * 4. See also notes for the appropriate fields in comments for the storage sub-loan structures above:
+     * 4. The meaning of the principal and remuneratory interest parts depends on the sub-loan overdue status:
+     *    - if the sub-loan is not overdue, then the principal and remuneratory interest parts are normal ones;
+     *    - if the sub-loan is overdue, then see notes for the appropriate fields of the `SubLoanState` structure above.
+     * 5. See also notes for the appropriate fields in comments for the storage sub-loan structures above:
      *    `SubLoanInception`, `SubLoanState`, `SubLoanMetadata`.
      *
      */
@@ -530,6 +553,7 @@ interface ILendingMarketV2Types {
         uint256 latestOperationId;
         uint256 status;
         uint256 gracePeriodStatus;
+        uint256 overdueStatus;
 
         uint256 programId;
         address borrower;
@@ -574,7 +598,8 @@ interface ILendingMarketV2Types {
      * - day -------------------------------- The day index at which the preview is calculated.
      * - firstSubLoanId --------------------- The ID of the first sub-loan in the loan.
      * - subLoanCount ----------------------- The number of sub-loans in the loan.
-     * - ongoingSubLoanCount ---------------- The number of ongoing sub-loans in the loan.
+     * - ongoingSubLoanCount ---------------- The number of all ongoing sub-loans in the loan despite of the overdue status.
+     * - overdueSubLoanCount ---------------- The number of ongoing overdue sub-loans in the loan.
      * - repaidSubLoanCount ----------------- The number of fully repaid sub-loans in the loan.
      * - revokedSubLoanCount ---------------- The number of revoked sub-loans in the loan.
      * - programId -------------------------- The ID of the lending program used to take the loan.
@@ -582,25 +607,38 @@ interface ILendingMarketV2Types {
      * - totalBorrowedAmount ---------------- The total borrowed amount of the loan over all sub-loans.
      * - totalAddonAmount ------------------- The total addon amount of the loan over all sub-loans.
      * - totalTrackedPrincipal -------------- The total tracked principal of the loan over all sub-loans.
+     * - totalTrackedLegalPrincipal --------- The total tracked legal principal of the loan over all sub-loans.
      * - totalTrackedRemuneratoryInterest --- The total tracked remuneratory interest of the loan over all sub-loans.
      * - totalTrackedMoratoryInterest ------- The total tracked moratory interest of the loan over all sub-loans.
      * - totalTrackedLateFee ---------------- The total tracked late fee of the loan over all sub-loans.
      * - totalOutstandingBalance ------------ The total outstanding balance of the loan over all sub-loans.
      * - totalRepaidPrincipal --------------- The total repaid principal of the loan over all sub-loans.
+     * - totalRepaidLegalPrincipal ----------- The total repaid legal principal of the loan over all sub-loans.
      * - totalRepaidRemuneratoryInterest ---- The total repaid remuneratory interest of the loan over all sub-loans.
      * - totalRepaidMoratoryInterest -------- The total repaid moratory interest of the loan over all sub-loans.
      * - totalRepaidLateFee ----------------- The total repaid late fee of the loan over all sub-loans.
      * - totalDiscountPrincipal ------------- The total discount principal of the loan over all sub-loans.
+     * - totalDiscountLegalPrincipal --------- The total discount legal principal of the loan over all sub-loans.
      * - totalDiscountRemuneratoryInterest -- The total discount remuneratory interest of the loan over all sub-loans.
      * - totalDiscountMoratoryInterest ------ The total discount moratory interest of the loan over all sub-loans.
      * - totalDiscountLateFee --------------- The total discount late fee of the loan over all sub-loans.
      *
      * Notes:
      *
-     * 1. All `total...` fields are calculated as the sum of the corresponding fields of all sub-loans in the loan.
-     * 2. See notes about the outstanding balance in the comments for the `SubLoanPreview` structure.
-     * 3. See also notes for the appropriate fields in comments for the storage sub-loan structures above:
-     *    `SubLoanInception`, `SubLoanState`, `SubLoanMetadata`.
+     * 1.  All `total...` fields are calculated as the sum of the corresponding fields of all sub-loans in the loan.
+     * 2.  See notes about the outstanding balance in the comments for the `SubLoanPreview` structure.
+     * 3.  See also notes for the appropriate fields in comments for the storage sub-loan structures above:
+     *     `SubLoanInception`, `SubLoanState`, `SubLoanMetadata`.
+     * 4.  The `totalTrackedPrincipal` field does not include the tracked principal of overdue sub-loans.
+     * 5.  The `totaTrackedRemuneratoryInterest` field does not include the tracked remuneratory interest of
+     *     overdue sub-loans before the due date, it is included in the `totalTrackedLegalPrincipal` field.
+     * 6.  The `totalRepaidPrincipal` field does not include the repaid principal of overdue sub-loans.
+     * 7.  The `totalRepaidRemuneratoryInterest` field does not include the repaid remuneratory interest of
+     *     overdue sub-loans before the due date, it is included in the `totalRepaidLegalPrincipal` field.
+     * 8.  The `totalDiscountPrincipal` field does not include the discount principal of overdue sub-loans.
+     * 9.  The `totalDiscountRemuneratoryInterest` field does not include the discount remuneratory interest of
+     *     overdue sub-loans before the due date, it is included in the `totalDiscountLegalPrincipal` field.
+     * 10. About legal principal parts see the notes of the `SubLoanState` structure.
      */
     // The comment below is to keep gaps between fields for better readability
     // prettier-ignore
@@ -609,6 +647,7 @@ interface ILendingMarketV2Types {
         uint256 firstSubLoanId;
         uint256 subLoanCount;
         uint256 ongoingSubLoanCount;
+        uint256 overdueSubLoanCount;
         uint256 repaidSubLoanCount;
         uint256 revokedSubLoanCount;
 
@@ -618,17 +657,20 @@ interface ILendingMarketV2Types {
         uint256 totalAddonAmount;
 
         uint256 totalTrackedPrincipal;
+        uint256 totalTrackedLegalPrincipal;
         uint256 totalTrackedRemuneratoryInterest;
         uint256 totalTrackedMoratoryInterest;
         uint256 totalTrackedLateFee;
         uint256 totalOutstandingBalance;
 
         uint256 totalRepaidPrincipal;
+        uint256 totalRepaidLegalPrincipal;
         uint256 totalRepaidRemuneratoryInterest;
         uint256 totalRepaidMoratoryInterest;
         uint256 totalRepaidLateFee;
 
         uint256 totalDiscountPrincipal;
+        uint256 totalDiscountLegalPrincipal;
         uint256 totalDiscountRemuneratoryInterest;
         uint256 totalDiscountMoratoryInterest;
         uint256 totalDiscountLateFee;

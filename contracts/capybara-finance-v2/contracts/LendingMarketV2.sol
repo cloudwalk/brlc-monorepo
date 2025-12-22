@@ -537,6 +537,7 @@ contract LendingMarketV2 is
         preview.latestOperationId = storedSubLoan.metadata.latestOperationId;
         preview.status = subLoan.status;
         preview.gracePeriodStatus = subLoan.gracePeriodStatus;
+        preview.overdueStatus = _isOverdue(subLoan, subLoan.trackedTimestamp) ? 1 : 0;
         preview.programId = storedSubLoan.inception.programId;
         preview.borrower = storedSubLoan.inception.borrower;
         preview.borrowedAmount = storedSubLoan.inception.borrowedAmount;
@@ -614,6 +615,9 @@ contract LendingMarketV2 is
             singleLoanPreview = _getSubLoanPreview(subLoanId, timestamp, flags);
             if (singleLoanPreview.status == uint256(SubLoanStatus.Ongoing)) {
                 preview.ongoingSubLoanCount += 1;
+                if (singleLoanPreview.overdueStatus != 0) {
+                    preview.overdueSubLoanCount += 1;
+                }
             }
             if (singleLoanPreview.status == uint256(SubLoanStatus.Repaid)) {
                 preview.repaidSubLoanCount += 1;
@@ -623,16 +627,28 @@ contract LendingMarketV2 is
             }
             preview.totalBorrowedAmount += singleLoanPreview.borrowedAmount;
             preview.totalAddonAmount += singleLoanPreview.addonAmount;
-            preview.totalTrackedPrincipal += singleLoanPreview.trackedPrincipal;
+            if (singleLoanPreview.overdueStatus != 0) {
+                preview.totalTrackedLegalPrincipal += singleLoanPreview.trackedPrincipal;
+            } else {
+                preview.totalTrackedPrincipal += singleLoanPreview.trackedPrincipal;
+            }
             preview.totalTrackedRemuneratoryInterest += singleLoanPreview.trackedRemuneratoryInterest;
             preview.totalTrackedMoratoryInterest += singleLoanPreview.trackedMoratoryInterest;
             preview.totalTrackedLateFee += singleLoanPreview.trackedLateFee;
             preview.totalOutstandingBalance += singleLoanPreview.outstandingBalance;
-            preview.totalRepaidPrincipal += singleLoanPreview.repaidPrincipal;
+            if (singleLoanPreview.overdueStatus != 0) {
+                preview.totalRepaidLegalPrincipal += singleLoanPreview.repaidPrincipal;
+            } else {
+                preview.totalRepaidPrincipal += singleLoanPreview.repaidPrincipal;
+            }
             preview.totalRepaidRemuneratoryInterest += singleLoanPreview.repaidRemuneratoryInterest;
             preview.totalRepaidMoratoryInterest += singleLoanPreview.repaidMoratoryInterest;
             preview.totalRepaidLateFee += singleLoanPreview.repaidLateFee;
-            preview.totalDiscountPrincipal += singleLoanPreview.discountPrincipal;
+            if (singleLoanPreview.overdueStatus != 0) {
+                preview.totalDiscountLegalPrincipal += singleLoanPreview.discountPrincipal;
+            } else {
+                preview.totalDiscountPrincipal += singleLoanPreview.discountPrincipal;
+            }
             preview.totalDiscountRemuneratoryInterest += singleLoanPreview.discountRemuneratoryInterest;
             preview.totalDiscountMoratoryInterest += singleLoanPreview.discountMoratoryInterest;
             preview.totalDiscountLateFee += singleLoanPreview.discountLateFee;

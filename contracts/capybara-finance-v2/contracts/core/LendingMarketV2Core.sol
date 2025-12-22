@@ -75,4 +75,12 @@ abstract contract LendingMarketV2Core is
         }
         return roundedValue;
     }
+
+    /**
+     * @dev Returns true if the sub-loan is past its due date at the specified timestamp.
+     */
+    function _isOverdue(ProcessingSubLoan memory subLoan, uint256 timestamp) internal pure returns (bool) {
+        uint256 dueDay = _dayIndex(subLoan.startTimestamp) + subLoan.duration;
+        return _dayIndex(timestamp) > dueDay;
+    }
 }

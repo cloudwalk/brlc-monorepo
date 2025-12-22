@@ -911,6 +911,8 @@ contract LendingEngineV2 is
                     _accrueRemuneratoryInterest(subLoan, finishDay - startDay);
                 } else {
                     _accrueRemuneratoryInterest(subLoan, dueDay - startDay);
+                    subLoan.gracePeriodStatus = uint256(GracePeriodStatus.None);
+                    _capitalizeRemuneratoryInterest(subLoan);
                     _imposeLateFee(subLoan);
                     _accrueRemuneratoryInterest(subLoan, finishDay - dueDay);
                     _accrueMoratoryInterest(subLoan, finishDay - dueDay);
@@ -943,6 +945,22 @@ contract LendingEngineV2 is
             dayCount,
             subLoan.moratoryRate
         );
+    }
+
+    /**
+     * @dev Capitalizes the current remuneratory interest into the principal,
+     *      increasing the tracked, repaid and discount parts.
+     *      Then the remuneratory interest parts are reset to 0.
+     *      This converts the principal to a legal one and
+     *      resets tracking of the remuneratory interest after the due date.
+     */
+    function _capitalizeRemuneratoryInterest(ProcessingSubLoan memory subLoan) internal pure {
+        subLoan.trackedPrincipal += subLoan.trackedRemuneratoryInterest;
+        subLoan.repaidPrincipal += subLoan.repaidRemuneratoryInterest;
+        subLoan.discountPrincipal += subLoan.discountRemuneratoryInterest;
+        subLoan.trackedRemuneratoryInterest = 0;
+        subLoan.repaidRemuneratoryInterest = 0;
+        subLoan.discountRemuneratoryInterest = 0;
     }
 
     /**
@@ -1794,14 +1812,6 @@ contract LendingEngineV2 is
             ((moratoryRate & type(uint32).max) << 32) |
             ((lateFeeRate & type(uint32).max) << 64) |
             ((graceDiscountRate & type(uint32).max) << 96);
-    }
-
-    /**
-     * @dev Returns true if the sub-loan is past its due date at the specified timestamp.
-     */
-    function _isOverdue(ProcessingSubLoan memory subLoan, uint256 timestamp) internal pure returns (bool) {
-        uint256 dueDay = _dayIndex(subLoan.startTimestamp) + subLoan.duration;
-        return _dayIndex(timestamp) > dueDay;
     }
 
     /**

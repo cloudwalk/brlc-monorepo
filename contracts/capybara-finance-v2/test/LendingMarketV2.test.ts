@@ -170,6 +170,7 @@ interface SubLoanPreview {
   latestOperationId: number;
   status: SubLoanStatus;
   gracePeriodStatus: GracePeriodStatus;
+  overdueStatus: number;
   programId: number;
   borrower: string;
   borrowedAmount: bigint;
@@ -205,6 +206,7 @@ interface LoanPreview {
   firstSubLoanId: bigint;
   subLoanCount: number;
   ongoingSubLoanCount: number;
+  overdueSubLoanCount: number;
   repaidSubLoanCount: number;
   revokedSubLoanCount: number;
   programId: number;
@@ -212,15 +214,18 @@ interface LoanPreview {
   totalBorrowedAmount: bigint;
   totalAddonAmount: bigint;
   totalTrackedPrincipal: bigint;
+  totalTrackedLegalPrincipal: bigint;
   totalTrackedRemuneratoryInterest: bigint;
   totalTrackedMoratoryInterest: bigint;
   totalTrackedLateFee: bigint;
   totalOutstandingBalance: bigint;
   totalRepaidPrincipal: bigint;
+  totalRepaidLegalPrincipal: bigint;
   totalRepaidRemuneratoryInterest: bigint;
   totalRepaidMoratoryInterest: bigint;
   totalRepaidLateFee: bigint;
   totalDiscountPrincipal: bigint;
+  totalDiscountLegalPrincipal: bigint;
   totalDiscountRemuneratoryInterest: bigint;
   totalDiscountMoratoryInterest: bigint;
   totalDiscountLateFee: bigint;
@@ -645,6 +650,7 @@ function defineExpectedSubLoanPreview(subLoan: SubLoan): SubLoanPreview {
     latestOperationId: subLoan.metadata.latestOperationId,
     status: subLoan.state.status,
     gracePeriodStatus: subLoan.state.gracePeriodStatus,
+    overdueStatus: isOverdue(subLoan, subLoan.state.trackedTimestamp) ? 1 : 0,
     programId: subLoan.inception.programId,
     borrower: subLoan.inception.borrower,
     borrowedAmount: subLoan.inception.borrowedAmount,
@@ -681,21 +687,25 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
   const subLoanPreviews = loan.subLoans.map(defineExpectedSubLoanPreview);
 
   let ongoingSubLoanCount = 0;
+  let overdueSubLoanCount = 0;
   let repaidSubLoanCount = 0;
   let revokedSubLoanCount = 0;
 
   let totalBorrowedAmount = 0n;
   let totalAddonAmount = 0n;
   let totalTrackedPrincipal = 0n;
+  let totalTrackedLegalPrincipal = 0n;
   let totalTrackedRemuneratoryInterest = 0n;
   let totalTrackedMoratoryInterest = 0n;
   let totalTrackedLateFee = 0n;
   let totalOutstandingBalance = 0n;
   let totalRepaidPrincipal = 0n;
+  let totalRepaidLegalPrincipal = 0n;
   let totalRepaidRemuneratoryInterest = 0n;
   let totalRepaidMoratoryInterest = 0n;
   let totalRepaidLateFee = 0n;
   let totalDiscountPrincipal = 0n;
+  let totalDiscountLegalPrincipal = 0n;
   let totalDiscountRemuneratoryInterest = 0n;
   let totalDiscountMoratoryInterest = 0n;
   let totalDiscountLateFee = 0n;
@@ -703,6 +713,9 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
   for (const preview of subLoanPreviews) {
     if (preview.status === SubLoanStatus.Ongoing) {
       ongoingSubLoanCount += 1;
+      if (preview.overdueStatus !== 0) {
+        overdueSubLoanCount += 1;
+      }
     } else if (preview.status === SubLoanStatus.Repaid) {
       repaidSubLoanCount += 1;
     } else if (preview.status === SubLoanStatus.Revoked) {
@@ -711,16 +724,28 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
 
     totalBorrowedAmount += preview.borrowedAmount;
     totalAddonAmount += preview.addonAmount;
-    totalTrackedPrincipal += preview.trackedPrincipal;
+    if (preview.overdueStatus !== 0) {
+      totalTrackedLegalPrincipal += preview.trackedPrincipal;
+    } else {
+      totalTrackedPrincipal += preview.trackedPrincipal;
+    }
     totalTrackedRemuneratoryInterest += preview.trackedRemuneratoryInterest;
     totalTrackedMoratoryInterest += preview.trackedMoratoryInterest;
     totalTrackedLateFee += preview.trackedLateFee;
     totalOutstandingBalance += preview.outstandingBalance;
-    totalRepaidPrincipal += preview.repaidPrincipal;
+    if (preview.overdueStatus !== 0) {
+      totalRepaidLegalPrincipal += preview.repaidPrincipal;
+    } else {
+      totalRepaidPrincipal += preview.repaidPrincipal;
+    }
     totalRepaidRemuneratoryInterest += preview.repaidRemuneratoryInterest;
     totalRepaidMoratoryInterest += preview.repaidMoratoryInterest;
     totalRepaidLateFee += preview.repaidLateFee;
-    totalDiscountPrincipal += preview.discountPrincipal;
+    if (preview.overdueStatus !== 0) {
+      totalDiscountLegalPrincipal += preview.discountPrincipal;
+    } else {
+      totalDiscountPrincipal += preview.discountPrincipal;
+    }
     totalDiscountRemuneratoryInterest += preview.discountRemuneratoryInterest;
     totalDiscountMoratoryInterest += preview.discountMoratoryInterest;
     totalDiscountLateFee += preview.discountLateFee;
@@ -733,6 +758,7 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
     firstSubLoanId,
     subLoanCount,
     ongoingSubLoanCount,
+    overdueSubLoanCount,
     repaidSubLoanCount,
     revokedSubLoanCount,
     programId: lastPreview.programId,
@@ -740,15 +766,18 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
     totalBorrowedAmount,
     totalAddonAmount,
     totalTrackedPrincipal,
+    totalTrackedLegalPrincipal,
     totalTrackedRemuneratoryInterest,
     totalTrackedMoratoryInterest,
     totalTrackedLateFee,
     totalOutstandingBalance,
     totalRepaidPrincipal,
+    totalRepaidLegalPrincipal,
     totalRepaidRemuneratoryInterest,
     totalRepaidMoratoryInterest,
     totalRepaidLateFee,
     totalDiscountPrincipal,
+    totalDiscountLegalPrincipal,
     totalDiscountRemuneratoryInterest,
     totalDiscountMoratoryInterest,
     totalDiscountLateFee,
@@ -900,6 +929,11 @@ function getOperationView(operation: Operation): OperationView {
 
 function dayIndex(timestamp: number): number {
   return Math.floor((timestamp - 3 * 3600) / 86400);
+}
+
+function isOverdue(subLoan: SubLoan, timestamp: number): boolean {
+  const dueDay = dayIndex(subLoan.inception.startTimestamp) + subLoan.state.duration;
+  return dayIndex(timestamp) > dueDay;
 }
 
 function accrueRemuneratoryInterest(subLoan: SubLoan, timestamp: number) {

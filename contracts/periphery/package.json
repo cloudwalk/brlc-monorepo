@@ -7,6 +7,7 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "catalog:",
     "@nomicfoundation/hardhat-ethers": "catalog:",
+    "@nomicfoundation/hardhat-network-helpers": "catalog:",
     "@openzeppelin/hardhat-upgrades": "catalog:",
     "ethers": "catalog:",
     "dotenv": "catalog:",
@@ -20,6 +21,7 @@
     }
   },
   "scripts": {
+    "ts:check": "tsc --noEmit",
     "build": "hardhat compile",
     "test": "hardhat test",
     "test:coverage": "hardhat coverage",

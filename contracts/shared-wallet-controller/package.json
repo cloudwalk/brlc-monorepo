@@ -8,6 +8,7 @@
     "@nomicfoundation/hardhat-toolbox": "catalog:",
     "@nomicfoundation/hardhat-ethers": "catalog:",
     "@openzeppelin/hardhat-upgrades": "catalog:",
+    "ethers": "catalog:",
     "dotenv": "catalog:",
     "hardhat": "catalog:",
     "hardhat-contract-sizer": "catalog:"

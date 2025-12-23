@@ -57,13 +57,13 @@ jobs:
         with:
           app-id: ${{ vars.DEV_EX_APP_ID }}
           private-key: ${{ secrets.DEV_EX_APP_PRIVATE_KEY }}
-          repositories: brlc-monorepo
-          owner: cloudwalk
+          # repositories: stratus
+          # owner: cloudwalk
 
       - name: Checkout Stratus repository
         uses: actions/checkout@v6
         with:
-          repository: cloudwalk/brlc-monorepo # TODO: change to stratus
+          repository: cloudwalk/stratus
           path: stratus
           token: ${{ steps.app-token.outputs.token }}
 
@@ -78,7 +78,6 @@ jobs:
         with:
           path: stratus
           token: ${{ steps.app-token.outputs.token }}
-          #add-paths: static/contracts-signatures
           branch: brlc/update-contract-signatures
           delete-branch: true
           sign-commits: true

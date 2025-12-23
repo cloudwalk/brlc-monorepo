@@ -3,7 +3,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-ROOT_DIR="${SCRIPT_DIR}"
+ROOT_DIR="${SCRIPT_DIR}/.."
 SIGNATURES_DIR="${ROOT_DIR}/signatures"
 
 

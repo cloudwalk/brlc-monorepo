@@ -4,22 +4,22 @@ on:
   push:
     branches:
       - main
+      - stratus-integration
   workflow_dispatch:
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
+  collect-signatures:
     runs-on: ubuntu-latest
-    name: ${{ matrix.os }}
+    name: Collect signatures
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+
+      - name: Install mise
+        uses: jdx/mise-action@v3
+        with:
+          github_token: ${{ secrets.GHA_PAT }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -36,22 +36,13 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GHA_PAT }}
 
-      - name: Run eslint
-        run: pnpm run eslint:check # check all with concurrency -1 (cpu core count)
+      - name: Generate signatures
+        run: ./stratus-integration/generate-signatures.bash
+        shell: bash
 
-      - name: Build all contracts
-        run: pnpm run -r --workspace-concurrency=-1 build # build all with concurrency -1 (cpu core count)
-
-      - name: Test all contracts without coverage if not on Linux
-        run: pnpm run -r --workspace-concurrency=-1 test # test all with concurrency -1 (cpu core count)
-        if: runner.os != 'Linux'
-
-      - name: Test all contracts with coverage if on Linux
-        run: pnpm run -r --workspace-concurrency=-1 test:coverage # test all with concurrency -1 (cpu core count)
-        if: runner.os == 'Linux'
-
-      - name: Upload results to Codecov
-        if: runner.os == 'Linux'
-        uses: codecov/codecov-action@v5
+      - name: Save artifact
+        uses: actions/upload-artifact@v6
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          name: contract-signatures
+          path: signatures
+          overwrite: true

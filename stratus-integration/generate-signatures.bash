@@ -2,8 +2,7 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-ROOT_DIR="${SCRIPT_DIR}/.."
+ROOT_DIR="$(pwd)"
 SIGNATURES_DIR="${ROOT_DIR}/signatures"
 
 
@@ -12,7 +11,9 @@ SIGNATURES_DIR="${ROOT_DIR}/signatures"
 rm -rf $SIGNATURES_DIR
 mkdir -p $SIGNATURES_DIR
 
-eval "$(mise activate bash)"
+export MISE_BACKENDS_SOLIDITY=asdf:diegodorado/asdf-solidity
+
+# eval "$(mise activate bash)"
 
 for dir in $ROOT_DIR/contracts/*; do
   cd "$dir"
@@ -27,7 +28,7 @@ for dir in $ROOT_DIR/contracts/*; do
     -o artifacts/signatures  \
     --overwrite contracts/*.sol
 
-  for sig_file in artifacts/contracts/*.sol; do
+  for sig_file in contracts/*.sol; do
     base_name=$(basename "$sig_file" .sol)
     sig_file="artifacts/signatures/${base_name}.signatures"
     if [[ -f "$sig_file" ]]; then

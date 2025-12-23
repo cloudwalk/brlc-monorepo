@@ -71,7 +71,7 @@ jobs:
         uses: actions/download-artifact@v6
         with:
           name: contract-signatures
-          path: static/contracts-signatures
+          path: stratus/static/contracts-signatures
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8

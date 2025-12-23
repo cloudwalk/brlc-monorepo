@@ -345,32 +345,32 @@ interface ILendingMarketV2Types {
         uint32 graceDiscountRate;
         // uint32 __reserved; // Reserved until the end of the storage slot
 
-        // Slot 2 -- The principal related parts
+        // Slots 2, 3 -- The principal related parts
         uint64 trackedPrincipal;
         uint64 repaidPrincipal;
         uint64 discountPrincipal;
-        uint64 _reserved1;
+        uint256 _reserved1;
         // No reserve until the end of the storage slot
 
-        // Slot 3 -- The remuneratory interest related parts
+        // Slot 4, 5 -- The remuneratory interest related parts
         uint64 trackedRemuneratoryInterest;
         uint64 repaidRemuneratoryInterest;
         uint64 discountRemuneratoryInterest;
-        uint64 _reserved2;
+        uint256 _reserved2;
         // No reserve until the end of the storage slot
 
-        // Slot 4 -- The moratory interest related parts
+        // Slot 6, 7 -- The moratory interest related parts
         uint64 trackedMoratoryInterest;
         uint64 repaidMoratoryInterest;
         uint64 discountMoratoryInterest;
-        uint64 _reserved3;
+        uint256 _reserved3;
         // No reserve until the end of the storage slot
 
-        // Slot 5 -- The late fee related parts
+        // Slot 8, 9 -- The late fee related parts
         uint64 trackedLateFee;
         uint64 repaidLateFee;
         uint64 discountLateFee;
-        uint64 _reserved4;
+        uint256 _reserved4;
         // No reserve until the end of the storage slot
     }
 
@@ -394,10 +394,10 @@ interface ILendingMarketV2Types {
         uint256[48] __gap0;
         // No reserve until the end of the storage slot
 
-        // Slot 51 ... 54
+        // Slot 51 ... 59
         SubLoanState state;
-        // Slots 55 ... 100
-        uint256[46] __gap1;
+        // Slots 60 ... 100
+        uint256[41] __gap1;
         // No reserve until the end of the storage slot
 
         // Slot 101

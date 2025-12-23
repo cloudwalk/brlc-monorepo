@@ -57,15 +57,15 @@ jobs:
         with:
           app-id: ${{ vars.DEV_EX_APP_ID }}
           private-key: ${{ secrets.DEV_EX_APP_PRIVATE_KEY }}
-          # repositories: stratus
-          # owner: cloudwalk
+          repositories: stratus
+          owner: cloudwalk
 
       - name: Checkout Stratus repository
         uses: actions/checkout@v6
         with:
           repository: cloudwalk/stratus
           path: stratus
-          # token: ${{ steps.app-token.outputs.token }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Remove existing signatures
         run: rm -rf stratus/static/contracts-signatures
@@ -81,7 +81,7 @@ jobs:
         uses: peter-evans/create-pull-request@v8
         with:
           path: stratus
-          #token: ${{ steps.app-token.outputs.token }}
+          token: ${{ steps.app-token.outputs.token }}
           branch: brlc/update-contract-signatures
           delete-branch: true
           sign-commits: true

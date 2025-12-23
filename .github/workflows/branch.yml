@@ -39,7 +39,7 @@ jobs:
       - run: pnpm install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GHA_PAT }}
-      
+
       - name: Run eslint
         run: pnpm run eslint:check # check all with concurrency -1 (cpu core count)
 

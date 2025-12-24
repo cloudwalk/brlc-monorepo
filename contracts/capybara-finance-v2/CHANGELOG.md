@@ -6,24 +6,16 @@
    Tracked, repaid and discount fields are no longer rounded to cents individually, maintaining precise internal values.
    Rounding is now applied only when calculating the outstanding balance by summing all related parts first, then rounding the result.
 2. The number of bits per rate in the packed rates fields of events has been changed from 64 bits per rate to 32 bits per rate.
-3. The `SubLoanTaken` event has been changed.
-4. The legal principal approach has been introduced to the financial logic of sub-loans. After the due date, the remuneratory interest is capitalized into the principal, converting it to a "legal principal". Then the remuneratory interest parts are reset to zero to start tracking only new interest accrued, repaid and discounted amounts only after the due date. Formally it looks like the following:
-   - `trackedPrincipal += trackedRemuneratoryInterest`;
-   - `repaidPrincipal += repaidRemuneratoryInterest`;
-   - `discountPrincipal += discountRemuneratoryInterest`;
-   - `trackedRemuneratoryInterest = 0`
-   - `repaidRemuneratoryInterest = 0`
-   - `discountRemuneratoryInterest = 0`.
-5. The `isOverdie` field has been added to the `SubLoanPreview` structure to track the overdue status of the sub-loan.
-6. The `LoanPreview` structure has been updated to track the legal principal amounts for overdue sub-loans.
-   The structure now includes `totalTrackedLegalPrincipal`, `totalRepaidLegalPrincipal`, and `totalDiscountLegalPrincipal` fields.
-   For overdue sub-loans (when `overdueStatus != 0`), principal amounts are tracked in the legal principal fields instead of the regular principal fields.
-   Legal principal represents the principal after the due date, which includes the initial principal plus the remuneratory interest that was capitalized into principal at the due date.
-7. The sub-loan parts have been regrouped in storage slots, view structures and event packed fields as follows:
+3. The remuneratory interest fields have been split into two fields:
+   - `upToDueRemuneratoryInterest` -- the interest (tracked, repaid, discount) up to the due date.
+   - `postDueRemuneratoryInterest` -- the interest (tracked, repaid, discount) post the due date.
+4. The sub-loan parts have been regrouped in storage slots, view structures and event packed fields as follows:
    - principal: `trackedPrincipal`, `repaidPrincipal`, `discountPrincipal`;
-   - remuneratory interest: `trackedRemuneratoryInterest`, `repaidRemuneratoryInterest`, `discountRemuneratoryInterest`;
+   - remuneratory interest up to the due date: `trackedUpToDueRemuneratoryInterest`, `repaidUpToDueRemuneratoryInterest`, `discountUpToDueRemuneratoryInterest`;
+   - remuneratory interest post the due date: `trackedPostDueRemuneratoryInterest`, `repaidPostDueRemuneratoryInterest`, `discountPostDueRemuneratoryInterest`;
    - moratory interest: `trackedMoratoryInterest`, `repaidMoratoryInterest`, `discountMoratoryInterest`;
    - late fee: `trackedLateFee`, `repaidLateFee`, `discountLateFee`.
+5. The `SubLoanTaken` and  `SubLoanUpdated` events have been changed according to the points above.
 
 # 2.0.0
 

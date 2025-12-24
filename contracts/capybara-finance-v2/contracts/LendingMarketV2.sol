@@ -201,7 +201,7 @@ contract LendingMarketV2 is
         uint256 timestamp,
         uint256 flags
     ) external view returns (SubLoanPreview memory) {
-        return _getSubLoanPreview(subLoanId, timestamp, flags);
+        return _convertToSubLoanPreview(_getSubLoanPreview(subLoanId, timestamp, flags));
     }
 
     /// @inheritdoc ILendingMarketV2Primary
@@ -537,17 +537,20 @@ contract LendingMarketV2 is
         preview.latestOperationId = storedSubLoan.metadata.latestOperationId;
         preview.status = subLoan.status;
         preview.gracePeriodStatus = subLoan.gracePeriodStatus;
-        preview.overdueStatus = _isOverdue(subLoan, subLoan.trackedTimestamp) ? 1 : 0;
+
         preview.programId = storedSubLoan.inception.programId;
         preview.borrower = storedSubLoan.inception.borrower;
         preview.borrowedAmount = storedSubLoan.inception.borrowedAmount;
         preview.addonAmount = storedSubLoan.inception.addonAmount;
+
         preview.startTimestamp = subLoan.startTimestamp;
         preview.freezeTimestamp = subLoan.freezeTimestamp;
         preview.trackedTimestamp = subLoan.trackedTimestamp;
         preview.pendingTimestamp = subLoan.pendingTimestamp;
         preview.duration = subLoan.duration;
-        preview.remuneratoryRate = subLoan.remuneratoryRate;
+
+        preview.upToDueRemuneratoryRate = subLoan.upToDueRemuneratoryRate;
+        preview.postDueRemuneratoryRate = subLoan.postDueRemuneratoryRate;
         preview.moratoryRate = subLoan.moratoryRate;
         preview.lateFeeRate = subLoan.lateFeeRate;
         preview.graceDiscountRate = subLoan.graceDiscountRate;
@@ -556,9 +559,13 @@ contract LendingMarketV2 is
         preview.repaidPrincipal = subLoan.repaidPrincipal;
         preview.discountPrincipal = subLoan.discountPrincipal;
 
-        preview.trackedRemuneratoryInterest = subLoan.trackedRemuneratoryInterest;
-        preview.repaidRemuneratoryInterest = subLoan.repaidRemuneratoryInterest;
-        preview.discountRemuneratoryInterest = subLoan.discountRemuneratoryInterest;
+        preview.trackedUpToDueRemuneratoryInterest = subLoan.trackedUpToDueRemuneratoryInterest;
+        preview.repaidUpToDueRemuneratoryInterest = subLoan.repaidUpToDueRemuneratoryInterest;
+        preview.discountUpToDueRemuneratoryInterest = subLoan.discountUpToDueRemuneratoryInterest;
+
+        preview.trackedPostDueRemuneratoryInterest = subLoan.trackedPostDueRemuneratoryInterest;
+        preview.repaidPostDueRemuneratoryInterest = subLoan.repaidPostDueRemuneratoryInterest;
+        preview.discountPostDueRemuneratoryInterest = subLoan.discountPostDueRemuneratoryInterest;
 
         preview.trackedMoratoryInterest = subLoan.trackedMoratoryInterest;
         preview.repaidMoratoryInterest = subLoan.repaidMoratoryInterest;
@@ -580,7 +587,7 @@ contract LendingMarketV2 is
         uint256 subLoanId,
         uint256 timestamp,
         uint256 flags
-    ) internal view returns (SubLoanPreview memory) {
+    ) internal view returns (ProcessingSubLoan memory) {
         bytes memory ret = _selfStaticCall(
             abi.encodeCall(
                 this.delegateToEngine,
@@ -591,9 +598,7 @@ contract LendingMarketV2 is
         // The `delegateToEngine` function returns `bytes` which wrap the engine return data.
         // First, decode the outer `bytes`, then decode the inner payload.
         bytes memory engineRet = abi.decode(ret, (bytes));
-        ProcessingSubLoan memory subLoan = abi.decode(engineRet, (ProcessingSubLoan));
-
-        return _convertToSubLoanPreview(subLoan);
+        return abi.decode(engineRet, (ProcessingSubLoan));
     }
 
     /**
@@ -609,19 +614,20 @@ contract LendingMarketV2 is
     ) internal view returns (LoanPreview memory) {
         LoanPreview memory preview;
 
-        SubLoan storage subLoan = _getLendingMarketStorage().subLoans[subLoanId];
-        uint256 subLoanCount = subLoan.metadata.subLoanCount;
-        subLoanId = subLoanId - subLoan.metadata.subLoanIndex;
+        SubLoan storage storedSubLoan = _getLendingMarketStorage().subLoans[subLoanId];
+        uint256 subLoanCount = storedSubLoan.metadata.subLoanCount;
+        subLoanId = subLoanId - storedSubLoan.metadata.subLoanIndex;
 
         preview.firstSubLoanId = subLoanId;
         preview.subLoanCount = subLoanCount;
 
         SubLoanPreview memory singleLoanPreview;
         for (uint256 i = 0; i < subLoanCount; ++i) {
-            singleLoanPreview = _getSubLoanPreview(subLoanId, timestamp, flags);
+            ProcessingSubLoan memory subLoan = _getSubLoanPreview(subLoanId, timestamp, flags);
+            singleLoanPreview = _convertToSubLoanPreview(subLoan);
             if (singleLoanPreview.status == uint256(SubLoanStatus.Ongoing)) {
                 preview.ongoingSubLoanCount += 1;
-                if (singleLoanPreview.overdueStatus != 0) {
+                if (_isOverdue(subLoan, timestamp)) {
                     preview.overdueSubLoanCount += 1;
                 }
             }
@@ -634,19 +640,17 @@ contract LendingMarketV2 is
             preview.totalBorrowedAmount += singleLoanPreview.borrowedAmount;
             preview.totalAddonAmount += singleLoanPreview.addonAmount;
 
-            if (singleLoanPreview.overdueStatus != 0) {
-                preview.totalTrackedLegalPrincipal += singleLoanPreview.trackedPrincipal;
-                preview.totalRepaidLegalPrincipal += singleLoanPreview.repaidPrincipal;
-                preview.totalDiscountLegalPrincipal += singleLoanPreview.discountPrincipal;
-            } else {
-                preview.totalTrackedPrincipal += singleLoanPreview.trackedPrincipal;
-                preview.totalRepaidPrincipal += singleLoanPreview.repaidPrincipal;
-                preview.totalDiscountPrincipal += singleLoanPreview.discountPrincipal;
-            }
+            preview.totalTrackedPrincipal += singleLoanPreview.trackedPrincipal;
+            preview.totalRepaidPrincipal += singleLoanPreview.repaidPrincipal;
+            preview.totalDiscountPrincipal += singleLoanPreview.discountPrincipal;
 
-            preview.totalTrackedRemuneratoryInterest += singleLoanPreview.trackedRemuneratoryInterest;
-            preview.totalRepaidRemuneratoryInterest += singleLoanPreview.repaidRemuneratoryInterest;
-            preview.totalDiscountRemuneratoryInterest += singleLoanPreview.discountRemuneratoryInterest;
+            preview.totalTrackedUpToDueRemuneratoryInterest += singleLoanPreview.trackedUpToDueRemuneratoryInterest;
+            preview.totalRepaidUpToDueRemuneratoryInterest += singleLoanPreview.repaidUpToDueRemuneratoryInterest;
+            preview.totalDiscountUpToDueRemuneratoryInterest += singleLoanPreview.discountUpToDueRemuneratoryInterest;
+
+            preview.totalTrackedPostDueRemuneratoryInterest += singleLoanPreview.trackedPostDueRemuneratoryInterest;
+            preview.totalRepaidPostDueRemuneratoryInterest += singleLoanPreview.repaidPostDueRemuneratoryInterest;
+            preview.totalDiscountPostDueRemuneratoryInterest += singleLoanPreview.discountUpToDueRemuneratoryInterest;
 
             preview.totalTrackedMoratoryInterest += singleLoanPreview.trackedMoratoryInterest;
             preview.totalRepaidMoratoryInterest += singleLoanPreview.repaidMoratoryInterest;

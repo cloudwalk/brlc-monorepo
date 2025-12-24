@@ -98,17 +98,18 @@ interface ILendingMarketV2Types {
      *
      * Values:
      *
-     * - Nonexistent = 0 --------------- The operation does not exist. The default value.
-     * - Repayment = 1 ----------------- The repayment of the sub-loan.
-     * - Discount = 2 ------------------ The discount of the sub-loan.
-     * - Revocation = 3 ---------------- The revocation of the sub-loan.
-     * - Freezing = 4 ------------------ The freezing of the sub-loan.
-     * - Unfreezing = 5 ---------------- The unfreezing of the sub-loan.
-     * - RemuneratoryRateSetting = 6 --- The setting of the remuneratory rate of the sub-loan.
-     * - MoratoryRateSetting = 7 ------- The setting of the moratory rate of the sub-loan.
-     * - LateFeeRateSetting = 8 -------- The setting of the late fee rate of the sub-loan.
-     * - GraceDiscountRateSetting = 9 -- The setting of the grace discount rate of the sub-loan.
-     * - DurationSetting = 10 ---------- The setting of the duration of the sub-loan.
+     * - Nonexistent = 0 ---------------------- The operation does not exist. The default value.
+     * - Repayment = 1 ------------------------ The repayment of the sub-loan.
+     * - Discount = 2 ------------------------- The discount of the sub-loan.
+     * - Revocation = 3 ----------------------- The revocation of the sub-loan.
+     * - Freezing = 4 ------------------------- The freezing of the sub-loan.
+     * - Unfreezing = 5 ----------------------- The unfreezing of the sub-loan.
+     * - UpToDueRemuneratoryRateSetting = 6 --- The setting of the up to the due date remuneratory rate of the sub-loan.
+     * - PostDueRemuneratoryRateSetting = 7 --- The setting of the post the due date remuneratory rate of the sub-loan.
+     * - MoratoryRateSetting = 8 -------------- The setting of the moratory rate of the sub-loan.
+     * - LateFeeRateSetting = 9 --------------- The setting of the late fee rate of the sub-loan.
+     * - GraceDiscountRateSetting = 10 -------- The setting of the grace discount rate of the sub-loan.
+     * - DurationSetting = 11 ----------------- The setting of the duration of the sub-loan.
      *
      * Notes:
      *
@@ -123,7 +124,8 @@ interface ILendingMarketV2Types {
      *    - Unfreezing: The flag indicating whether the sub-loan duration extension should be skipped during unfreezing:
      *      - 0: The sub-loan duration is extended by the number of days since the freezing timestamp.
      *      - 1: The sub-loan duration is kept without changes.
-     *    - RemuneratoryRateSetting: The remuneratory rate of the sub-loan to set.
+     *    - UpToDueRemuneratoryRateSetting: The up to the due date remuneratory rate of the sub-loan to set.
+     *    - PostDueRemuneratoryRateSetting: The post the due date remuneratory rate of the sub-loan to set.
      *    - MoratoryRateSetting: The moratory rate of the sub-loan to set.
      *    - LateFeeRateSetting: The late fee rate of the sub-loan to set.
      *    - GraceDiscountRateSetting: The grace discount rate of the sub-loan to set.
@@ -139,7 +141,8 @@ interface ILendingMarketV2Types {
         Revocation,
         Freezing,
         Unfreezing,
-        RemuneratoryRateSetting,
+        UpToDueRemuneratoryRateSetting,
+        PostDueRemuneratoryRateSetting,
         MoratoryRateSetting,
         LateFeeRateSetting,
         GraceDiscountRateSetting,
@@ -192,16 +195,17 @@ interface ILendingMarketV2Types {
      *
      * Fields:
      *
-     * - borrowedAmount ------------ The borrowed amount of the sub-loan.
-     * - addonAmount --------------- The addon amount of the sub-loan.
-     * - initialRemuneratoryRate --- The initial remuneratory rate of the sub-loan.
-     * - initialMoratoryRate ------- The initial moratory rate of the sub-loan.
-     * - initialLateFeeRate -------- The initial late fee rate of the sub-loan.
-     * - initialGraceDiscountRate -- The initial grace discount rate of the sub-loan.
-     * - initialDuration ----------- The initial duration of the sub-loan in days.
-     * - startTimestamp ------------ The timestamp (at UTC timezone) when the sub-loan is started.
-     * - programId ----------------- The ID of the lending program used to take the sub-loan.
-     * - borrower ------------------ The address of the borrower.
+     * - borrower ------------------------- The address of the borrower.
+     * - programId ------------------------ The ID of the lending program used to take the sub-loan.
+     * - startTimestamp ------------------- The timestamp (at UTC timezone) when the sub-loan is started.
+     * - initialDuration ------------------ The initial duration of the sub-loan in days.
+     * - borrowedAmount ------------------- The borrowed amount of the sub-loan.
+     * - addonAmount ---------------------- The addon amount of the sub-loan.
+     * - initialUpToDueRemuneratoryRate --- The initial up to the due date remuneratory rate of the sub-loan.
+     * - initialPostDueRemuneratoryRate --- The initial post the due date remuneratory rate of the sub-loan.
+     * - initialMoratoryRate -------------- The initial moratory rate of the sub-loan.
+     * - initialLateFeeRate --------------- The initial late fee rate of the sub-loan.
+     * - initialGraceDiscountRate --------- The initial grace discount rate of the sub-loan.
      *
      * Notes:
      *
@@ -211,21 +215,24 @@ interface ILendingMarketV2Types {
      * 3. All rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
      */
     struct SubLoanInception {
-        // Slot1 -- This data will never change and is rarely read
+        // Slot 1 -- This data will never change
+        address borrower;
+        uint24 programId;
+        uint32 startTimestamp;
+        uint16 initialDuration;
+        // uint24 __reserved; // Reserved until the end of the storage slot
+
+        // Slot2 -- This data will never change and is rarely read
         uint64 borrowedAmount;
         uint64 addonAmount;
-        uint32 initialRemuneratoryRate;
+        uint32 initialUpToDueRemuneratoryRate;
+        uint32 initialPostDueRemuneratoryRate;
         uint32 initialMoratoryRate;
         uint32 initialLateFeeRate;
-        uint32 initialGraceDiscountRate;
         // No reserve until the end of the storage slot
 
-        // Slot 2 -- This data will never change
-        uint16 initialDuration;
-        uint32 startTimestamp;
-        uint24 programId;
-        address borrower;
-        // uint24 __reserved; // Reserved until the end of the storage slot
+        // Slot 3 -- This data will never change and is rarely read
+        uint32 initialGraceDiscountRate;
     }
 
     /**
@@ -270,107 +277,111 @@ interface ILendingMarketV2Types {
      *
      * Fields:
      *
-     * - status ------------------------ The status of the sub-loan.
-     * - gracePeriodStatus ------------- The status of the grace period of the sub-loan.
-     * - duration ---------------------- The duration of the sub-loan in days.
-     * - freezeTimestamp --------------- The timestamp (at UTC timezone) when the sub-loan is frozen.
-     * - trackedTimestamp -------------- The timestamp (at UTC timezone) at which this state is determined.
-     * - remuneratoryRate -------------- The remuneratory rate of the sub-loan.
-     * - moratoryRate ------------------ The moratory rate of the sub-loan.
-     * - lateFeeRate ------------------- The late fee rate of the sub-loan.
-     * - graceDiscountRate ------------- The grace discount rate of the sub-loan.
-     * - trackedPrincipal -------------- The tracked principal of the sub-loan, remaining to be repaid.
-     * - repaidPrincipal --------------- The repaid principal of the sub-loan.
-     * - discountPrincipal ------------- The discount principal of the sub-loan.
-     * - _reserved1 -------------------- Reserved for future use.
-     * - trackedRemuneratoryInterest --- The tracked remuneratory interest of the sub-loan, remaining to be repaid.
-     * - repaidRemuneratoryInterest ---- The repaid remuneratory interest of the sub-loan.
-     * - discountRemuneratoryInterest -- The discount remuneratory interest of the sub-loan.
-     * - _reserved2 -------------------- Reserved for future use.
-     * - trackedMoratoryInterest ------- The tracked moratory interest of the sub-loan, remaining to be repaid.
-     * - repaidMoratoryInterest -------- The repaid moratory interest of the sub-loan.
-     * - discountMoratoryInterest ------ The discount moratory interest of the sub-loan.
-     * - _reserved3 -------------------- Reserved for future use.
-     * - trackedLateFee ---------------- The tracked late fee of the sub-loan, remaining to be repaid.
-     * - repaidLateFee ----------------- The repaid late fee of the sub-loan.
-     * - discountLateFee --------------- The discount late fee of the sub-loan.
-     * - _reserved4 -------------------- Reserved for future use.
+     * - status ------------------------------- The status of the sub-loan.
+     * - gracePeriodStatus -------------------- The status of the grace period of the sub-loan.
+     * - duration ----------------------------- The duration of the sub-loan in days.
+     * - freezeTimestamp ---------------------- The timestamp (at UTC timezone) when the sub-loan is frozen.
+     * - trackedTimestamp --------------------- The timestamp (at UTC timezone) at which this state is determined.
+     * - upToDueRemuneratoryRate -------------- The up to the due date remuneratory rate of the sub-loan.
+     * - postDueRemuneratoryRate -------------- The post the due date remuneratory rate of the sub-loan.
+     * - moratoryRate ------------------------- The moratory rate of the sub-loan.
+     * - lateFeeRate -------------------------- The late fee rate of the sub-loan.
+     * - graceDiscountRate -------------------- The grace discount rate of the sub-loan.
+     * - _reserved0 --------------------------- Reserved for future use.
+     * - trackedPrincipal --------------------- The tracked principal of the sub-loan, remaining to be repaid.
+     * - repaidPrincipal ---------------------- The repaid principal of the sub-loan.
+     * - discountPrincipal -------------------- The discount principal of the sub-loan.
+     * - _reserved1 --------------------------- Reserved for future use.
+     * - trackedUpToDueRemuneratoryInterest --- The tracked up to the due date remuneratory interest.
+     * - repaidUpToDueRemuneratoryInterest ---- The repaid up to the due date remuneratory interest.
+     * - discountUpToDueRemuneratoryInterest -- The discount up to the due date remuneratory interest.
+     * - _reserved2 --------------------------- Reserved for future use.
+     * - trackedPostDueRemuneratoryInterest --- The tracked post the due date remuneratory interest.
+     * - repaidPostDueRemuneratoryInterest ---- The repaid post the due date remuneratory interest.
+     * - discountPostDueRemuneratoryInterest -- The discount post the due date remuneratory interest.
+     * - _reserved2 --------------------------- Reserved for future use.
+     * - trackedMoratoryInterest -------------- The tracked moratory interest.
+     * - repaidMoratoryInterest --------------- The repaid moratory interest.
+     * - discountMoratoryInterest ------------- The discount moratory interest.
+     * - _reserved3 --------------------------- Reserved for future use.
+     * - trackedLateFee ----------------------- The tracked late fee.
+     * - repaidLateFee ------------------------ The repaid late fee.
+     * - discountLateFee ---------------------- The discount late fee.
+     * - _reserved4 --------------------------- Reserved for future use.
      *
      * Notes:
      *
-     * 1. The `gracePeriodStatus` field is needed to be sure in which state the sub-loan is during the grace period,
-     *    Consider the case when there is only one operation after the due date and it is voided.
-     *    Then next operation most likely will be after the due date and it is redundant
-     *    to change the grace period status again. So to be sure what is the current status we store it explicitly.
-     * 2. The `graceDiscountRate` field is used to calculate effective remuneratory rate during the grace period
-     *    according to the formula:
-     *   `effectiveRate = (remuneratoryRate * (INTEREST_RATE_FACTOR - graceDiscountRate)) /INTEREST_RATE_FACTOR`.
-     * 3. The principal parts obey the following formula:
+     * 1.  The tracked fields show the remaining sub-loan parts to be repaid.
+     *     They are increased (exept the principal) when the appropriate interest is accrued or a fee is imposed.
+     *     They are decreased when the appropriate amount is repaid or discounted.
+     *     When zero, the appropriate sub-loan part is fully repaid.
+     * 2.  The repaid fields show the amount that was repaid for the appropriate sub-loan parts.
+     *     They are increased only when the appropriate part is repaid.
+     * 3.  The discount fields show the amount that was discounted for the appropriate sub-loan parts.
+     *     They are increased only when the appropriate part is discounted.
+     * 4.  The `gracePeriodStatus` field is needed to be sure in which state the sub-loan is during the grace period,
+     *     Consider the case when there is only one operation after the due date and it is voided.
+     *     Then next operation most likely will be after the due date and it is redundant
+     *     to change the grace period status again. So to be sure what is the current status we store it explicitly.
+     * 5.  The `graceDiscountRate` field is used to calculate effective remuneratory rate during the grace period
+     *     according to the formula:
+     *   ` effectiveRate = (upToDueRemuneratoryRate * (INTEREST_RATE_FACTOR - graceDiscountRate)) /INTEREST_RATE_FACTOR`.
+     * 6.  The principal parts obey the following formula:
      *    `principal = borrowedAmount + addonAmount = trackedPrincipal + repaidPrincipal + discountPrincipal`.
-     * 4. The initial late fee imposed just after the due date can be calculated as:
-     *   `initialLateFee = trackedLateFee + repaidLateFee + discountLateFee`.
-     * 5. All rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
-     * 6. All fields related to tracked, repaid, and discount amounts are not financially rounded
-     *    according to the ACCURACY_FACTOR, see the `Constants` contract.
-     * 7. Just after the due date the remuneratory interest is capitalized into the legal principal:
-     *    - the remuneratory interest parts are added to the principal parts:
-     *      trackedPrincipal += trackedRemuneratoryInterest,
-     *      repaidPrincipal += repaidRemuneratoryInterest,
-     *      discountPrincipal += discountRemuneratoryInterest,
-     *    - the remuneratory interest parts are reset to 0 to track the them after the due date,
-     *      trackedRemuneratoryInterest = 0,
-     *      repaidRemuneratoryInterest = 0,
-     *      discountRemuneratoryInterest = 0.
-     * 8. The logic from the previous point changes the meaning of the principal and remuneratory interest parts
-     *    as follows after the due date:
-     *    - `trackedPrincipal` corresponds to the legal principal remaining to be repaid,
-     *      that includes the initial principal and the remuneratory interest remaining to be repaid at the end of the due date;
-     *    - `repaidPrincipal` corresponds to the legal principal that is repaid only after the due date;
-     *    - `discountPrincipal` corresponds to the legal principal that is discounted only after the due date;
-     *    - `trackedRemuneratoryInterest` corresponds to the remuneratory interest that is accrued and
-     *       remaining to be repaid after the due date;
-     *    - `repaidRemuneratoryInterest` corresponds to the remuneratory interest that is repaid only after the due date;
-     *    - `discountRemuneratoryInterest` corresponds to the remuneratory interest that is discounted only after the due date.
+     * 7.  The initial late fee imposed just after the due date can be calculated as:
+     *   ` initialLateFee = trackedLateFee + repaidLateFee + discountLateFee`.
+     * 8.  All rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
+     * 9.  All fields related to tracked, repaid, and discount amounts are not financially rounded
+     *     according to the ACCURACY_FACTOR, see the `Constants` contract.
      */
     struct SubLoanState {
-        // Slot 1 -- Frequently used data for reading and writing
+        // Slot 1, 2 -- Frequently used data for reading and writing
         SubLoanStatus status;
         GracePeriodStatus gracePeriodStatus;
         uint16 duration;
         uint32 freezeTimestamp;
         uint32 trackedTimestamp;
-        uint32 remuneratoryRate;
+        uint32 upToDueRemuneratoryRate;
+        uint32 postDueRemuneratoryRate;
         uint32 moratoryRate;
         uint32 lateFeeRate;
         uint32 graceDiscountRate;
-        // uint32 __reserved; // Reserved until the end of the storage slot
+        uint256 _reserved0;
+        // No reserve until the end of the storage slot
 
-        // Slots 2, 3 -- The principal related parts
+        // Slots 3, 4 -- The principal related parts
         uint64 trackedPrincipal;
         uint64 repaidPrincipal;
         uint64 discountPrincipal;
         uint256 _reserved1;
         // No reserve until the end of the storage slot
 
-        // Slot 4, 5 -- The remuneratory interest related parts
-        uint64 trackedRemuneratoryInterest;
-        uint64 repaidRemuneratoryInterest;
-        uint64 discountRemuneratoryInterest;
+        // Slots 5, 6 -- The up to the due date remuneratory interest related parts
+        uint64 trackedUpToDueRemuneratoryInterest;
+        uint64 repaidUpToDueRemuneratoryInterest;
+        uint64 discountUpToDueRemuneratoryInterest;
         uint256 _reserved2;
         // No reserve until the end of the storage slot
 
-        // Slot 6, 7 -- The moratory interest related parts
-        uint64 trackedMoratoryInterest;
-        uint64 repaidMoratoryInterest;
-        uint64 discountMoratoryInterest;
+        // Slots 7, 8 -- The post the due date remuneratory interest related parts
+        uint64 trackedPostDueRemuneratoryInterest;
+        uint64 repaidPostDueRemuneratoryInterest;
+        uint64 discountPostDueRemuneratoryInterest;
         uint256 _reserved3;
         // No reserve until the end of the storage slot
 
-        // Slot 8, 9 -- The late fee related parts
+        // Slots 9, 10 -- The moratory interest related parts
+        uint64 trackedMoratoryInterest;
+        uint64 repaidMoratoryInterest;
+        uint64 discountMoratoryInterest;
+        uint256 _reserved4;
+        // No reserve until the end of the storage slot
+
+        // Slots 11, 12 -- The late fee related parts
         uint64 trackedLateFee;
         uint64 repaidLateFee;
         uint64 discountLateFee;
-        uint256 _reserved4;
+        uint256 _reserved5;
         // No reserve until the end of the storage slot
     }
 
@@ -394,10 +405,10 @@ interface ILendingMarketV2Types {
         uint256[48] __gap0;
         // No reserve until the end of the storage slot
 
-        // Slot 51 ... 59
+        // Slot 51 ... 62
         SubLoanState state;
-        // Slots 60 ... 100
-        uint256[41] __gap1;
+        // Slots 63 ... 100
+        uint256[38] __gap1;
         // No reserve until the end of the storage slot
 
         // Slot 101
@@ -418,33 +429,37 @@ interface ILendingMarketV2Types {
      * 
      * Values:
      *
-     * - id ---------------------------- The ID of the sub-loan.
-     * - earliestOperationId ----------- The ID of the earliest submitted operation of the sub-loan.
-     * - recentOperationId ------------- The ID of the recent applied operation of the sub-loan.
-     * - flags ------------------------- The flags of the sub-loan.
-     * - status ------------------------ The status of the sub-loan.
-     * - gracePeriodStatus ------------- The status of the grace period of the sub-loan.
-     * - startTimestamp ---------------- The timestamp (at UTC timezone) when the sub-loan is started.
-     * - freezeTimestamp --------------- The timestamp (at UTC timezone) when the sub-loan is frozen.
-     * - trackedTimestamp -------------- The timestamp (at UTC timezone) at which this state is determined.
-     * - pendingTimestamp -------------- The timestamp of the earliest pending operation or zero if none.
-     * - duration ---------------------- The duration of the sub-loan in days.
-     * - remuneratoryRate -------------- The remuneratory rate of the sub-loan.
-     * - moratoryRate ------------------ The moratory rate of the sub-loan.
-     * - lateFeeRate ------------------- The late fee rate of the sub-loan.
-     * - graceDiscountRate ------------- The grace discount rate of the sub-loan.
-     * - trackedPrincipal -------------- The tracked principal of the sub-loan, remaining to be repaid.
-     * - repaidPrincipal --------------- The repaid principal of the sub-loan.
-     * - discountPrincipal ------------- The discount principal of the sub-loan.
-     * - trackedRemuneratoryInterest --- The tracked remuneratory interest of the sub-loan, remaining to be repaid.
-     * - discountRemuneratoryInterest -- The discount remuneratory interest of the sub-loan.
-     * - repaidRemuneratoryInterest ---- The repaid remuneratory interest of the sub-loan.
-     * - trackedMoratoryInterest ------- The tracked moratory interest of the sub-loan, remaining to be repaid.
-     * - repaidMoratoryInterest -------- The repaid moratory interest of the sub-loan.
-     * - discountMoratoryInterest ------ The discount moratory interest of the sub-loan.
-     * - trackedLateFee ---------------- The tracked late fee of the sub-loan, remaining to be repaid`.
-     * - repaidLateFee ----------------- The repaid late fee of the sub-loan.
-     * - discountLateFee --------------- The discount late fee of the sub-loan.
+     * - id ----------------------------------- The ID of the sub-loan.
+     * - earliestOperationId ------------------ The ID of the earliest submitted operation of the sub-loan.
+     * - recentOperationId -------------------- The ID of the recent applied operation of the sub-loan.
+     * - flags -------------------------------- The flags of the sub-loan.
+     * - status ------------------------------- The status of the sub-loan.
+     * - gracePeriodStatus -------------------- The status of the grace period of the sub-loan.
+     * - startTimestamp ----------------------- The timestamp (at UTC timezone) when the sub-loan is started.
+     * - freezeTimestamp ---------------------- The timestamp (at UTC timezone) when the sub-loan is frozen.
+     * - trackedTimestamp --------------------- The timestamp (at UTC timezone) at which this state is determined.
+     * - pendingTimestamp --------------------- The timestamp of the earliest pending operation or zero if none.
+     * - duration ----------------------------- The duration of the sub-loan in days.
+     * - upToDueRemuneratoryRate -------------- The up to the due date remuneratory rate of the sub-loan.
+     * - postDueRemuneratoryRate -------------- The post the due date remuneratory rate of the sub-loan.
+     * - moratoryRate ------------------------- The moratory rate of the sub-loan.
+     * - lateFeeRate -------------------------- The late fee rate of the sub-loan.
+     * - graceDiscountRate -------------------- The grace discount rate of the sub-loan.
+     * - trackedPrincipal --------------------- The tracked principal of the sub-loan, remaining to be repaid.
+     * - repaidPrincipal ---------------------- The repaid principal of the sub-loan.
+     * - discountPrincipal -------------------- The discount principal of the sub-loan.
+     * - trackedUpToDueRemuneratoryInterest --- The tracked up to the due date remuneratory interest.
+     * - discountUpToDueRemuneratoryInterest -- The discount up to the due date remuneratory interest.
+     * - repaidUpToDueRemuneratoryInterest ---- The repaid up to the due date remuneratory interest.
+     * - trackedPostDueRemuneratoryInterest --- The tracked post the due date remuneratory interest.
+     * - discountPostDueRemuneratoryInterest -- The discount post the due date remuneratory interest.
+     * - repaidPostDueRemuneratoryInterest ---- The repaid post the due date remuneratory interest.
+     * - trackedMoratoryInterest -------------- The tracked moratory interest.
+     * - repaidMoratoryInterest --------------- The repaid moratory interest.
+     * - discountMoratoryInterest ------------- The discount moratory interest.
+     * - trackedLateFee ----------------------- The tracked late fee.
+     * - repaidLateFee ------------------------ The repaid late fee.
+     * - discountLateFee ---------------------- The discount late fee.
      * 
      * See notes for the appropriate fields in comments for the storage sub-loan structures above:
      * `SubLoanInception`, `SubLoanState`, `SubLoanMetadata`.
@@ -465,7 +480,8 @@ interface ILendingMarketV2Types {
         uint256 pendingTimestamp;
         uint256 duration;
 
-        uint256 remuneratoryRate;
+        uint256 upToDueRemuneratoryRate;
+        uint256 postDueRemuneratoryRate;
         uint256 moratoryRate;
         uint256 lateFeeRate;
         uint256 graceDiscountRate;
@@ -474,9 +490,13 @@ interface ILendingMarketV2Types {
         uint256 repaidPrincipal;
         uint256 discountPrincipal;
 
-        uint256 trackedRemuneratoryInterest;
-        uint256 repaidRemuneratoryInterest;
-        uint256 discountRemuneratoryInterest;
+        uint256 trackedUpToDueRemuneratoryInterest;
+        uint256 repaidUpToDueRemuneratoryInterest;
+        uint256 discountUpToDueRemuneratoryInterest;
+
+        uint256 trackedPostDueRemuneratoryInterest;
+        uint256 repaidPostDueRemuneratoryInterest;
+        uint256 discountPostDueRemuneratoryInterest;
 
         uint256 trackedMoratoryInterest;
         uint256 repaidMoratoryInterest;
@@ -494,43 +514,46 @@ interface ILendingMarketV2Types {
      *
      * Fields:
      *
-     * - day --------------------------- The day index at which the preview is calculated.
-     * - id ---------------------------- The ID of the sub-loan.
-     * - firstSubLoanId ---------------- The ID of the first sub-loan in the loan.
-     * - subLoanCount ------------------ The number of sub-loans in the loan.
-     * - operationCount ---------------- The number of operations (with all states) for the sub-loan.
-     * - earliestOperationId ----------- The ID of the earliest submitted operation of the sub-loan.
-     * - recentOperationId ------------- The ID of the recent applied operation of the sub-loan.
-     * - latestOperationId ------------- The ID of the latest submitted operation of the sub-loan.
-     * - status ------------------------ The status of the sub-loan.
-     * - gracePeriodStatus ------------- The status of the grace period of the sub-loan.
-     * - overdueStatus ----------------- The overdue status of the sub-loan: 0 -- not overdue, 1 -- overdue.
-     * - programId --------------------- The ID of the lending program used to take the sub-loan.
-     * - borrower ---------------------- The address of the borrower.
-     * - borrowedAmount ---------------- The borrowed amount of the sub-loan.
-     * - addonAmount ------------------- The addon amount of the sub-loan.
-     * - startTimestamp ---------------- The timestamp (at UTC timezone) when the sub-loan is started.
-     * - freezeTimestamp --------------- The timestamp (at UTC timezone) when the sub-loan is frozen.
-     * - trackedTimestamp -------------- The timestamp (at UTC timezone) at which this view is determined.
-     * - pendingTimestamp -------------- The timestamp of the earliest pending operation or zero if none.
-     * - duration ---------------------- The duration of the sub-loan in days.
-     * - remuneratoryRate -------------- The remuneratory rate of the sub-loan.
-     * - moratoryRate ------------------ The moratory rate of the sub-loan.
-     * - lateFeeRate ------------------- The late fee rate of the sub-loan.
-     * - graceDiscountRate ------------- The grace discount rate of the sub-loan.
-     * - trackedPrincipal -------------- The tracked principal of the sub-loan, remaining to be repaid.
-     * - repaidPrincipal --------------- The repaid principal of the sub-loan.
-     * - discountPrincipal ------------- The discount principal of the sub-loan.
-     * - trackedRemuneratoryInterest --- The tracked remuneratory interest of the sub-loan, remaining to be repaid.
-     * - repaidRemuneratoryInterest ---- The repaid remuneratory interest of the sub-loan.
-     * - discountRemuneratoryInterest -- The discount remuneratory interest of the sub-loan.
-     * - trackedMoratoryInterest ------- The tracked moratory interest of the sub-loan, remaining to be repaid.
-     * - repaidMoratoryInterest -------- The repaid moratory interest of the sub-loan.
-     * - discountMoratoryInterest ------ The discount moratory interest of the sub-loan.
-     * - trackedLateFee ---------------- The tracked late fee of the sub-loan, remaining to be repaid.
-     * - repaidLateFee ----------------- The repaid late fee of the sub-loan.
-     * - discountLateFee --------------- The discount late fee of the sub-loan.
-     * - outstandingBalance ------------ The outstanding balance of the sub-loan, see notes below.
+     * - day ---------------------------------- The day index at which the preview is calculated.
+     * - id ----------------------------------- The ID of the sub-loan.
+     * - firstSubLoanId ----------------------- The ID of the first sub-loan in the loan.
+     * - subLoanCount ------------------------- The number of sub-loans in the loan.
+     * - operationCount ----------------------- The number of operations (with all states) for the sub-loan.
+     * - earliestOperationId ------------------ The ID of the earliest submitted operation of the sub-loan.
+     * - recentOperationId -------------------- The ID of the recent applied operation of the sub-loan.
+     * - latestOperationId -------------------- The ID of the latest submitted operation of the sub-loan.
+     * - status ------------------------------- The status of the sub-loan.
+     * - gracePeriodStatus -------------------- The status of the grace period of the sub-loan.
+     * - programId ---------------------------- The ID of the lending program used to take the sub-loan.
+     * - borrower ----------------------------- The address of the borrower.
+     * - borrowedAmount ----------------------- The borrowed amount of the sub-loan.
+     * - addonAmount -------------------------- The addon amount of the sub-loan.
+     * - startTimestamp ----------------------- The timestamp (at UTC timezone) when the sub-loan is started.
+     * - freezeTimestamp ---------------------- The timestamp (at UTC timezone) when the sub-loan is frozen.
+     * - trackedTimestamp --------------------- The timestamp (at UTC timezone) at which this view is determined.
+     * - pendingTimestamp --------------------- The timestamp of the earliest pending operation or zero if none.
+     * - duration ----------------------------- The duration of the sub-loan in days.
+     * - upToDueRemuneratoryRate -------------- The up to the due date remuneratory rate of the sub-loan.
+     * - postDueRemuneratoryRate -------------- The post the due date remuneratory rate of the sub-loan.
+     * - moratoryRate ------------------------- The moratory rate of the sub-loan.
+     * - lateFeeRate -------------------------- The late fee rate of the sub-loan.
+     * - graceDiscountRate -------------------- The grace discount rate of the sub-loan.
+     * - trackedPrincipal --------------------- The tracked principal of the sub-loan, remaining to be repaid.
+     * - repaidPrincipal ---------------------- The repaid principal of the sub-loan.
+     * - discountPrincipal -------------------- The discount principal of the sub-loan.
+     * - trackedUpToDueRemuneratoryInterest --- The tracked up to the due date remuneratory interest.
+     * - discountUpToDueRemuneratoryInterest -- The discount up to the due date remuneratory interest.
+     * - repaidUpToDueRemuneratoryInterest ---- The repaid up to the due date remuneratory interest.
+     * - trackedPostDueRemuneratoryInterest --- The tracked post the due date remuneratory interest.
+     * - discountPostDueRemuneratoryInterest -- The discount post the due date remuneratory interest.
+     * - repaidPostDueRemuneratoryInterest ---- The repaid post the due date remuneratory interest.
+     * - trackedMoratoryInterest -------------- The tracked moratory interest.
+     * - repaidMoratoryInterest --------------- The repaid moratory interest.
+     * - discountMoratoryInterest ------------- The discount moratory interest.
+     * - trackedLateFee ----------------------- The tracked late fee.
+     * - repaidLateFee ------------------------ The repaid late fee.
+     * - discountLateFee ---------------------- The discount late fee.
+     * - outstandingBalance ------------------- The outstanding balance of the sub-loan, see notes below.
      *
      * Notes:
      *
@@ -545,10 +568,7 @@ interface ILendingMarketV2Types {
      * 3. The `outstandingBalance` fields is financially rounded according to the ACCURACY_FACTOR,
      *    see the `Constants` contract.
      *    All other fields related to tracked, repaid, and discount amounts are not financially rounded.
-     * 4. The meaning of the principal and remuneratory interest parts depends on the sub-loan overdue status:
-     *    - if the sub-loan is not overdue, then the principal and remuneratory interest parts are normal ones;
-     *    - if the sub-loan is overdue, then see notes for the appropriate fields of the `SubLoanState` structure above.
-     * 5. See also notes for the appropriate fields in comments for the storage sub-loan structures above:
+     * 4. See also notes for the appropriate fields in comments for the storage sub-loan structures above:
      *    `SubLoanInception`, `SubLoanState`, `SubLoanMetadata`.
      *
      */
@@ -565,8 +585,6 @@ interface ILendingMarketV2Types {
         uint256 latestOperationId;
         uint256 status;
         uint256 gracePeriodStatus;
-        // TODO: Consider removing this field
-        uint256 overdueStatus;
 
         uint256 programId;
         address borrower;
@@ -579,7 +597,8 @@ interface ILendingMarketV2Types {
         uint256 pendingTimestamp;
         uint256 duration;
 
-        uint256 remuneratoryRate;
+        uint256 upToDueRemuneratoryRate;
+        uint256 postDueRemuneratoryRate;
         uint256 moratoryRate;
         uint256 lateFeeRate;
         uint256 graceDiscountRate;
@@ -588,9 +607,13 @@ interface ILendingMarketV2Types {
         uint256 repaidPrincipal;
         uint256 discountPrincipal;
 
-        uint256 trackedRemuneratoryInterest;
-        uint256 repaidRemuneratoryInterest;
-        uint256 discountRemuneratoryInterest;
+        uint256 trackedUpToDueRemuneratoryInterest;
+        uint256 repaidUpToDueRemuneratoryInterest;
+        uint256 discountUpToDueRemuneratoryInterest;
+
+        uint256 trackedPostDueRemuneratoryInterest;
+        uint256 repaidPostDueRemuneratoryInterest;
+        uint256 discountPostDueRemuneratoryInterest;
 
         uint256 trackedMoratoryInterest;
         uint256 repaidMoratoryInterest;
@@ -610,33 +633,36 @@ interface ILendingMarketV2Types {
      *
      * Fields:
      *
-     * - day -------------------------------- The day index at which the preview is calculated.
-     * - firstSubLoanId --------------------- The ID of the first sub-loan in the loan.
-     * - subLoanCount ----------------------- The number of sub-loans in the loan.
-     * - ongoingSubLoanCount ---------------- The number of all ongoing sub-loans in the loan despite of the overdue status.
-     * - overdueSubLoanCount ---------------- The number of ongoing overdue sub-loans in the loan.
-     * - repaidSubLoanCount ----------------- The number of fully repaid sub-loans in the loan.
-     * - revokedSubLoanCount ---------------- The number of revoked sub-loans in the loan.
-     * - programId -------------------------- The ID of the lending program used to take the loan.
-     * - borrower --------------------------- The address of the borrower.
-     * - totalBorrowedAmount ---------------- The total borrowed amount of the loan over all sub-loans.
-     * - totalAddonAmount ------------------- The total addon amount of the loan over all sub-loans.
-     * - totalTrackedPrincipal -------------- The total tracked principal of the loan over all sub-loans.
-     * - totalRepaidPrincipal --------------- The total repaid principal of the loan over all sub-loans.
-     * - totalDiscountPrincipal ------------- The total discount principal of the loan over all sub-loans.
-     * - totalTrackedLegalPrincipal --------- The total tracked legal principal of the loan over all sub-loans.
-     * - totalRepaidLegalPrincipal ----------- The total repaid legal principal of the loan over all sub-loans.
-     * - totalDiscountLegalPrincipal --------- The total discount legal principal of the loan over all sub-loans.
-     * - totalTrackedRemuneratoryInterest --- The total tracked remuneratory interest of the loan over all sub-loans.
-     * - totalRepaidRemuneratoryInterest ---- The total repaid remuneratory interest of the loan over all sub-loans.
-     * - totalDiscountRemuneratoryInterest -- The total discount remuneratory interest of the loan over all sub-loans.
-     * - totalTrackedMoratoryInterest ------- The total tracked moratory interest of the loan over all sub-loans.
-     * - totalRepaidMoratoryInterest -------- The total repaid moratory interest of the loan over all sub-loans.
-     * - totalDiscountMoratoryInterest ------ The total discount moratory interest of the loan over all sub-loans.
-     * - totalTrackedLateFee ---------------- The total tracked late fee of the loan over all sub-loans.
-     * - totalRepaidLateFee ----------------- The total repaid late fee of the loan over all sub-loans.
-     * - totalDiscountLateFee --------------- The total discount late fee of the loan over all sub-loans.
-     * - totalOutstandingBalance ------------ The total outstanding balance of the loan over all sub-loans.
+     * - day --------------------------------------- The day index at which the preview is calculated.
+     * - firstSubLoanId ---------------------------- The ID of the first sub-loan in the loan.
+     * - subLoanCount ------------------------------ The number of sub-loans in the loan.
+     * - ongoingSubLoanCount ----------------------- The number of all ongoing sub-loans in the loan despite of the overdue status.
+     * - overdueSubLoanCount ----------------------- The number of ongoing overdue sub-loans in the loan.
+     * - repaidSubLoanCount ------------------------ The number of fully repaid sub-loans in the loan.
+     * - revokedSubLoanCount ----------------------- The number of revoked sub-loans in the loan.
+     * - programId --------------------------------- The ID of the lending program used to take the loan.
+     * - borrower ---------------------------------- The address of the borrower.
+     * - totalBorrowedAmount ----------------------- The total borrowed amount.
+     * - totalAddonAmount -------------------------- The total addon amount.
+     * - totalTrackedPrincipal --------------------- The total tracked principal.
+     * - totalRepaidPrincipal ---------------------- The total repaid principal.
+     * - totalDiscountPrincipal -------------------- The total discount principal.
+     * - totalTrackedLegalPrincipal ---------------- The total tracked legal principal.
+     * - totalRepaidLegalPrincipal ----------------- The total repaid legal principal.
+     * - totalDiscountLegalPrincipal --------------- The total discount legal principal.
+     * - totalTrackedUpToDueRemuneratoryInterest --- The total tracked up to the due date remuneratory interest.
+     * - totalRepaidUpToDueRemuneratoryInterest ---- The total repaid up to the due date remuneratory interest.
+     * - totalDiscountUpToDueRemuneratoryInterest -- The total discount up to the due date remuneratory interest.
+     * - totalTrackedPostDueRemuneratoryInterest --- The total tracked post the due date remuneratory interest.
+     * - totalRepaidPostDueRemuneratoryInterest ---- The total repaid post the due date remuneratory interest.
+     * - totalDiscountPostDueRemuneratoryInterest -- The total discount post the due date remuneratory interest.
+     * - totalTrackedMoratoryInterest -------------- The total tracked moratory interest.
+     * - totalRepaidMoratoryInterest --------------- The total repaid moratory interest.
+     * - totalDiscountMoratoryInterest ------------- The total discount moratory interest.
+     * - totalTrackedLateFee ----------------------- The total tracked late fee.
+     * - totalRepaidLateFee ------------------------ The total repaid late fee.
+     * - totalDiscountLateFee ---------------------- The total discount late fee.
+     * - totalOutstandingBalance ------------------- The total outstanding balance.
      *
      * Notes:
      *
@@ -644,16 +670,6 @@ interface ILendingMarketV2Types {
      * 2.  See notes about the outstanding balance in the comments for the `SubLoanPreview` structure.
      * 3.  See also notes for the appropriate fields in comments for the storage sub-loan structures above:
      *     `SubLoanInception`, `SubLoanState`, `SubLoanMetadata`.
-     * 4.  The `totalTrackedPrincipal` field does not include the tracked principal of overdue sub-loans.
-     * 5.  The `totaTrackedRemuneratoryInterest` field does not include the tracked remuneratory interest of
-     *     overdue sub-loans before the due date, it is included in the `totalTrackedLegalPrincipal` field.
-     * 6.  The `totalRepaidPrincipal` field does not include the repaid principal of overdue sub-loans.
-     * 7.  The `totalRepaidRemuneratoryInterest` field does not include the repaid remuneratory interest of
-     *     overdue sub-loans before the due date, it is included in the `totalRepaidLegalPrincipal` field.
-     * 8.  The `totalDiscountPrincipal` field does not include the discount principal of overdue sub-loans.
-     * 9.  The `totalDiscountRemuneratoryInterest` field does not include the discount remuneratory interest of
-     *     overdue sub-loans before the due date, it is included in the `totalDiscountLegalPrincipal` field.
-     * 10. About legal principal parts see the notes of the `SubLoanState` structure.
      */
     // The comment below is to keep gaps between fields for better readability
     // prettier-ignore
@@ -679,9 +695,13 @@ interface ILendingMarketV2Types {
         uint256 totalRepaidLegalPrincipal;
         uint256 totalDiscountLegalPrincipal;
 
-        uint256 totalTrackedRemuneratoryInterest;
-        uint256 totalRepaidRemuneratoryInterest;
-        uint256 totalDiscountRemuneratoryInterest;
+        uint256 totalTrackedUpToDueRemuneratoryInterest;
+        uint256 totalRepaidUpToDueRemuneratoryInterest;
+        uint256 totalDiscountUpToDueRemuneratoryInterest;
+
+        uint256 totalTrackedPostDueRemuneratoryInterest;
+        uint256 totalRepaidPostDueRemuneratoryInterest;
+        uint256 totalDiscountPostDueRemuneratoryInterest;
 
         uint256 totalTrackedMoratoryInterest;
         uint256 totalRepaidMoratoryInterest;
@@ -798,13 +818,14 @@ interface ILendingMarketV2Types {
      *
      * Fields:
      *
-     * - borrowedAmount ----- The borrowed amount of the sub-loan.
-     * - addonAmount -------- The addon amount of the sub-loan.
-     * - duration ----------- The duration of the sub-loan in days.
-     * - remuneratoryRate --- The remuneratory rate of the sub-loan.
-     * - moratoryRate ------- The moratory rate of the sub-loan.
-     * - lateFeeRate -------- The late fee rate of the sub-loan.
-     * - graceDiscountRate -- The grace discount rate of the sub-loan.
+     * - borrowedAmount ------------ The borrowed amount of the sub-loan.
+     * - addonAmount --------------- The addon amount of the sub-loan.
+     * - duration ------------------ The duration of the sub-loan in days.
+     * - upToDueRemuneratoryRate --- The up to the due date remuneratory rate of the sub-loan.
+     * - postDueRemuneratoryRate --- The post the due date remuneratory rate of the sub-loan.
+     * - moratoryRate -------------- The moratory rate of the sub-loan.
+     * - lateFeeRate --------------- The late fee rate of the sub-loan.
+     * - graceDiscountRate --------- The grace discount rate of the sub-loan.
      *
      * Notes:
      *
@@ -817,7 +838,8 @@ interface ILendingMarketV2Types {
         uint256 borrowedAmount;
         uint256 addonAmount;
         uint256 duration;
-        uint256 remuneratoryRate;
+        uint256 upToDueRemuneratoryRate;
+        uint256 postDueRemuneratoryRate;
         uint256 moratoryRate;
         uint256 lateFeeRate;
         uint256 graceDiscountRate;
@@ -927,11 +949,12 @@ interface ILendingMarketV2PrimaryEvents is ILendingMarketV2Types {
      * @param duration The duration of the sub-loan in days.
      * @param packedRates The packed rates of the sub-loan. A bitfield with the following bits:
      *
-     * - 32  bits from   0 to  31: the remuneratory interest rate.
-     * - 32  bits from  32 to  63: the moratory interest rate.
-     * - 32  bits from  64 to  95: the late fee rate.
-     * - 32  bits from  96 to 127: the grace interest rate.
-     * - 128 bits from 128 to 255: reserved for future usage.
+     * - 32  bits from   0 to  31: the up to the due date remuneratory interest rate.
+     * - 32  bits from  32 to  63: the post the due date remuneratory interest rate.
+     * - 32  bits from  64 to  95: the moratory interest rate.
+     * - 32  bits from  96 to 127: the late fee rate.
+     * - 32  bits from 128 to 159: the grace discount rate.
+     * - 128 bits from 160 to 255: reserved for future usage.
      *
      */
     event SubLoanTaken(
@@ -977,14 +1000,17 @@ interface ILendingMarketV2PrimaryEvents is ILendingMarketV2Types {
      *
      * 4. The update index is incremented by one for each update event of the sub-loan.
      *
+     * 5. The parameters of the event are provided at the timestamp equals to the stored tracked timestamp.
+     *
      * @param subLoanId The unique identifier of the sub-loan.
      * @param updateIndex The sequence index of the update event for the sub-loan.
      * @param packedParameters The packed parameters of the sub-loan, see notes above.
      * @param packedRates The packed rates of the sub-loan, see notes above.
-     * @param packedPrincipalParts The packed principal parts at the stored tracked timestamp, see notes above.
-     * @param packedRemuneratoryInterestParts The packed remuneratory interest parts at the stored tracked timestamp.
-     * @param packedMoratoryInterestParts The packed moratory interest parts at the stored tracked timestamp.
-     * @param packedLateFeeParts The packed late fee parts at the stored tracked timestamp.
+     * @param packedPrincipalParts The packed principal parts.
+     * @param packedUpToDueRemuneratoryInterestParts The packed up to the due date remuneratory interest parts
+     * @param packedPostDueRemuneratoryInterestParts The packed post the due date remuneratory interest parts.
+     * @param packedMoratoryInterestParts The packed moratory interest parts.
+     * @param packedLateFeeParts The packed late fee parts.
      */
     // TODO: add the overdue status to the packedParameters
     event SubLoanUpdated(
@@ -993,7 +1019,8 @@ interface ILendingMarketV2PrimaryEvents is ILendingMarketV2Types {
         bytes32 packedParameters,
         bytes32 packedRates,
         bytes32 packedPrincipalParts,
-        bytes32 packedRemuneratoryInterestParts,
+        bytes32 packedUpToDueRemuneratoryInterestParts,
+        bytes32 packedPostDueRemuneratoryInterestParts,
         bytes32 packedMoratoryInterestParts,
         bytes32 packedLateFeeParts
     );

@@ -10,15 +10,17 @@
 
 3. **Financial Tracking**: Each sub-loan separately tracks the following financial parts remaining to be repaid:
     - the principal,
-    - the accrued remuneratory interest (primary rate),
+    - the accrued remuneratory interest up to the due date (primary interest),
+    - the accrued remuneratory interest post the due date (secondary interest),
     - the accrued moratory interest (penalty rate),
     - the late fee.
-    For each financial part, the contract maintains the tracked, repaid, and discounted amounts.
+   For each financial part, the contract maintains the tracked, repaid, and discounted amounts.
 
 4. **Interest and Fee Calculations**: The following calculations are performed for each financial part:
-    - the remuneratory interest compounds on (principal + accrued remuneratory interest);
-    - the moratory interest accrues as simple interest on principal after the due date;
-    - the late fee is imposed as a one-time fee on the principal at the due date.
+    - the remuneratory interest compounds on (principal + primary interest) up to the due date;
+    - the remuneratory interest compounds on (principal + primary interest + secondary interest) post the due date;
+    - the moratory interest accrues as simple interest on (principal + primary interest) after the due date;
+    - the late fee is imposed as a one-time fee on the (principal + primary interest) at the due date.
 
 5. **Sub-Loan Status**: Each sub-loan can have one of the following statuses: 
     - `Nonexistent` (default value)
@@ -41,7 +43,8 @@
     - `Revocation`: revoke the sub-loan.
     - `Freezing`: freeze the sub-loan.
     - `Unfreezing`: unfreeze the sub-loan.
-    - `RemuneratoryRateSetting`: set the remuneratory rate of the sub-loan.
+    - `UpToDueRemuneratoryRateSetting`: set the up to the due date remuneratory rate of the sub-loan.
+    - `PostDueRemuneratoryRateSetting`: set the post the due date remuneratory rate of the sub-loan.
     - `MoratoryRateSetting`: set the moratory rate of the sub-loan.
     - `LateFeeRateSetting`: set the late fee rate of the sub-loan.
     - `GraceDiscountRateSetting`: set the grace discount rate of the sub-loan.
@@ -220,9 +223,9 @@
 **Initial State:** Same as Example A after the second repayment.
 
 **Adding Rate Change:**
-- Insert operation: RemuneratoryRateSetting(ID=3, timestamp=t15, value=1.5%)
-- System replays: initialize revision => apply Repayment1(t10) => apply RemuneratoryRateSetting(t15) => apply Repayment2(t20)
-- Operations: [Repayment1(t10), RemuneratoryRateSetting(t15), Repayment2(t20)]
+- Insert operation: UpToDueRemuneratoryRateSetting(ID=3, timestamp=t15, value=1.5%)
+- System replays: initialize revision => apply Repayment1(t10) => apply UpToDueRemuneratoryRateSetting(t15) => apply Repayment2(t20)
+- Operations: [Repayment1(t10), UpToDueRemuneratoryRateSetting(t15), Repayment2(t20)]
 - New events: [OperationApplied(ID=3, value=1.5%, timestamp=t15), SubLoanUpdated]
 - Result: Status=Ongoing, outstanding balance is greater because of the new rate at t15
 
@@ -231,8 +234,8 @@
 **Initial State:** Same as Example A after the first repayment.
 
 **Adding Future Rate Change:**
-- Insert operation: RemuneratoryRateSetting(ID=2, timestamp=t15, value=2.0%)
-- Operations: [Repayment1(t10), RemuneratoryRateSetting(ID=2, timestamp=t15, value=2.0%, status=Pending)]
+- Insert operation: UpToDueRemuneratoryRateSetting(ID=2, timestamp=t15, value=2.0%)
+- Operations: [Repayment1(t10), UpToDueRemuneratoryRateSetting(ID=2, timestamp=t15, value=2.0%, status=Pending)]
 - New events: [OperationPended(ID=2, value=2.0%, timestamp=t15)]
 - Result: Status=Ongoing, rate change pending
 
@@ -240,8 +243,8 @@
 
 **Second Repayment After Rate Change:**
 - Process pending operations first at t15, then apply repayment at t20
-- Operations: [Repayment1(t10), RemuneratoryRateSetting(t15), Repayment2(t20)]
-- New events: [OperationApplied(RemuneratoryRateSetting(t15)), OperationApplied(Repayment2(t20)), SubLoanUpdated]
+- Operations: [Repayment1(t10), UpToDueRemuneratoryRateSetting(t15), Repayment2(t20)]
+- New events: [OperationApplied(UpToDueRemuneratoryRateSetting(t15)), OperationApplied(Repayment2(t20)), SubLoanUpdated]
 - Result: Status=Ongoing, outstanding balance is greater because of the new rate at t15
 
 ### 5. Notes

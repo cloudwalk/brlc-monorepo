@@ -42,7 +42,7 @@ const ERROR_NAME_MAX_BORROWED_AMOUNT_EXCESS = "CreditLineV2_MaxBorrowedAmountExc
 const ERROR_NAME_LOANS_PROHIBITED = "CreditLineV2_LoansProhibited";
 const ERROR_NAME_LIMIT_VIOLATION_ON_SINGLE_ACTIVE_LOAN = "CreditLineV2_LimitViolationOnSingleActiveLoan";
 const ERROR_NAME_LIMIT_VIOLATION_ON_TOTAL_ACTIVE_LOAN_AMOUNT =
-  "CreditLoneV2_LimitViolationOnTotalActiveLoanAmount";
+  "CreditLineV2_LimitViolationOnTotalActiveLoanAmount";
 const ERROR_NAME_BORROWER_STATE_OVERFLOW = "CreditLineV2_BorrowerStateOverflow";
 const ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID = "CreditLineV2_ImplementationAddressInvalid";
 

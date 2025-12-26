@@ -327,7 +327,7 @@ interface ICreditLineV2Errors {
      * E.g., the borrower's borrowing policy is set to TotalActiveAmountLimit and the new total would exceed
      *      the maximum allowed amount.
      */
-    error CreditLoneV2_LimitViolationOnTotalActiveLoanAmount(
+    error CreditLineV2_LimitViolationOnTotalActiveLoanAmount(
         uint256 newTotalActiveLoanAmount,
         uint256 maxBorrowedAmount
     );

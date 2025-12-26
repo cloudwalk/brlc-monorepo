@@ -119,12 +119,10 @@ interface ILendingEngineV2 is ILendingMarketV2Types {
      *
      * @param subLoanId The unique off-chain identifier of the sub-loan to preview.
      * @param timestamp The timestamp to preview the sub-loan at.
-     * @param flags The flags to preview the sub-loan with. See the `SubLoanPreviewRequest` structure for the details.
      */
     function previewSubLoan(
-        uint256 subLoanId,
-        uint256 timestamp,
-        uint256 flags
+        uint256 subLoanId, // Tools: prevent Prettier one-liner
+        uint256 timestamp
     ) external view returns (ProcessingSubLoan memory subLoan);
 
     /**

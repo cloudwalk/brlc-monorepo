@@ -151,11 +151,10 @@ contract LendingEngineV2 is
     /// @inheritdoc ILendingEngineV2
     function previewSubLoan(
         uint256 subLoanId,
-        uint256 timestamp,
-        uint256 flags
+        uint256 timestamp
     ) external view returns (ProcessingSubLoan memory subLoan) {
         _checkCallContext();
-        return _previewSubLoan(subLoanId, timestamp, flags);
+        return _previewSubLoan(subLoanId, timestamp);
     }
 
     /// @inheritdoc ILendingEngineV2
@@ -312,9 +311,9 @@ contract LendingEngineV2 is
             subLoanTakingRequest.postDueRemuneratoryRate > INTEREST_RATE_FACTOR ||
             subLoanTakingRequest.moratoryRate > INTEREST_RATE_FACTOR ||
             subLoanTakingRequest.lateFeeRate > INTEREST_RATE_FACTOR ||
-            subLoanTakingRequest.graceDiscountRate > INTEREST_RATE_FACTOR
+            subLoanTakingRequest.clawbackFeeRate > INTEREST_RATE_FACTOR
         ) {
-            revert LendingMarketV2_SubLoanRateValueInvalid();
+            revert LendingMarketV2_SubLoanRateValueExcess();
         }
 
         // Set the sub-loan fields and call the hook function in a separate block to avoid the 'stack too deep' error
@@ -337,13 +336,11 @@ contract LendingEngineV2 is
             subLoan.inception.initialPostDueRemuneratoryRate = uint32(subLoanTakingRequest.postDueRemuneratoryRate);
             subLoan.inception.initialMoratoryRate = uint32(subLoanTakingRequest.moratoryRate);
             subLoan.inception.initialLateFeeRate = uint32(subLoanTakingRequest.lateFeeRate);
-            subLoan.inception.initialGraceDiscountRate = uint32(subLoanTakingRequest.graceDiscountRate);
+            subLoan.inception.initialClawbackFeeRate = uint32(subLoanTakingRequest.clawbackFeeRate);
 
-            // State fields, slot 1
+            // State fields, slot 1, 2
             subLoan.state.status = SubLoanStatus.Ongoing;
-            subLoan.state.gracePeriodStatus = subLoanTakingRequest.graceDiscountRate == 0
-                ? GracePeriodStatus.None
-                : GracePeriodStatus.Active;
+            // subLoan.state._reservedStatus = 0;
             subLoan.state.duration = uint16(duration);
             // subLoan.state.freezeTimestamp = 0;
             subLoan.state.trackedTimestamp = uint32(startTimestamp);
@@ -351,31 +348,43 @@ contract LendingEngineV2 is
             subLoan.state.postDueRemuneratoryRate = uint32(subLoanTakingRequest.postDueRemuneratoryRate);
             subLoan.state.moratoryRate = uint32(subLoanTakingRequest.moratoryRate);
             subLoan.state.lateFeeRate = uint32(subLoanTakingRequest.lateFeeRate);
-            subLoan.state.graceDiscountRate = uint32(subLoanTakingRequest.graceDiscountRate);
+            subLoan.state.clawbackFeeRate = uint32(subLoanTakingRequest.clawbackFeeRate);
 
-            // State fields, slot 2
+            // State fields, slot 3, 4
             subLoan.state.trackedPrincipal = uint64(principal);
             // subLoan.state.repaidPrincipal = 0;
             // subLoan.state.discountPrincipal = 0;
             // subLoan.state._reserved1 = 0;
 
-            // State fields, slot 3
-            // subLoan.state.trackedRemuneratoryInterest = 0;
-            // subLoan.state.repaidRemuneratoryInterest = 0;
-            // subLoan.state.discountRemuneratoryInterest = 0;
+            // State fields, slot 5, 6
+            // subLoan.state.trackedUpToDueRemuneratoryInterest = 0;
+            // subLoan.state.repaidUpToDueRemuneratoryInterest = 0;
+            // subLoan.state.discountUpToDueRemuneratoryInterest = 0;
             // subLoan.state._reserved2 = 0;
 
-            // State fields, slot 4
+            // State fields, slot 7, 8
+            // subLoan.state.trackedPostDueRemuneratoryInterest = 0;
+            // subLoan.state.repaidPostDueRemuneratoryInterest = 0;
+            // subLoan.state.discountPostDueRemuneratoryInterest = 0;
+            // subLoan.state._reserved3 = 0;
+
+            // State fields, slot 9, 10
             // subLoan.state.trackedMoratoryInterest = 0;
             // subLoan.state.repaidMoratoryInterest = 0;
             // subLoan.state.discountMoratoryInterest = 0;
             // subLoan.state._reserved3 = 0;
 
-            // State fields, slot 5
+            // State fields, slot 11, 12
             // subLoan.state.trackedLateFee = 0;
             // subLoan.state.repaidLateFee = 0;
             // subLoan.state.discountLateFee = 0;
             // subLoan.state._reserved4 = 0;
+
+            // State fields, slot 13, 14
+            // subLoan.state.trackedClawbackFee = 0;
+            // subLoan.state.repaidClawbackFee = 0;
+            // subLoan.state.discountClawbackFee = 0;
+            // subLoan.state._reserved6 = 0;
 
             // Metadata fields
             // subLoan.metadata.subLoanIndex = 0;
@@ -393,7 +402,7 @@ contract LendingEngineV2 is
                 subLoanTakingRequest.postDueRemuneratoryRate,
                 subLoanTakingRequest.moratoryRate,
                 subLoanTakingRequest.lateFeeRate,
-                subLoanTakingRequest.graceDiscountRate
+                subLoanTakingRequest.clawbackFeeRate
             );
             emit SubLoanTaken(
                 subLoanId,
@@ -683,11 +692,9 @@ contract LendingEngineV2 is
             return;
         }
 
-        subLoan.flags |= SUB_LOAN_FLAG_GRACE_PERIOD_BY_LAST_OPERATION_TIMESTAMP;
-
         // After applying, the tracked balance and tracked timestamp match the time of the last applied operation.
-        (uint256 earliestPendingOperation, uint256 pendingOperationCount) = _applyOperations(subLoan, timestamp);
-        _processPendingOperations(subLoan, earliestPendingOperation, pendingOperationCount);
+        (uint256 earliestNewlyAppliedOpId, uint256 newlyAppliedOpCount) = _applyOperations(subLoan, timestamp);
+        _processNewlyAppliedOperations(subLoan, earliestNewlyAppliedOpId, newlyAppliedOpCount);
         _updateSubLoan(subLoan);
     }
 
@@ -696,25 +703,15 @@ contract LendingEngineV2 is
      */
     function _previewSubLoan(
         uint256 subLoanId,
-        uint256 timestamp,
-        uint256 flags
+        uint256 timestamp
     ) internal view returns (ProcessingSubLoan memory subLoan) {
         subLoan = _convertToProcessingSubLoan(subLoanId, _getSubLoan(subLoanId));
-        subLoan.flags |= flags; // Add active binary flags
 
         if (timestamp == 0) {
             timestamp = _blockTimestamp();
         }
         if (timestamp == 1) {
             timestamp = subLoan.trackedTimestamp;
-        }
-
-        // If the requested timestamp changes the grace period status,
-        // reapply operations from the start timestamp.
-        uint256 newGracePeriodStatus = _determineGracePeriodStatus(subLoan, timestamp);
-        if (newGracePeriodStatus != uint256(subLoan.gracePeriodStatus)) {
-            subLoan.gracePeriodStatus = newGracePeriodStatus;
-            subLoan.pendingTimestamp = subLoan.startTimestamp;
         }
 
         // After applying, the tracked balance and tracked timestamp match the time of the last applied operation.
@@ -725,75 +722,59 @@ contract LendingEngineV2 is
     }
 
     /**
-     * @dev Applies or re-applies all operations up to the specified timestamp, handling grace period status changes.
+     * @dev Applies or re-applies all operations up to the specified timestamp.
      */
     function _applyOperations(
         ProcessingSubLoan memory subLoan,
         uint256 timestamp
-    ) internal view returns (uint256 earliestPendingOperationId, uint256 pendingOperationCount) {
+    ) internal view returns (uint256 earliestNewlyAppliedOperationId, uint256 newlyAppliedOperationCount) {
         if (timestamp < subLoan.startTimestamp) {
             revert LendingMarketV2_OperationApplyingTimestampTooEarly();
         }
 
         SubLoan storage storedSubLoan = _getSubLoan(subLoan.id);
         uint256 operationId;
-        uint256 lastAppliedOperationTimestamp = subLoan.startTimestamp;
-        uint256 gracePeriodStatus = subLoan.gracePeriodStatus; // To detect changes in grace period status
 
-        do {
+        if (
+            timestamp < subLoan.trackedTimestamp ||
+            (subLoan.pendingTimestamp != 0 && subLoan.pendingTimestamp <= subLoan.trackedTimestamp)
+        ) {
+            _initiateSubLoan(subLoan);
+        }
+
+        uint256 recentOperationId = subLoan.recentOperationId;
+        if (recentOperationId == 0) {
+            operationId = subLoan.earliestOperationId;
+        } else {
+            operationId = storedSubLoan.operations[recentOperationId].nextOperationId;
+        }
+
+        while (operationId != 0) {
+            Operation storage operation = storedSubLoan.operations[operationId];
+            if (operation.timestamp > timestamp) {
+                break;
+            }
+            uint256 operationStatus = uint256(operation.status);
             if (
-                gracePeriodStatus != subLoan.gracePeriodStatus ||
-                timestamp < subLoan.trackedTimestamp ||
-                (subLoan.pendingTimestamp != 0 && subLoan.pendingTimestamp <= subLoan.trackedTimestamp)
+                operationStatus == uint256(OperationStatus.Applied) || // Tools: prevent Prettier one-liner
+                operationStatus == uint256(OperationStatus.Pending)
             ) {
-                _initiateSubLoan(subLoan);
-            }
-            subLoan.gracePeriodStatus = gracePeriodStatus;
-
-            uint256 recentOperationId = subLoan.recentOperationId;
-            if (recentOperationId == 0) {
-                operationId = subLoan.earliestOperationId;
-            } else {
-                operationId = storedSubLoan.operations[recentOperationId].nextOperationId;
-            }
-
-            while (operationId != 0) {
-                Operation storage operation = storedSubLoan.operations[operationId];
-                if (operation.timestamp > timestamp) {
-                    break;
-                }
-                uint256 operationStatus = uint256(operation.status);
-                if (
-                    operationStatus == uint256(OperationStatus.Applied) || // Tools: prevent Prettier one-liner
-                    operationStatus == uint256(OperationStatus.Pending)
-                ) {
-                    lastAppliedOperationTimestamp = operation.timestamp;
-                    _applySingleOperation(subLoan, operation);
-                    if (operationStatus == uint256(OperationStatus.Pending)) {
-                        // TODO: Rename pendingOperationCount => newlyAppliedOperationCount
-                        ++pendingOperationCount;
-                        // TODO: Rename earliestPendingOperationId => earliestNewlyAppliedOperationId
-                        if (earliestPendingOperationId == 0) {
-                            earliestPendingOperationId = operationId;
-                        }
+                _applySingleOperation(subLoan, operation);
+                if (operationStatus == uint256(OperationStatus.Pending)) {
+                    ++newlyAppliedOperationCount;
+                    if (earliestNewlyAppliedOperationId == 0) {
+                        earliestNewlyAppliedOperationId = operationId;
                     }
                 }
-                recentOperationId = operationId;
-                operationId = storedSubLoan.operations[operationId].nextOperationId;
             }
-            subLoan.recentOperationId = recentOperationId;
+            recentOperationId = operationId;
+            operationId = storedSubLoan.operations[operationId].nextOperationId;
+        }
+        subLoan.recentOperationId = recentOperationId;
 
-            if (0 == _calculateTrackedBalance(subLoan) && subLoan.status == uint256(SubLoanStatus.Ongoing)) {
-                subLoan.status = uint256(SubLoanStatus.Repaid);
-            }
-
-            // If after applying operations the grace period status has changed reapply operations again
-            if (_isFlagSet(subLoan.flags, SUB_LOAN_FLAG_GRACE_PERIOD_BY_LAST_OPERATION_TIMESTAMP)) {
-                gracePeriodStatus = _determineGracePeriodStatus(subLoan, lastAppliedOperationTimestamp);
-            } else {
-                gracePeriodStatus = _determineGracePeriodStatus(subLoan, timestamp);
-            }
-        } while (gracePeriodStatus != subLoan.gracePeriodStatus);
+        if (0 == _calculateTrackedBalance(subLoan) && subLoan.status == uint256(SubLoanStatus.Ongoing)) {
+            subLoan.status = uint256(SubLoanStatus.Repaid);
+        }
 
         subLoan.pendingTimestamp = _findNextActiveOperationTimestamp(storedSubLoan, operationId);
     }
@@ -825,23 +806,23 @@ contract LendingEngineV2 is
             subLoan.moratoryRate = operation.value;
         } else if (operationKind == uint256(OperationKind.LateFeeRateSetting)) {
             subLoan.lateFeeRate = operation.value;
-        } else if (operationKind == uint256(OperationKind.GraceDiscountRateSetting)) {
-            subLoan.graceDiscountRate = operation.value;
+        } else if (operationKind == uint256(OperationKind.ClawbackFeeRateSetting)) {
+            subLoan.clawbackFeeRate = operation.value;
         } else if (operationKind == uint256(OperationKind.DurationSetting)) {
             subLoan.duration = operation.value;
         }
     }
 
     /**
-     * @dev Processes pending operations by transferring tokens and updating their status to applied.
+     * @dev Processes newly applied operations by transferring tokens and updating their status to applied.
      */
-    function _processPendingOperations(
+    function _processNewlyAppliedOperations(
         ProcessingSubLoan memory subLoan, // Tools: prevent Prettier one-liner
         uint256 operationId,
-        uint256 pendingOperationCount
+        uint256 newlyAppliedOperationCount
     ) internal {
         SubLoan storage storedSubLoan = _getLendingMarketStorage().subLoans[subLoan.id];
-        while (pendingOperationCount > 0) {
+        while (newlyAppliedOperationCount > 0 && operationId != 0) {
             Operation storage operation = storedSubLoan.operations[operationId];
             if (operation.status == OperationStatus.Pending) {
                 address account = _getOperationAccount(storedSubLoan, operation);
@@ -860,7 +841,7 @@ contract LendingEngineV2 is
                 );
 
                 unchecked {
-                    --pendingOperationCount;
+                    --newlyAppliedOperationCount;
                 }
             }
             operationId = operation.nextOperationId;
@@ -879,7 +860,7 @@ contract LendingEngineV2 is
         subLoan.postDueRemuneratoryRate = storedSubLoan.inception.initialPostDueRemuneratoryRate;
         subLoan.moratoryRate = storedSubLoan.inception.initialMoratoryRate;
         subLoan.lateFeeRate = storedSubLoan.inception.initialLateFeeRate;
-        subLoan.graceDiscountRate = storedSubLoan.inception.initialGraceDiscountRate;
+        subLoan.clawbackFeeRate = storedSubLoan.inception.initialClawbackFeeRate;
 
         subLoan.trackedPrincipal = storedSubLoan.inception.borrowedAmount + storedSubLoan.inception.addonAmount;
         subLoan.repaidPrincipal = 0;
@@ -901,10 +882,12 @@ contract LendingEngineV2 is
         subLoan.repaidLateFee = 0;
         subLoan.discountLateFee = 0;
 
+        subLoan.trackedClawbackFee = 0;
+        subLoan.repaidClawbackFee = 0;
+        subLoan.discountClawbackFee = 0;
+
         subLoan.trackedTimestamp = subLoan.startTimestamp;
         subLoan.freezeTimestamp = 0;
-
-        // The `gracePeriodStatus` field remains unchanged because we expects the same status at the end of processing.
     }
 
     /**
@@ -914,7 +897,7 @@ contract LendingEngineV2 is
         ProcessingSubLoan memory subLoan, // Tools: prevent Prettier one-liner
         uint256 finishTimestamp
     ) internal pure {
-        uint256 startDay = _dayIndex(subLoan.trackedTimestamp);
+        uint256 begDay = _dayIndex(subLoan.trackedTimestamp);
         subLoan.trackedTimestamp = finishTimestamp;
 
         {
@@ -926,40 +909,41 @@ contract LendingEngineV2 is
 
         uint256 finishDay = _dayIndex(finishTimestamp);
 
-        if (finishDay > startDay) {
-            uint256 dueDay = _dayIndex(subLoan.startTimestamp) + subLoan.duration;
-            if (startDay <= dueDay) {
+        if (finishDay > begDay) {
+            uint256 startDay = _dayIndex(subLoan.startTimestamp);
+            uint256 dueDay = startDay + subLoan.duration;
+            if (begDay <= dueDay) {
                 if (finishDay <= dueDay) {
-                    _accrueUpToDueRemuneratoryInterest(subLoan, finishDay - startDay);
+                    _accrueUpToDueRemuneratoryInterest(subLoan, finishDay - begDay);
                 } else {
-                    _accrueUpToDueRemuneratoryInterest(subLoan, dueDay - startDay);
-                    subLoan.gracePeriodStatus = uint256(GracePeriodStatus.None);
+                    _accrueUpToDueRemuneratoryInterest(subLoan, dueDay - begDay);
+                    _imposeClawbackFee(subLoan, dueDay - startDay);
                     _imposeLateFee(subLoan);
                     _accruePostDueRemuneratoryInterest(subLoan, finishDay - dueDay);
                     _accrueMoratoryInterest(subLoan, finishDay - dueDay);
                 }
             } else {
-                _accruePostDueRemuneratoryInterest(subLoan, finishDay - startDay);
-                _accrueMoratoryInterest(subLoan, finishDay - startDay);
+                _accruePostDueRemuneratoryInterest(subLoan, finishDay - begDay);
+                _accrueMoratoryInterest(subLoan, finishDay - begDay);
             }
         }
     }
 
     /**
-     * @dev Accrues up to the due date remuneratory interest using compound interest, applying grace discount if active.
+     * @dev Accrues up to the due date remuneratory interest using compound interest.
      */
     function _accrueUpToDueRemuneratoryInterest(ProcessingSubLoan memory subLoan, uint256 dayCount) internal pure {
         uint256 oldTrackedBalance = subLoan.trackedPrincipal + subLoan.trackedUpToDueRemuneratoryInterest;
-        uint256 rate = (subLoan.gracePeriodStatus == uint256(GracePeriodStatus.Active))
-            ? (subLoan.upToDueRemuneratoryRate * (INTEREST_RATE_FACTOR - subLoan.graceDiscountRate)) /
-                INTEREST_RATE_FACTOR
-            : subLoan.upToDueRemuneratoryRate;
-        uint256 newTrackedBalance = _calculateCompoundInterest(oldTrackedBalance, dayCount, rate);
+        uint256 newTrackedBalance = _calculateCompoundInterest(
+            oldTrackedBalance,
+            dayCount,
+            subLoan.upToDueRemuneratoryRate
+        );
         subLoan.trackedUpToDueRemuneratoryInterest += newTrackedBalance - oldTrackedBalance;
     }
 
     /**
-     * @dev Accrues post the due date remuneratory interest using compound interest, applying grace discount if active.
+     * @dev Accrues post the due date remuneratory interest using compound interest.
      */
     function _accruePostDueRemuneratoryInterest(ProcessingSubLoan memory subLoan, uint256 dayCount) internal pure {
         uint256 oldTrackedBalance = subLoan.trackedPrincipal +
@@ -977,30 +961,29 @@ contract LendingEngineV2 is
      * @dev Accrues moratory interest using simple interest calculation on the principal.
      */
     function _accrueMoratoryInterest(ProcessingSubLoan memory subLoan, uint256 dayCount) internal pure {
-        subLoan.trackedMoratoryInterest += _calculateSimpleInterest(
-            subLoan.trackedPrincipal + subLoan.trackedUpToDueRemuneratoryInterest,
-            dayCount,
-            subLoan.moratoryRate
-        );
+        uint256 accrualBase = (subLoan.trackedPrincipal + subLoan.trackedUpToDueRemuneratoryInterest) * dayCount;
+        subLoan.trackedMoratoryInterest += _calculateSimpleInterest(accrualBase, subLoan.moratoryRate);
     }
 
     /**
      * @dev Imposes a one-time late fee calculated as a percentage of the tracked principal.
      */
     function _imposeLateFee(ProcessingSubLoan memory subLoan) internal pure {
-        // The equivalent formula:
-        // round((trackedPrincipal + trackedUpToDueRemuneratoryInterest) * lateFeeRate / INTEREST_RATE_FACTOR)
-        // Where division operator `/` takes into account the fractional part and
-        // the `round()` function returns an integer rounded according to standard mathematical rules.
-        uint256 product = (subLoan.trackedPrincipal + subLoan.trackedUpToDueRemuneratoryInterest) * subLoan.lateFeeRate;
-        uint256 remainder = product % INTEREST_RATE_FACTOR;
-        uint256 result = product / INTEREST_RATE_FACTOR;
-        if (remainder >= (INTEREST_RATE_FACTOR / 2)) {
-            unchecked {
-                ++result;
-            }
-        }
-        subLoan.trackedLateFee = result;
+        uint256 trackedLegalPrincipal = subLoan.trackedPrincipal + subLoan.trackedUpToDueRemuneratoryInterest;
+        subLoan.trackedLateFee = _calculateSimpleInterest(trackedLegalPrincipal, subLoan.lateFeeRate);
+    }
+
+    /**
+     * @dev Imposes a one-time clawback fee calculate.
+     */
+    function _imposeClawbackFee(ProcessingSubLoan memory subLoan, uint256 dayCount) internal pure {
+        uint256 oldTrackedLegalPrincipal = subLoan.trackedPrincipal + subLoan.trackedUpToDueRemuneratoryInterest;
+        uint256 newTrackedLegalPrincipal = _calculateCompoundInterest(
+            oldTrackedLegalPrincipal,
+            dayCount,
+            subLoan.clawbackFeeRate
+        );
+        subLoan.trackedClawbackFee = newTrackedLegalPrincipal - oldTrackedLegalPrincipal;
     }
 
     /**
@@ -1028,7 +1011,7 @@ contract LendingEngineV2 is
 
         // State fields, slot 1, 2
         storedSubLoan.state.status = SubLoanStatus(subLoan.status);
-        storedSubLoan.state.gracePeriodStatus = GracePeriodStatus(subLoan.gracePeriodStatus);
+        // storedSubLoan.state._reservedStatus = 0;
         storedSubLoan.state.duration = uint16(subLoan.duration);
         storedSubLoan.state.freezeTimestamp = uint32(subLoan.freezeTimestamp);
         storedSubLoan.state.trackedTimestamp = uint32(subLoan.trackedTimestamp);
@@ -1036,7 +1019,7 @@ contract LendingEngineV2 is
         storedSubLoan.state.postDueRemuneratoryRate = uint32(subLoan.postDueRemuneratoryRate);
         storedSubLoan.state.moratoryRate = uint32(subLoan.moratoryRate);
         storedSubLoan.state.lateFeeRate = uint32(subLoan.lateFeeRate);
-        storedSubLoan.state.graceDiscountRate = uint32(subLoan.graceDiscountRate);
+        storedSubLoan.state.clawbackFeeRate = uint32(subLoan.clawbackFeeRate);
 
         // State fields, slot 3, 4
         storedSubLoan.state.trackedPrincipal = uint64(subLoan.trackedPrincipal);
@@ -1091,7 +1074,7 @@ contract LendingEngineV2 is
             subLoan.postDueRemuneratoryRate,
             subLoan.moratoryRate,
             subLoan.lateFeeRate,
-            subLoan.graceDiscountRate
+            subLoan.clawbackFeeRate
         );
 
         emit SubLoanUpdated(
@@ -1103,7 +1086,8 @@ contract LendingEngineV2 is
             bytes32(_packUpToDueRemuneratoryInterestParts(subLoan)),
             bytes32(_packPostDueRemuneratoryInterestParts(subLoan)),
             bytes32(_packMoratoryInterestParts(subLoan)),
-            bytes32(_packLateFeeParts(subLoan))
+            bytes32(_packLateFeeParts(subLoan)),
+            bytes32(_packClawbackParts(subLoan))
         );
 
         // No custom error is introduced because index overflow is not possible due to the overall contract logic
@@ -1128,6 +1112,7 @@ contract LendingEngineV2 is
         amount = _repayPostDueRemuneratoryInterest(subLoan, amount);
         amount = _repayMoratoryInterest(subLoan, amount);
         amount = _repayLateFee(subLoan, amount);
+        amount = _repayClawbackFee(subLoan, amount);
         amount = _repayUpToDueRemuneratoryInterest(subLoan, amount);
         amount = _repayPrincipal(subLoan, amount);
     }
@@ -1140,7 +1125,7 @@ contract LendingEngineV2 is
         uint256 trackedBalance = _calculateTrackedBalance(subLoan);
         uint256 roundedTrackedBalance = _roundFinancially(trackedBalance);
         if (amount > roundedTrackedBalance) {
-            revert LendingMarketV2_SubLoanRepaymentExcess();
+            revert LendingMarketV2_SubLoanDiscountExcess();
         }
         // Since rounding may occur downwards (e.g. 1.004 => 1.00), adjust the amount in case of a full discount.
         if (amount == roundedTrackedBalance) {
@@ -1150,6 +1135,7 @@ contract LendingEngineV2 is
         amount = _discountPostDueRemuneratoryInterest(subLoan, amount);
         amount = _discountMoratoryInterest(subLoan, amount);
         amount = _discountLateFee(subLoan, amount);
+        amount = _discountClawbackFee(subLoan, amount);
         amount = _discountUpToDueRemuneratoryInterest(subLoan, amount);
         amount = _discountPrincipal(subLoan, amount);
     }
@@ -1281,7 +1267,7 @@ contract LendingEngineV2 is
     }
 
     /**
-     * @dev Repays fee, returning the remaining amount.
+     * @dev Repays late fee, returning the remaining amount.
      */
     function _repayLateFee(ProcessingSubLoan memory subLoan, uint256 amount) internal pure returns (uint256) {
         uint256 changeAmount = subLoan.trackedLateFee;
@@ -1296,6 +1282,25 @@ contract LendingEngineV2 is
             subLoan.trackedLateFee -= changeAmount;
         }
         subLoan.repaidLateFee += changeAmount;
+        return amount;
+    }
+
+    /**
+     * @dev Repays clawback fee, returning the remaining amount.
+     */
+    function _repayClawbackFee(ProcessingSubLoan memory subLoan, uint256 amount) internal pure returns (uint256) {
+        uint256 changeAmount = subLoan.trackedClawbackFee;
+        if (changeAmount > amount) {
+            changeAmount = amount;
+        }
+        if (changeAmount == 0) {
+            return amount;
+        }
+        unchecked {
+            amount -= changeAmount;
+            subLoan.trackedClawbackFee -= changeAmount;
+        }
+        subLoan.repaidClawbackFee += changeAmount;
         return amount;
     }
 
@@ -1385,7 +1390,7 @@ contract LendingEngineV2 is
     }
 
     /**
-     * @dev Discounts fee, returning the remaining amount.
+     * @dev Discounts late fee, returning the remaining amount.
      */
     function _discountLateFee(ProcessingSubLoan memory subLoan, uint256 amount) internal pure returns (uint256) {
         uint256 changeAmount = subLoan.trackedLateFee;
@@ -1400,6 +1405,25 @@ contract LendingEngineV2 is
             subLoan.trackedLateFee -= changeAmount;
         }
         subLoan.discountLateFee += changeAmount;
+        return amount;
+    }
+
+    /**
+     * @dev Discounts clawback fee, returning the remaining amount.
+     */
+    function _discountClawbackFee(ProcessingSubLoan memory subLoan, uint256 amount) internal pure returns (uint256) {
+        uint256 changeAmount = subLoan.trackedClawbackFee;
+        if (changeAmount > amount) {
+            changeAmount = amount;
+        }
+        if (changeAmount == 0) {
+            return amount;
+        }
+        unchecked {
+            amount -= changeAmount;
+            subLoan.trackedClawbackFee -= changeAmount;
+        }
+        subLoan.discountClawbackFee += changeAmount;
         return amount;
     }
 
@@ -1482,14 +1506,11 @@ contract LendingEngineV2 is
     }
 
     /**
-     * @dev Calculates simple interest with mathematical rounding based on principal, days, and rate.
+     * @dev Calculates simple interest with mathematical rounding based on principal, and rate.
      */
-    function _calculateSimpleInterest(
-        uint256 principal,
-        uint256 dayCount,
-        uint256 interestRate
-    ) internal pure returns (uint256) {
-        uint256 product = principal * dayCount * interestRate;
+    function _calculateSimpleInterest(uint256 accrualBase, uint256 interestRate) internal pure returns (uint256) {
+        // The risk that the `accrualBase * interestRate` can overflow `uint256` and revert is accepted.
+        uint256 product = accrualBase * interestRate;
         uint256 remainder = product % INTEREST_RATE_FACTOR;
         uint256 result = product / INTEREST_RATE_FACTOR;
         if (remainder >= (INTEREST_RATE_FACTOR / 2)) {
@@ -1583,23 +1604,10 @@ contract LendingEngineV2 is
             kind == uint256(OperationKind.PostDueRemuneratoryRateSetting) ||
             kind == uint256(OperationKind.MoratoryRateSetting) ||
             kind == uint256(OperationKind.LateFeeRateSetting) ||
-            kind == uint256(OperationKind.GraceDiscountRateSetting)
+            kind == uint256(OperationKind.ClawbackFeeRateSetting)
         ) {
-            if (value > type(uint32).max) {
-                revert LendingMarketV2_SubLoanRateValueInvalid();
-            }
-        }
-
-        if (kind == uint256(OperationKind.GraceDiscountRateSetting)) {
-            uint256 graceDiscountRate = subLoan.state.graceDiscountRate;
-            if (graceDiscountRate != 0 && value == 0) {
-                revert LendingMarketV2_SubLoanGraceDiscountRateZeroingProhibited();
-            }
-            if (graceDiscountRate == 0 && value != 0) {
-                revert LendingMarketV2_SubLoanGraceDiscountRateInitializationProhibited();
-            }
             if (value > INTEREST_RATE_FACTOR) {
-                revert LendingMarketV2_SubLoanGraceDiscountRateExcess();
+                revert LendingMarketV2_SubLoanRateValueExcess();
             }
         }
 
@@ -1621,12 +1629,15 @@ contract LendingEngineV2 is
             kind == uint256(OperationKind.Repayment) || // Tools: prevent Prettier one-liner
             kind == uint256(OperationKind.Discount)
         ) {
+            // The zero value is prohibited.
             // The unrounded value is prohibited.
             // No special value for a full repayment or discount.
+            if (value == 0) {
+                revert LendingMarketV2_OperationValueInvalid();
+            }
             if (value != _roundFinancially(value)) {
                 revert LendingMarketV2_SubLoanRepaymentOrDiscountAmountUnrounded();
             }
-
             if (timestamp > _blockTimestamp()) {
                 revert LendingMarketV2_OperationKindProhibitedInFuture();
             }
@@ -1667,7 +1678,6 @@ contract LendingEngineV2 is
         subLoan.recentOperationId = storedSubLoan.metadata.recentOperationId;
         // subLoan.flags = 0;
         subLoan.status = uint256(storedSubLoan.state.status);
-        subLoan.gracePeriodStatus = uint256(storedSubLoan.state.gracePeriodStatus);
 
         subLoan.startTimestamp = storedSubLoan.inception.startTimestamp;
         subLoan.freezeTimestamp = storedSubLoan.state.freezeTimestamp;
@@ -1679,7 +1689,7 @@ contract LendingEngineV2 is
         subLoan.postDueRemuneratoryRate = storedSubLoan.state.postDueRemuneratoryRate;
         subLoan.moratoryRate = storedSubLoan.state.moratoryRate;
         subLoan.lateFeeRate = storedSubLoan.state.lateFeeRate;
-        subLoan.graceDiscountRate = storedSubLoan.state.graceDiscountRate;
+        subLoan.clawbackFeeRate = storedSubLoan.state.clawbackFeeRate;
 
         subLoan.trackedPrincipal = storedSubLoan.state.trackedPrincipal;
         subLoan.repaidPrincipal = storedSubLoan.state.repaidPrincipal;
@@ -1700,6 +1710,10 @@ contract LendingEngineV2 is
         subLoan.trackedLateFee = storedSubLoan.state.trackedLateFee;
         subLoan.repaidLateFee = storedSubLoan.state.repaidLateFee;
         subLoan.discountLateFee = storedSubLoan.state.discountLateFee;
+
+        subLoan.trackedClawbackFee = storedSubLoan.state.trackedClawbackFee;
+        subLoan.repaidClawbackFee = storedSubLoan.state.repaidClawbackFee;
+        subLoan.discountClawbackFee = storedSubLoan.state.discountClawbackFee;
 
         return subLoan;
     }
@@ -1902,55 +1916,42 @@ contract LendingEngineV2 is
     }
 
     /**
+     * @dev Packs the clawback fee parts (tracked, repaid, discount) into a single value.
+     */
+    function _packClawbackParts(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
+        return
+            _packAmountParts(
+                subLoan.trackedClawbackFee, // Tools: prevent Prettier one-liner
+                subLoan.repaidClawbackFee,
+                subLoan.discountClawbackFee
+            );
+    }
+
+    /**
      * @dev Packs rate values into a single 256-bit value.
      *
      * The packed rates is a bitfield with the following bits:
      *
-     * - 32  bits from   0 to  31: the up to the due date remuneratory interest rate.
-     * - 32  bits from  32 to  63: the post the due date remuneratory interest rate.
-     * - 32  bits from  64 to  95: the moratory interest rate.
-     * - 32  bits from  96 to 127: the late fee rate.
-     * - 32  bits from 128 to 159: the grace discount rate.
-     * - 128 bits from 160 to 255: reserved for future usage.
+     * - 32 bits from   0 to  31: the up to the due date remuneratory interest rate.
+     * - 32 bits from  32 to  63: the post the due date remuneratory interest rate.
+     * - 32 bits from  64 to  95: the moratory interest rate.
+     * - 32 bits from  96 to 127: the late fee rate.
+     * - 32 bits from 128 to 159: the clawback fee rate.
+     * - 96 bits from 160 to 255: reserved for future usage.
      */
     function _packRates(
         uint256 upToDueRemuneratoryRate,
         uint256 postDueRemuneratoryRate,
         uint256 moratoryRate,
         uint256 lateFeeRate,
-        uint256 graceDiscountRate
+        uint256 clawbackFeeRate
     ) internal pure returns (uint256) {
         return
             ((upToDueRemuneratoryRate & type(uint32).max) << 0) |
             ((postDueRemuneratoryRate & type(uint32).max) << 32) |
             ((moratoryRate & type(uint32).max) << 64) |
             ((lateFeeRate & type(uint32).max) << 96) |
-            ((graceDiscountRate & type(uint32).max) << 128);
-    }
-
-    /**
-     * @dev Returns true if the specified flag is set in the bitfield.
-     */
-    function _isFlagSet(uint256 bitfield, uint256 flagMask) internal pure returns (bool) {
-        return (bitfield & flagMask) != 0;
-    }
-
-    /**
-     * @dev Returns the grace period status based on discount rate, flags, and whether the loan is overdue.
-     */
-    function _determineGracePeriodStatus(
-        ProcessingSubLoan memory subLoan,
-        uint256 timestamp
-    ) internal pure returns (uint256) {
-        if (
-            subLoan.graceDiscountRate == 0 ||
-            _isFlagSet(subLoan.flags, SUB_LOAN_FLAG_IGNORE_GRACE_PERIOD) ||
-            _isOverdue(subLoan, timestamp)
-        ) {
-            return uint256(GracePeriodStatus.None);
-        } else {
-            return uint256(GracePeriodStatus.Active);
-        }
+            ((clawbackFeeRate & type(uint32).max) << 128);
     }
 
     /**

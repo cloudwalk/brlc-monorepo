@@ -50,7 +50,8 @@ abstract contract LendingMarketV2Core is
             subLoan.trackedUpToDueRemuneratoryInterest +
             subLoan.trackedPostDueRemuneratoryInterest +
             subLoan.trackedMoratoryInterest +
-            subLoan.trackedLateFee;
+            subLoan.trackedLateFee +
+            subLoan.trackedClawbackFee;
     }
 
     /**

@@ -50,19 +50,6 @@ abstract contract Constants {
     /// @dev The start value for the auto-generated sub-loan ID.
     uint256 internal constant SUB_LOAN_AUTO_ID_START = 10_000_000;
 
-    /// @dev The flag to ignore the grace period.
-    uint256 internal constant SUB_LOAN_FLAG_IGNORE_GRACE_PERIOD = (1 << 0);
-
-    /// @dev The start index for the internal flags of the sub-loan.
-    uint256 internal constant SUB_LOAN_FLAG_INTERNAL_START_INDEX = 8;
-
-    /// @dev The mask to reset all the internal flags of the sub-loan.
-    uint256 internal constant SUB_LOAN_FLAGS_INTERNAL_RESET_MASK = 2 ** SUB_LOAN_FLAG_INTERNAL_START_INDEX - 1;
-
-    /// @dev The flag to define the grace period by the last applied operation timestamp.
-    uint256 internal constant SUB_LOAN_FLAG_GRACE_PERIOD_BY_LAST_OPERATION_TIMESTAMP =
-        (1 << (SUB_LOAN_FLAG_INTERNAL_START_INDEX + 0));
-
     /// @dev The special account ID of an operation corresponding to the borrower of the sub-loan.
     uint256 internal constant ACCOUNT_ID_BORROWER = type(uint64).max;
 }

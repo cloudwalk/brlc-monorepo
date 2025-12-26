@@ -52,6 +52,7 @@ abstract contract CreditLineV2StorageLayout is ICreditLineV2Types {
 
     // ------------------ Internal functions ---------------------- //
 
+    // TODO: Rename the function to V2
     /// @dev Returns the storage slot location for the `LendingMarketStorage` struct.
     function _getCreditLineStorage() internal pure returns (CreditLineStorage storage $) {
         assembly {

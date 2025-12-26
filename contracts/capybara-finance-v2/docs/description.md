@@ -12,7 +12,8 @@
     - the principal,
     - the accrued remuneratory interest up to the due date (primary interest),
     - the accrued remuneratory interest post the due date (secondary interest),
-    - the accrued moratory interest (penalty rate),
+    - the accrued moratory interest (penalty interest),
+    - the clawback fee (see notes below),
     - the late fee.
    For each financial part, the contract maintains the tracked, repaid, and discounted amounts.
 
@@ -47,7 +48,7 @@
     - `PostDueRemuneratoryRateSetting`: set the post the due date remuneratory rate of the sub-loan.
     - `MoratoryRateSetting`: set the moratory rate of the sub-loan.
     - `LateFeeRateSetting`: set the late fee rate of the sub-loan.
-    - `GraceDiscountRateSetting`: set the grace discount rate of the sub-loan.
+    - `ClawbackFeeRateSetting`: set the clawback fee rate of the sub-loan.
     - `DurationSetting`: set the duration of the sub-loan.
 
 7. **Operation IDs**: Each operation has an ID within a sub-loan. Operation IDs are `uint16` values from 1 to 65535. The zero ID (`0`) means `no operation`.
@@ -92,7 +93,7 @@
 
 3. [LendingMarketV2.sol](../contracts/LendingMarketV2.sol): Main contract implementation for the lending market smart contract of the CFv2 protocol. It contains all business logic for the loan life cycle, operation processing, interest calculations, revision handling, and batch operations, and implements access control, pausability, upgradeability, token transfers, and integration with credit lines and liquidity pools.
 
-4. [LendingEngineV2.sol](../contracts/LendingEngineV2.sol): Helper contract for the lending market smart contract of the CFv2 protocol. It contains the lending engine smart contract for standalone deployments. The engine is used by the lending market contract through the delegatecall mechanism to perform the loan life cycle, operation processing, interest calculations, revision handling, and batch operations.
+4. [LendingEngineV2.sol](../contracts/LendingEngineV2.sol): Helper contract for the lending market smart contract of the CFv2 protocol. It contains the lending engine smart contract for standalone deployments. The engine is used only by the lending market contract through the delegatecall mechanism to perform the loan life cycle, operation processing, interest calculations, revision handling, and batch operations.
 
 ### 3. Main Code Entities
 
@@ -102,7 +103,7 @@
 - `SubLoanStatus`: The status of a sub-loan.
 - `GracePeriodStatus`: The status of the grace period of a sub-loan.
 - `OperationStatus`: The status of an operation.
-- `OperationKind`: The kind of an operation.
+- `OperationKind`: The kind of operation.
 
 #### 3.2. Structures:
 
@@ -158,8 +159,8 @@
 3. **Programs, loans, and sub-loans:**
 
     - `getProgram(uint32 programId)`: Returns `LendingProgramView` for the specified program.
-    - `getSubLoanPreview(uint256 subLoanId, uint256 timestamp, uint256 flags)`: Returns `SubLoanPreview` for a sub-loan at a given timestamp.
-    - `getLoanPreview(uint256 subLoanId, uint256 timestamp, uint256 flags)`: Returns `LoanPreview` for the loan that contains the given sub-loan.
+    - `getSubLoanPreview(uint256 subLoanId, uint256 timestamp)`: Returns `SubLoanPreview` for a sub-loan at a given timestamp.
+    - `getLoanPreview(uint256 subLoanId, uint256 timestamp)`: Returns `LoanPreview` for the loan that contains the given sub-loan.
 
 4. **Operations:**
 
@@ -255,21 +256,19 @@
     * `0` — the address is not provided or zero.
     * `type(uint64).max` — the address is the borrower of the sub-loan.
 4. Operations are ordered in the sub-loan linked list by timestamp and then by ID: earlier timestamps come first, and matching timestamps are ordered by lower IDs before higher ones.
-5. Loans (a group of sub-loans) can be taken starting with a timestamp in the past. If zero is provided, the current block timestamp is used. Loans cannot be taken in the future.
+5. Loans (a group of sub-loans) can be taken starting with a timestamp in the past. If zero is provided, the current block timestamp is used. Loans cannot be taken in the future. Additionally, `startTimestamp == 1` is rejected as a special reserved value.
 6. No direct token transfers to or from a pool. Tokens always move through the lending market contract. Examples:
     * Taking a loan:
       * `borrowedAmount`: LP => LM => borrower
       * `addonAmount`: LP => LM => addonTreasury
     * Repaying a loan:
       * `repaymentAmount`: borrower => LM => LP
-7. Late fee rate change operations can have any timestamp, but the new rate is applied only if the operation timestamp is not later than the sub-loan due date.
-8. You cannot activate a grace period for a sub-loan that was taken without one (initial grace discount rate equals zero). Any operation that changes the grace discount rate from zero to a non-zero value is rejected.
-9. You cannot deactivate a grace period for a sub-loan that was taken with one (the initial grace discount rate is non-zero). Any operation that changes the grace discount rate from non-zero to zero is rejected.
-10. There is currently no special amount for full sub-loan repayment. In V1 you could pass `type(uint256).max`; in V2 only explicit repayment and discount amounts are supported. If a special amount is added in the future, it must be converted to the outstanding balance when the operation is added, not when it is processed.
-11. Batch view functions that return arrays of structs are no longer exposed. This keeps the ABI forward-compatible when structs gain new fields: returning a single struct remains backward compatible, whereas returning an array forces an ABI update and couples smart contracts to backend updates. To keep backend reads consistent, call the individual view functions against the same block number (not `latest`) and aggregate the results. Most blockchain libraries also let you batch JSON-RPC calls; for example, see https://docs.ethers.org/v6/api/providers/jsonrpc/#JsonRpcApiProviderOptions.
-12. All rates are expressed as multiplied by `INTEREST_RATE_FACTOR = 10^9` (see the `Constants` contract).
-13. The tracked, repaid and discount parts of sub-loans are not rounded financially (according to the accuracy factor) as well as fees, they are stored in the contract in the raw form. Only the sum of tracked parts are rounded when calculating the outstanding balance of a sub-loan. That rounded value is exposed by the separate field of the preview structures returned by the view functions.
-14. The financially rounded values are calculated using the standard mathematical rules and the following rule: if the initial value for rounding is not zero and the rounded value is zero, then the rounded value is set to the accuracy factor. Examples of rounding for BRLC (6 decimals, accuracy factor = 10_000):
+7. Late fee rate change operations can have any timestamp, but the new rate is applied only if the operation timestamp is not later than the sub-loan due date. Similarly for clawback fee rate change operations.
+8. There is currently no special amount for full sub-loan repayment. In V1 you could pass `type(uint256).max`; in V2 only explicit repayment and discount amounts are supported. If a special amount is added in the future, it must be converted to the outstanding balance when the operation is added, not when it is processed.
+9. Batch view functions that return arrays of structs are no longer exposed. This keeps the ABI forward-compatible when structs gain new fields: returning a single struct remains backward compatible, whereas returning an array forces an ABI update and couples smart contracts to backend updates. To keep backend reads consistent, call the individual view functions against the same block number (not `latest`) and aggregate the results. Most blockchain libraries also let you batch JSON-RPC calls; for example, see https://docs.ethers.org/v6/api/providers/jsonrpc/#JsonRpcApiProviderOptions.
+10. All rates are expressed as multiplied by `INTEREST_RATE_FACTOR = 10^9` (see the `Constants` contract).
+11. The tracked, repaid and discount parts of sub-loans are not rounded financially (according to the accuracy factor) as well as fees, they are stored in the contract in the raw form. Only the sum of tracked parts are rounded when calculating the outstanding balance of a sub-loan. That rounded value is exposed by the separate field of the preview structures returned by the view functions.
+12. The financially rounded values are calculated using the standard mathematical rules and the following rule: if the initial value for rounding is not zero and the rounded value is zero, then the rounded value is set to the accuracy factor. Examples of rounding for BRLC (6 decimals, accuracy factor = 10_000):
     * 1.009999 => 1.01,
     * 1.005000 => 1.01,
     * 1.004999 => 1.00,
@@ -280,6 +279,8 @@
     * 0.004999 => 0.01,
     * 0.000001 => 0.01,
     * 0.000000 => 0.00.
+13. The clawback fee is the fee applied when a borrower fails to meet the conditions required to retain a discounted remuneratory interest rate, in particular when a sub-loan (installment) becomes overdue. The fee is equivalent to the interest retroactively recalculated as if the base (non-discounted) remuneratory interest rate had applied for the entire accrual period. **Note:** the current implementation excludes the clawback fee from the internal "tracked balance" used for repayment/discount validation and for deciding the `Repaid` status.
+14. The clawback fee rate is the rate used to compute the clawback fee. It reflects the difference between the discounted remuneratory interest rate and the base remuneratory interest rate and is applied compoundly to the legal principal (principal plus accrued remuneratory interest) as of the due date.
 
 
 ## Credit Line V2

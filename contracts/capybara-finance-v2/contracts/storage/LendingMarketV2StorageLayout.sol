@@ -81,6 +81,7 @@ abstract contract LendingMarketV2StorageLayout is ILendingMarketV2Types {
 
     // ------------------ Internal functions ---------------------- //
 
+    // TODO: Rename the function to V2
     /// @dev Returns the storage slot location for the `LendingMarketStorage` struct.
     function _getLendingMarketStorage() internal pure returns (LendingMarketStorage storage $) {
         assembly {

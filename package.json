@@ -6,7 +6,8 @@
     "prettier:fix": "prettier --write \"**/*.sol\"",
     "prettier:check": "prettier --check \"**/*.sol\"",
     "eslint:fix": "eslint --fix \"**/*.{js,ts}\"",
-    "eslint:check": "eslint"
+    "eslint:check": "eslint",
+    "flatten:contract": "./scripts/flatten-contract.bash"
   },
   "lint-staged": {
     "**/*.{js,ts}": [
@@ -17,7 +18,6 @@
     ]
   },
   "devDependencies": {
-    "@cloudwalk/eslint-config-smart-contracts": "^1.0.0",
     "eslint": "^9.39.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",

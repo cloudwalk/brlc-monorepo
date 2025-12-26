@@ -67,10 +67,6 @@ jobs:
           path: stratus
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Remove existing signatures
-        run: rm -rf stratus/static/contracts-signatures
-        shell: bash
-
       - name: Download artifact
         uses: actions/download-artifact@v6
         with:

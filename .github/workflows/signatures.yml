@@ -35,7 +35,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GHA_PAT }}
 
       - name: Generate signatures
-        run: ./stratus-integration/generate-signatures.bash
+        run: ./scripts/generate-signatures.bash
         shell: bash
 
       - name: Save artifact

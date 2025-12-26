@@ -5,7 +5,6 @@ set -euo pipefail
 ROOT_DIR="$(pwd)"
 SIGNATURES_DIR="${ROOT_DIR}/signatures"
 
-rm -rf -- "$SIGNATURES_DIR"
 mkdir -p -- "$SIGNATURES_DIR"
 
 export MISE_BACKENDS_SOLIDITY=asdf:diegodorado/asdf-solidity

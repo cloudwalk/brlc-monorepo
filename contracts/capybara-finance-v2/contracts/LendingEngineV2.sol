@@ -978,7 +978,7 @@ contract LendingEngineV2 is
      */
     function _accrueMoratoryInterest(ProcessingSubLoan memory subLoan, uint256 dayCount) internal pure {
         subLoan.trackedMoratoryInterest += _calculateSimpleInterest(
-            subLoan.trackedPrincipal,
+            subLoan.trackedPrincipal + subLoan.trackedUpToDueRemuneratoryInterest,
             dayCount,
             subLoan.moratoryRate
         );
@@ -988,10 +988,11 @@ contract LendingEngineV2 is
      * @dev Imposes a one-time late fee calculated as a percentage of the tracked principal.
      */
     function _imposeLateFee(ProcessingSubLoan memory subLoan) internal pure {
-        // The equivalent formula: round(trackedPrincipal * lateFeeRate / INTEREST_RATE_FACTOR)
+        // The equivalent formula:
+        // round((trackedPrincipal + trackedUpToDueRemuneratoryInterest) * lateFeeRate / INTEREST_RATE_FACTOR)
         // Where division operator `/` takes into account the fractional part and
         // the `round()` function returns an integer rounded according to standard mathematical rules.
-        uint256 product = subLoan.trackedPrincipal * subLoan.lateFeeRate;
+        uint256 product = (subLoan.trackedPrincipal + subLoan.trackedUpToDueRemuneratoryInterest) * subLoan.lateFeeRate;
         uint256 remainder = product % INTEREST_RATE_FACTOR;
         uint256 result = product / INTEREST_RATE_FACTOR;
         if (remainder >= (INTEREST_RATE_FACTOR / 2)) {

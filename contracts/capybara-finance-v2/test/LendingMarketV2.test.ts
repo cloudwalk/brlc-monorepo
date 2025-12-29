@@ -176,6 +176,7 @@ interface Loan {
 
 interface SubLoanPreview {
   day: number;
+  daysSinceStart: number;
   id: bigint;
   firstSubLoanId: bigint;
   subLoanCount: number;
@@ -705,9 +706,12 @@ function calculateOutstandingBalance(subLoan: SubLoan): bigint {
 
 function defineExpectedSubLoanPreview(subLoan: SubLoan): SubLoanPreview {
   const firstSubLoanId = subLoan.id - BigInt(subLoan.metadata.subLoanIndex);
+  const day = dayIndex(subLoan.state.trackedTimestamp);
+  const startDay = dayIndex(subLoan.inception.startTimestamp);
 
   return {
-    day: dayIndex(subLoan.state.trackedTimestamp),
+    day,
+    daysSinceStart: day >= startDay ? day - startDay : 0,
     id: subLoan.id,
     firstSubLoanId,
     subLoanCount: subLoan.metadata.subLoanCount,

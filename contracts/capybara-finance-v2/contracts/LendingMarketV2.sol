@@ -538,6 +538,7 @@ contract LendingMarketV2 is
         SubLoan storage storedSubLoan = _getLendingMarketStorage().subLoans[subLoan.id];
 
         preview.day = _dayIndex(subLoan.trackedTimestamp);
+        preview.daysSinceStart = preview.day - _dayIndex(subLoan.startTimestamp);
         preview.id = subLoan.id;
         preview.firstSubLoanId = subLoan.id - storedSubLoan.metadata.subLoanIndex;
         preview.subLoanCount = storedSubLoan.metadata.subLoanCount;

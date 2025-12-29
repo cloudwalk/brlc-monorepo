@@ -522,6 +522,7 @@ interface ILendingMarketV2Types {
      * Fields:
      *
      * - day ------------------------ The day index at which the preview is calculated.
+     * - daysSinceStart ------------- The number of days passed since the start day of the sub-loan.
      * - id ------------------------- The ID of the sub-loan.
      * - firstSubLoanId ------------- The ID of the first sub-loan in the loan.
      * - subLoanCount --------------- The number of sub-loans in the loan.
@@ -584,7 +585,7 @@ interface ILendingMarketV2Types {
     // prettier-ignore
     struct SubLoanPreview {
         uint256 day;
-        // TODO: Add the `daysSinceStart` field for simplicity
+        uint256 daysSinceStart;
         uint256 id;
         uint256 firstSubLoanId;
         uint256 subLoanCount;

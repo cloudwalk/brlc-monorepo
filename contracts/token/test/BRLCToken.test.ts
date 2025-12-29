@@ -116,7 +116,7 @@ describe("Contract 'BRLCToken'", async () => {
   });
 
   describe("Function 'isBRLCoin'", async () => {
-    it.only("Returns true", async () => {
+    it("Returns true", async () => {
       const { token } = await setUpFixture(deployToken);
       expect(await token.isBRLCoin()).to.eq(true);
     });

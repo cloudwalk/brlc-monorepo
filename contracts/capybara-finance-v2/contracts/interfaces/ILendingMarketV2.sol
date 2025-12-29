@@ -1008,7 +1008,8 @@ interface ILendingMarketV2PrimaryEvents is ILendingMarketV2Types {
      * - 16 bits from 176 to 191: the earliest operation ID.
      * - 16 bits from 192 to 207: the recent operation ID.
      * - 16 bits from 208 to 223: the latest operation ID.
-     * - 32 bits from 224 to 255: reserved for future usage.
+     * - 16 bits from 224 to 239: the number of days passed since the start day according to the tracked timestamp.
+     * - 16 bits from 240 to 255: reserved for future usage.
      *
      * 2. The `packedRates` value is a bitfield described in the comments for the `SubLoanTaken` event.
      *
@@ -1034,7 +1035,6 @@ interface ILendingMarketV2PrimaryEvents is ILendingMarketV2Types {
      * @param packedLateFeeParts The packed late fee parts.
      * @param packedClawbackFeeParts The packed clawback fee parts.
      */
-    // TODO: add the number of days passed since start to simplify analyze in DB
     event SubLoanUpdated(
         uint256 indexed subLoanId, // Tools: prevent Prettier one-liner
         uint256 indexed updateIndex,

@@ -1061,6 +1061,10 @@ contract LendingEngineV2 is
      * @dev Emits a sub-loan update event with packed parameters and increments the update index.
      */
     function _emitUpdateEvent(ProcessingSubLoan memory subLoan, SubLoan storage storedSubLoan) internal {
+        uint256 daysSinceStart = _dayIndex(subLoan.trackedTimestamp) - _dayIndex(subLoan.startTimestamp);
+        if (daysSinceStart > type(uint16).max) {
+            daysSinceStart = type(uint16).max;
+        }
         uint256 packedParameters = ((uint256(subLoan.status) & type(uint8).max) << 0) +
             ((uint256(0) & type(uint8).max) << 8) + // reserve for future usage
             ((uint256(subLoan.duration) & type(uint16).max) << 16) +
@@ -1071,7 +1075,8 @@ contract LendingEngineV2 is
             ((uint256(storedSubLoan.metadata.operationCount) & type(uint16).max) << 160) +
             ((uint256(storedSubLoan.metadata.earliestOperationId) & type(uint16).max) << 176) +
             ((uint256(storedSubLoan.metadata.recentOperationId) & type(uint16).max) << 192) +
-            ((uint256(storedSubLoan.metadata.latestOperationId) & type(uint16).max) << 208);
+            ((uint256(storedSubLoan.metadata.latestOperationId) & type(uint16).max) << 208) +
+            ((uint256(daysSinceStart) & type(uint16).max) << 224);
 
         uint256 packedRates = _packRates(
             subLoan.primaryRate,

@@ -328,10 +328,11 @@ const POST_DUE_REMUNERATORY_RATE = (INTEREST_RATE_FACTOR / 100) * 2; // 2%
 const MORATORY_RATE = (INTEREST_RATE_FACTOR / 100) * 3; // 3%
 const LATE_FEE_RATE = (INTEREST_RATE_FACTOR / 100) * 4; // 4%
 const CLAWBACK_FEE_RATE = (INTEREST_RATE_FACTOR / 100) * 5; // 5%
-const MASK_UINT8 = maxUintForBits(8);
-const MASK_UINT16 = maxUintForBits(16);
-const MASK_UINT32 = maxUintForBits(32);
-const MASK_UINT64 = maxUintForBits(64);
+const MAX_UINT8 = maxUintForBits(8);
+const MAX_UINT16 = maxUintForBits(16);
+const MAX_UINT16_NUMBER = Number(MAX_UINT16);
+const MAX_UINT32 = maxUintForBits(32);
+const MAX_UINT64 = maxUintForBits(64);
 const TIMESTAMP_SPECIAL_VALUE_TRACKED = 1n;
 // const ACCOUNT_ID_BORROWER = maxUintForBits(16);
 
@@ -508,7 +509,7 @@ async function deployAndConfigureContractsForLoanTaking(): Promise<Fixture> {
 }
 
 function packAmountParts(onePartBitShift: bigint, ...parts: bigint[]): bigint {
-  return parts.reduce((acc, part, index) => acc + ((part & MASK_UINT64) << (onePartBitShift * BigInt(index))), 0n);
+  return parts.reduce((acc, part, index) => acc + ((part & MAX_UINT64) << (onePartBitShift * BigInt(index))), 0n);
 }
 
 function packRates(subLoan: SubLoan): bigint {
@@ -523,18 +524,23 @@ function packRates(subLoan: SubLoan): bigint {
 }
 
 function packSubLoanParameters(subLoan: SubLoan): bigint {
+  let daysSinceStart = dayIndex(subLoan.state.trackedTimestamp) - dayIndex(subLoan.inception.startTimestamp);
+  if (daysSinceStart > MAX_UINT16_NUMBER) {
+    daysSinceStart = MAX_UINT16_NUMBER;
+  }
   return (
-    ((BigInt(subLoan.state.status) & MASK_UINT8) << 0n) +
-    ((0n & MASK_UINT8) << 8n) +
-    ((BigInt(subLoan.state.duration) & MASK_UINT16) << 16n) +
-    ((BigInt(subLoan.inception.startTimestamp) & MASK_UINT32) << 32n) +
-    ((BigInt(subLoan.state.trackedTimestamp) & MASK_UINT32) << 64n) +
-    ((BigInt(subLoan.state.freezeTimestamp) & MASK_UINT32) << 96n) +
-    ((BigInt(subLoan.metadata.pendingTimestamp ?? 0) & MASK_UINT32) << 128n) +
-    ((BigInt(subLoan.metadata.operationCount) & MASK_UINT16) << 160n) +
-    ((BigInt(subLoan.metadata.earliestOperationId) & MASK_UINT16) << 176n) +
-    ((BigInt(subLoan.metadata.recentOperationId) & MASK_UINT16) << 192n) +
-    ((BigInt(subLoan.metadata.latestOperationId) & MASK_UINT16) << 208n)
+    ((BigInt(subLoan.state.status) & MAX_UINT8) << 0n) +
+    ((0n & MAX_UINT8) << 8n) +
+    ((BigInt(subLoan.state.duration) & MAX_UINT16) << 16n) +
+    ((BigInt(subLoan.inception.startTimestamp) & MAX_UINT32) << 32n) +
+    ((BigInt(subLoan.state.trackedTimestamp) & MAX_UINT32) << 64n) +
+    ((BigInt(subLoan.state.freezeTimestamp) & MAX_UINT32) << 96n) +
+    ((BigInt(subLoan.metadata.pendingTimestamp ?? 0) & MAX_UINT32) << 128n) +
+    ((BigInt(subLoan.metadata.operationCount) & MAX_UINT16) << 160n) +
+    ((BigInt(subLoan.metadata.earliestOperationId) & MAX_UINT16) << 176n) +
+    ((BigInt(subLoan.metadata.recentOperationId) & MAX_UINT16) << 192n) +
+    ((BigInt(subLoan.metadata.latestOperationId) & MAX_UINT16) << 208n) +
+    ((BigInt(daysSinceStart) & MAX_UINT16) << 224n)
   );
 }
 

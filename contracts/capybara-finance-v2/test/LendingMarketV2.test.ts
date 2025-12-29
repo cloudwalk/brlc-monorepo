@@ -4,6 +4,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import {
   checkContractUupsUpgrading,
   checkEquality,
+  coverageTxOverrides,
   maxUintForBits,
   resultToObject,
   setUpFixture,
@@ -447,6 +448,7 @@ async function deployLiquidityPoolMock(): Promise<Contracts.LiquidityPoolMock> {
 }
 
 async function deployContracts(): Promise<Fixture> {
+  const txOverrides = coverageTxOverrides();
   const tokenMockDeployment = await tokenMockFactory.deploy();
   await tokenMockDeployment.waitForDeployment();
   const tokenMock = tokenMockDeployment.connect(deployer);
@@ -454,7 +456,7 @@ async function deployContracts(): Promise<Fixture> {
   const lendingEngineDeployment = await upgrades.deployProxy(
     lendingEngineFactory,
     [],
-    { kind: "uups" },
+    { kind: "uups", ...(txOverrides ? { txOverrides } : {}) },
   );
   await lendingEngineDeployment.waitForDeployment();
   const engine = lendingEngineDeployment.connect(deployer);
@@ -462,7 +464,7 @@ async function deployContracts(): Promise<Fixture> {
   const lendingMarketDeployment = await upgrades.deployProxy(
     lendingMarketFactory,
     [getAddress(tokenMock), getAddress(engine)],
-    MARKET_DEPLOYMENT_OPTIONS,
+    { ...MARKET_DEPLOYMENT_OPTIONS, ...(txOverrides ? { txOverrides } : {}) },
   );
   await lendingMarketDeployment.waitForDeployment();
   const market = lendingMarketDeployment.connect(deployer);
@@ -1342,23 +1344,25 @@ describe("Contract 'LendingMarket'", () => {
       });
 
       it("the provided token address is zero", async () => {
+        const txOverrides = coverageTxOverrides();
         const wrongTokenAddress = (ADDRESS_ZERO);
         await expect(
           upgrades.deployProxy(
             lendingMarketFactory,
             [wrongTokenAddress, getAddress(engine)],
-            MARKET_DEPLOYMENT_OPTIONS,
+            { ...MARKET_DEPLOYMENT_OPTIONS, ...(txOverrides ? { txOverrides } : {}) },
           ),
         ).to.be.revertedWithCustomError(market, ERROR_NAME_UNDERLYING_TOKEN_ADDRESS_ZERO);
       });
 
       it("the provided engine address is zero", async () => {
+        const txOverrides = coverageTxOverrides();
         const wrongEngineAddress = (ADDRESS_ZERO);
         await expect(
           upgrades.deployProxy(
             lendingMarketFactory,
             [getAddress(tokenMock), wrongEngineAddress],
-            MARKET_DEPLOYMENT_OPTIONS,
+            { ...MARKET_DEPLOYMENT_OPTIONS, ...(txOverrides ? { txOverrides } : {}) },
           ),
         ).to.be.revertedWithCustomError(market, ERROR_NAME_ENGINE_ADDRESS_ZERO);
       });

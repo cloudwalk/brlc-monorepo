@@ -1,7 +1,7 @@
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { checkContractUupsUpgrading, setUpFixture } from "../test-utils/common";
+import { checkContractUupsUpgrading, coverageTxOverrides, setUpFixture } from "../test-utils/common";
 import * as Contracts from "../typechain-types";
 import { proveTx } from "../test-utils/eth";
 
@@ -29,10 +29,11 @@ let deployer: HardhatEthersSigner;
 let stranger: HardhatEthersSigner;
 
 async function deployContracts(): Promise<Contracts.LendingEngineV2Testable> {
+  const txOverrides = coverageTxOverrides();
   const lendingEngineDeployment = await upgrades.deployProxy(
     lendingEngineFactory,
     [],
-    { kind: "uups" },
+    { kind: "uups", ...(txOverrides ? { txOverrides } : {}) },
   );
   await lendingEngineDeployment.waitForDeployment();
   return lendingEngineDeployment.connect(deployer);

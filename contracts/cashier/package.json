@@ -25,6 +25,7 @@
     "build": "hardhat compile",
     "test": "hardhat test",
     "test:coverage": "hardhat coverage",
+    "test:stratus": "hardhat test --network stratus",
     "contracts:size": "hardhat size-contracts"
   }
 }

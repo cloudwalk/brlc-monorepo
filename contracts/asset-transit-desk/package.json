@@ -27,6 +27,7 @@
     "ts:check": "tsc --noEmit",
     "build": "hardhat compile",
     "test": "hardhat test",
+    "test:stratus": "hardhat test --network stratus",
     "test:coverage": "hardhat coverage",
     "contracts:size": "hardhat size-contracts"
   }

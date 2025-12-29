@@ -42,6 +42,19 @@ abstract contract LendingMarketV2Core is
     }
 
     /**
+     * @dev Calculates the total tracked balance of a sub-loan by summing all tracked components.
+     */
+    function _calculateTrackedBalance(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
+        return
+            subLoan.trackedPrincipal +
+            subLoan.trackedPrimaryInterest +
+            subLoan.trackedSecondaryInterest +
+            subLoan.trackedMoratoryInterest +
+            subLoan.trackedLateFee +
+            subLoan.trackedClawbackFee;
+    }
+
+    /**
      * @dev Calculates the day index that corresponds the specified timestamp.
      */
     function _dayIndex(uint256 timestamp) internal pure returns (uint256) {
@@ -54,9 +67,22 @@ abstract contract LendingMarketV2Core is
     }
 
     /**
-     * @dev Rounds a value to the nearest multiple of the accuracy factor according to mathematical rules.
+     * @dev Rounds a value to the nearest multiple of the accuracy factor according to mathematical rules
+     * and the following rule: if the initial value for rounding is not zero and the rounded value is zero,
      */
-    function _roundMath(uint256 value) internal pure returns (uint256) {
-        return ((value + ACCURACY_FACTOR / 2) / ACCURACY_FACTOR) * ACCURACY_FACTOR;
+    function _roundFinancially(uint256 value) internal pure returns (uint256) {
+        uint256 roundedValue = ((value + ACCURACY_FACTOR / 2) / ACCURACY_FACTOR) * ACCURACY_FACTOR;
+        if (roundedValue == 0 && value != 0) {
+            roundedValue = ACCURACY_FACTOR;
+        }
+        return roundedValue;
+    }
+
+    /**
+     * @dev Returns true if the sub-loan is past its due date at the specified timestamp.
+     */
+    function _isOverdue(ProcessingSubLoan memory subLoan, uint256 timestamp) internal pure returns (bool) {
+        uint256 dueDay = _dayIndex(subLoan.startTimestamp) + subLoan.duration;
+        return _dayIndex(timestamp) > dueDay;
     }
 }

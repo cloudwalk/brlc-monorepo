@@ -30,11 +30,10 @@ abstract contract LendingMarketV2StorageLayout is ILendingMarketV2Types {
      * The value is the same as:
      *
      * ```solidity
-     * string memory id = "cloudwalk.storage.LendingMarket";
+     * string memory id = "cloudwalk.storage.LendingMarketV2";
      * bytes32 location = keccak256(abi.encode(uint256(keccak256(id) - 1)) & ~bytes32(uint256(0xff));
      * ```
      */
-    // TODO: use storage location id "cloudwalk.storage.LendingMarketV2", redeploy the contract
     bytes32 private constant LENDING_MARKET_STORAGE_LOCATION =
         0x27e9a497aa8e1867f33bd8bb7ff668e694c5f7d641b7a1234b1516e32cb50000;
 
@@ -57,7 +56,7 @@ abstract contract LendingMarketV2StorageLayout is ILendingMarketV2Types {
      *
      * 1. The `storageKind` field is used to ensure that the lending market storage layout is used in delegate calls.
      *
-     * @custom:storage-location erc7201:cloudwalk.storage.LendingMarket
+     * @custom:storage-location erc7201:cloudwalk.storage.LendingMarketV2
      */
     struct LendingMarketStorage {
         // Slot 1

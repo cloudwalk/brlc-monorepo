@@ -1,7 +1,7 @@
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { checkContractUupsUpgrading, setUpFixture } from "../test-utils/common";
+import { checkContractUupsUpgrading, coverageTxOverrides, setUpFixture } from "../test-utils/common";
 import * as Contracts from "../typechain-types";
 import { proveTx } from "../test-utils/eth";
 
@@ -29,10 +29,11 @@ let deployer: HardhatEthersSigner;
 let stranger: HardhatEthersSigner;
 
 async function deployContracts(): Promise<Contracts.LendingEngineV2Testable> {
+  const txOverrides = coverageTxOverrides();
   const lendingEngineDeployment = await upgrades.deployProxy(
     lendingEngineFactory,
     [],
-    { kind: "uups" },
+    { kind: "uups", ...(txOverrides ? { txOverrides } : {}) },
   );
   await lendingEngineDeployment.waitForDeployment();
   return lendingEngineDeployment.connect(deployer);
@@ -115,20 +116,18 @@ describe("Contract 'LendingEngine'", () => {
       const engine = await setUpFixture(deployContracts);
       const subLoanId = 1;
       const timestamp = 0;
-      const flags = 0;
 
       await proveTx(engine.setStorageKind(STORAGE_KIND_MARKET));
-      await expect(engine.previewSubLoan(subLoanId, timestamp, flags)).not.to.be.reverted;
+      await expect(engine.previewSubLoan(subLoanId, timestamp)).not.to.be.reverted;
     });
 
     it("is reverted if called not from the lending market contract storage context", async () => {
       const engine = await setUpFixture(deployContracts);
       const subLoanId = 1;
       const timestamp = 0;
-      const flags = 0;
 
       await expect(
-        engine.previewSubLoan(subLoanId, timestamp, flags),
+        engine.previewSubLoan(subLoanId, timestamp),
       ).to.be.revertedWithCustomError(engine, ERROR_NAME_UNAUTHORIZED_CALL_CONTEXT);
     });
   });

@@ -4,6 +4,17 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { BaseContract, Contract, ContractFactory, Result } from "ethers";
 import { proveTx } from "./eth";
 
+// TODO: Consider a better approach. On `mackOS` in GitHub Action it works without this two export entities
+export const IS_COVERAGE_RUN =
+  process.argv.includes("coverage") ||
+  process.env.COVERAGE === "true" ||
+  process.env.SOLIDITY_COVERAGE === "true" ||
+  process.env.HARDHAT_COVERAGE === "true";
+
+export function coverageTxOverrides() {
+  return IS_COVERAGE_RUN ? { gasLimit: 500_000_000 } : undefined;
+}
+
 /**
  * @dev helper function to convert wrongly typed typechain Result to a plain object
  */
@@ -53,7 +64,8 @@ export async function checkContractUupsUpgrading(
 ) {
   const contractAddress = await contract.getAddress();
   const oldImplementationAddress = await upgrades.erc1967.getImplementationAddress(contractAddress);
-  const newImplementation = await contractFactory.deploy();
+  const txOverrides = coverageTxOverrides();
+  const newImplementation = txOverrides ? await contractFactory.deploy(txOverrides) : await contractFactory.deploy();
   await newImplementation.waitForDeployment();
   const expectedNewImplementationAddress = await newImplementation.getAddress();
 

@@ -201,7 +201,7 @@ contract CreditLineV2 is
             } else if (borrowerConfig.borrowingPolicy == BorrowingPolicy.TotalActiveAmountLimit) {
                 uint256 maxBorrowedAmount = borrowerConfig.maxBorrowedAmount;
                 if (aggregatedActiveLoanAmount > borrowerConfig.maxBorrowedAmount) {
-                    revert CreditLoneV2_LimitViolationOnTotalActiveLoanAmount(
+                    revert CreditLineV2_LimitViolationOnTotalActiveLoanAmount(
                         aggregatedActiveLoanAmount,
                         maxBorrowedAmount
                     );

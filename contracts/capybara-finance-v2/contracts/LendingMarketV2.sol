@@ -196,21 +196,13 @@ contract LendingMarketV2 is
     }
 
     /// @inheritdoc ILendingMarketV2Primary
-    function getSubLoanPreview(
-        uint256 subLoanId,
-        uint256 timestamp,
-        uint256 flags
-    ) external view returns (SubLoanPreview memory) {
-        return _getSubLoanPreview(subLoanId, timestamp, flags);
+    function getSubLoanPreview(uint256 subLoanId, uint256 timestamp) external view returns (SubLoanPreview memory) {
+        return _convertToSubLoanPreview(_getSubLoanPreview(subLoanId, timestamp));
     }
 
     /// @inheritdoc ILendingMarketV2Primary
-    function getLoanPreview(
-        uint256 subLoanId,
-        uint256 timestamp,
-        uint256 flags
-    ) external view returns (LoanPreview memory previews) {
-        return _getLoanPreview(subLoanId, timestamp, flags);
+    function getLoanPreview(uint256 subLoanId, uint256 timestamp) external view returns (LoanPreview memory previews) {
+        return _getLoanPreview(subLoanId, timestamp);
     }
 
     /// @inheritdoc ILendingMarketV2Primary
@@ -218,7 +210,8 @@ contract LendingMarketV2 is
         SubLoan storage subLoan = _getLendingMarketStorage().subLoans[subLoanId];
         uint256[] memory operationIds = new uint256[](subLoan.metadata.operationCount);
         uint256 operationId = subLoan.metadata.earliestOperationId;
-        for (uint256 i = 0; operationId != 0; ++i) {
+        uint256 count = subLoan.metadata.operationCount;
+        for (uint256 i = 0; i < count && operationId != 0; ++i) {
             operationIds[i] = operationId;
             operationId = subLoan.operations[operationId].nextOperationId;
         }
@@ -299,6 +292,23 @@ contract LendingMarketV2 is
             revert LendingMarketV2_EngineAddressInvalid();
         }
         try ILendingEngineV2(engine_).proveLendingEngineV2() {} catch {
+            revert LendingMarketV2_EngineAddressInvalid();
+        }
+
+        // Be sure the provided address is proxy
+        address engineImplementation;
+        try ILendingEngineV2(engine_).getImplementation() returns (address engineImplementation_) {
+            engineImplementation = engineImplementation_;
+        } catch {
+            revert LendingMarketV2_EngineAddressInvalid();
+        }
+        if (engineImplementation == address(0)) {
+            revert LendingMarketV2_EngineAddressInvalid();
+        }
+        if (engineImplementation.code.length == 0) {
+            revert LendingMarketV2_EngineAddressInvalid();
+        }
+        try ILendingEngineV2(engineImplementation).proveLendingEngineV2() {} catch {
             revert LendingMarketV2_EngineAddressInvalid();
         }
 
@@ -516,7 +526,7 @@ contract LendingMarketV2 is
             }
             _delegateToEngine(abi.encodeCall(ILendingEngineV2.processSubLoan, (subLoanId)));
             // to be sure pending operations will not be reverted in the future
-            _getSubLoanPreview(subLoanId, _getLatestOperationTimestamp(subLoanId), 0);
+            _getSubLoanPreview(subLoanId, _getLatestOperationTimestamp(subLoanId));
         }
     }
 
@@ -528,6 +538,7 @@ contract LendingMarketV2 is
         SubLoan storage storedSubLoan = _getLendingMarketStorage().subLoans[subLoan.id];
 
         preview.day = _dayIndex(subLoan.trackedTimestamp);
+        preview.daysSinceStart = preview.day - _dayIndex(subLoan.startTimestamp);
         preview.id = subLoan.id;
         preview.firstSubLoanId = subLoan.id - storedSubLoan.metadata.subLoanIndex;
         preview.subLoanCount = storedSubLoan.metadata.subLoanCount;
@@ -536,57 +547,68 @@ contract LendingMarketV2 is
         preview.recentOperationId = subLoan.recentOperationId;
         preview.latestOperationId = storedSubLoan.metadata.latestOperationId;
         preview.status = subLoan.status;
-        preview.gracePeriodStatus = subLoan.gracePeriodStatus;
+
         preview.programId = storedSubLoan.inception.programId;
         preview.borrower = storedSubLoan.inception.borrower;
         preview.borrowedAmount = storedSubLoan.inception.borrowedAmount;
         preview.addonAmount = storedSubLoan.inception.addonAmount;
+
         preview.startTimestamp = subLoan.startTimestamp;
         preview.freezeTimestamp = subLoan.freezeTimestamp;
         preview.trackedTimestamp = subLoan.trackedTimestamp;
         preview.pendingTimestamp = subLoan.pendingTimestamp;
         preview.duration = subLoan.duration;
-        preview.remuneratoryRate = subLoan.remuneratoryRate;
+
+        preview.primaryRate = subLoan.primaryRate;
+        preview.secondaryRate = subLoan.secondaryRate;
         preview.moratoryRate = subLoan.moratoryRate;
         preview.lateFeeRate = subLoan.lateFeeRate;
-        preview.graceDiscountRate = subLoan.graceDiscountRate;
+        preview.clawbackFeeRate = subLoan.clawbackFeeRate;
+
         preview.trackedPrincipal = subLoan.trackedPrincipal;
-        preview.trackedRemuneratoryInterest = subLoan.trackedRemuneratoryInterest;
-        preview.trackedMoratoryInterest = subLoan.trackedMoratoryInterest;
-        preview.trackedLateFee = subLoan.trackedLateFee;
-        preview.outstandingBalance = _calculateOutstandingBalance(subLoan);
         preview.repaidPrincipal = subLoan.repaidPrincipal;
-        preview.repaidRemuneratoryInterest = subLoan.repaidRemuneratoryInterest;
-        preview.repaidMoratoryInterest = subLoan.repaidMoratoryInterest;
-        preview.repaidLateFee = subLoan.repaidLateFee;
         preview.discountPrincipal = subLoan.discountPrincipal;
-        preview.discountRemuneratoryInterest = subLoan.discountRemuneratoryInterest;
+
+        preview.trackedPrimaryInterest = subLoan.trackedPrimaryInterest;
+        preview.repaidPrimaryInterest = subLoan.repaidPrimaryInterest;
+        preview.discountPrimaryInterest = subLoan.discountPrimaryInterest;
+
+        preview.trackedSecondaryInterest = subLoan.trackedSecondaryInterest;
+        preview.repaidSecondaryInterest = subLoan.repaidSecondaryInterest;
+        preview.discountSecondaryInterest = subLoan.discountSecondaryInterest;
+
+        preview.trackedMoratoryInterest = subLoan.trackedMoratoryInterest;
+        preview.repaidMoratoryInterest = subLoan.repaidMoratoryInterest;
         preview.discountMoratoryInterest = subLoan.discountMoratoryInterest;
+
+        preview.trackedLateFee = subLoan.trackedLateFee;
+        preview.repaidLateFee = subLoan.repaidLateFee;
         preview.discountLateFee = subLoan.discountLateFee;
+
+        preview.trackedClawbackFee = subLoan.trackedClawbackFee;
+        preview.repaidClawbackFee = subLoan.repaidClawbackFee;
+        preview.discountClawbackFee = subLoan.discountClawbackFee;
+
+        preview.outstandingBalance = _calculateOutstandingBalance(subLoan);
+
         return preview;
     }
 
     /**
      * @dev Retrieves the preview of a sub-loan at a given timestamp via a delegated engine call.
      */
-    function _getSubLoanPreview(
-        uint256 subLoanId,
-        uint256 timestamp,
-        uint256 flags
-    ) internal view returns (SubLoanPreview memory) {
+    function _getSubLoanPreview(uint256 subLoanId, uint256 timestamp) internal view returns (ProcessingSubLoan memory) {
         bytes memory ret = _selfStaticCall(
             abi.encodeCall(
                 this.delegateToEngine,
-                (abi.encodeCall(ILendingEngineV2.previewSubLoan, (subLoanId, timestamp, flags)))
+                (abi.encodeCall(ILendingEngineV2.previewSubLoan, (subLoanId, timestamp)))
             )
         );
 
         // The `delegateToEngine` function returns `bytes` which wrap the engine return data.
         // First, decode the outer `bytes`, then decode the inner payload.
         bytes memory engineRet = abi.decode(ret, (bytes));
-        ProcessingSubLoan memory subLoan = abi.decode(engineRet, (ProcessingSubLoan));
-
-        return _convertToSubLoanPreview(subLoan);
+        return abi.decode(engineRet, (ProcessingSubLoan));
     }
 
     /**
@@ -595,25 +617,25 @@ contract LendingMarketV2 is
      * @param timestamp The timestamp to calculate the preview at.
      * @return The loan preview.
      */
-    function _getLoanPreview(
-        uint256 subLoanId,
-        uint256 timestamp,
-        uint256 flags
-    ) internal view returns (LoanPreview memory) {
+    function _getLoanPreview(uint256 subLoanId, uint256 timestamp) internal view returns (LoanPreview memory) {
         LoanPreview memory preview;
 
-        SubLoan storage subLoan = _getLendingMarketStorage().subLoans[subLoanId];
-        uint256 subLoanCount = subLoan.metadata.subLoanCount;
-        subLoanId = subLoanId - subLoan.metadata.subLoanIndex;
+        SubLoan storage storedSubLoan = _getLendingMarketStorage().subLoans[subLoanId];
+        uint256 subLoanCount = storedSubLoan.metadata.subLoanCount;
+        subLoanId = subLoanId - storedSubLoan.metadata.subLoanIndex;
 
         preview.firstSubLoanId = subLoanId;
         preview.subLoanCount = subLoanCount;
 
         SubLoanPreview memory singleLoanPreview;
         for (uint256 i = 0; i < subLoanCount; ++i) {
-            singleLoanPreview = _getSubLoanPreview(subLoanId, timestamp, flags);
+            ProcessingSubLoan memory subLoan = _getSubLoanPreview(subLoanId, timestamp);
+            singleLoanPreview = _convertToSubLoanPreview(subLoan);
             if (singleLoanPreview.status == uint256(SubLoanStatus.Ongoing)) {
                 preview.ongoingSubLoanCount += 1;
+                if (_isOverdue(subLoan, timestamp)) {
+                    preview.overdueSubLoanCount += 1;
+                }
             }
             if (singleLoanPreview.status == uint256(SubLoanStatus.Repaid)) {
                 preview.repaidSubLoanCount += 1;
@@ -623,19 +645,29 @@ contract LendingMarketV2 is
             }
             preview.totalBorrowedAmount += singleLoanPreview.borrowedAmount;
             preview.totalAddonAmount += singleLoanPreview.addonAmount;
+
             preview.totalTrackedPrincipal += singleLoanPreview.trackedPrincipal;
-            preview.totalTrackedRemuneratoryInterest += singleLoanPreview.trackedRemuneratoryInterest;
-            preview.totalTrackedMoratoryInterest += singleLoanPreview.trackedMoratoryInterest;
-            preview.totalTrackedLateFee += singleLoanPreview.trackedLateFee;
-            preview.totalOutstandingBalance += singleLoanPreview.outstandingBalance;
             preview.totalRepaidPrincipal += singleLoanPreview.repaidPrincipal;
-            preview.totalRepaidRemuneratoryInterest += singleLoanPreview.repaidRemuneratoryInterest;
-            preview.totalRepaidMoratoryInterest += singleLoanPreview.repaidMoratoryInterest;
-            preview.totalRepaidLateFee += singleLoanPreview.repaidLateFee;
             preview.totalDiscountPrincipal += singleLoanPreview.discountPrincipal;
-            preview.totalDiscountRemuneratoryInterest += singleLoanPreview.discountRemuneratoryInterest;
+
+            preview.totalTrackedPrimaryInterest += singleLoanPreview.trackedPrimaryInterest;
+            preview.totalRepaidPrimaryInterest += singleLoanPreview.repaidPrimaryInterest;
+            preview.totalDiscountPrimaryInterest += singleLoanPreview.discountPrimaryInterest;
+
+            preview.totalTrackedSecondaryInterest += singleLoanPreview.trackedSecondaryInterest;
+            preview.totalRepaidSecondaryInterest += singleLoanPreview.repaidSecondaryInterest;
+            preview.totalDiscountSecondaryInterest += singleLoanPreview.discountPrimaryInterest;
+
+            preview.totalTrackedMoratoryInterest += singleLoanPreview.trackedMoratoryInterest;
+            preview.totalRepaidMoratoryInterest += singleLoanPreview.repaidMoratoryInterest;
             preview.totalDiscountMoratoryInterest += singleLoanPreview.discountMoratoryInterest;
+
+            preview.totalTrackedLateFee += singleLoanPreview.trackedLateFee;
+            preview.totalRepaidLateFee += singleLoanPreview.repaidLateFee;
             preview.totalDiscountLateFee += singleLoanPreview.discountLateFee;
+
+            preview.totalOutstandingBalance += singleLoanPreview.outstandingBalance;
+
             unchecked {
                 ++subLoanId;
             }
@@ -681,11 +713,7 @@ contract LendingMarketV2 is
      * @dev Calculates the total outstanding balance of a sub-loan by summing all tracked components.
      */
     function _calculateOutstandingBalance(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
-        return
-            _roundMath(subLoan.trackedPrincipal) +
-            _roundMath(subLoan.trackedRemuneratoryInterest) +
-            _roundMath(subLoan.trackedMoratoryInterest) +
-            _roundMath(subLoan.trackedLateFee);
+        return _roundFinancially(_calculateTrackedBalance(subLoan));
     }
 
     /**

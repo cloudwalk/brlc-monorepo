@@ -78,16 +78,16 @@
         ```
       * Post the due date:
         ```
-        (7) legalPrincipal[dueDate] = principal[dueDate] + primaryInterest[dueDate];
-        (8) lateFee[dueDate] = legalPrincipal[dueDate] * lateFeeRate;
-        (9) clawbackFee[dueDate] = legalPrincipal[dueDate] * (1 + clawbackFeeRate)^(dueDate - startDate) - legalPrincipal[dueDate];
-        
-        (10) principal[d4] = principal[d3];
-        (11) primaryInterest[d4] = primaryInterest[d3];
-        (12) secondaryInterest[d4] = (legalPrincipal[d3] + secondaryInterest[d3]) * (1 + secondaryRate)^(d4 - d3) - legalPrincipal[d3];
-        (13) moratoryInterest[d4] = moratoryInterest[d3] + legalPrincipal[d3] * moratoryRate * (d4 - d3);
-        (14) lateFee[d4] = lateFee[d3];
-        (15) clawbackFee[d4] = clawbackFee[d3];
+        (8) legalPrincipal[dueDate] = principal[dueDate] + primaryInterest[dueDate];
+        (9) lateFee[dueDate] = legalPrincipal[dueDate] * lateFeeRate;
+        (10) clawbackFee[dueDate] = legalPrincipal[dueDate] * (1 + clawbackFeeRate)^(dueDate - startDate) - legalPrincipal[dueDate];
+
+        (11) principal[d4] = principal[d3];
+        (12) primaryInterest[d4] = primaryInterest[d3];
+        (13) secondaryInterest[d4] = (legalPrincipal[d3] + secondaryInterest[d3]) * (1 + secondaryRate)^(d4 - d3) - legalPrincipal[d3];
+        (14) moratoryInterest[d4] = moratoryInterest[d3] + legalPrincipal[d3] * moratoryRate * (d4 - d3);
+        (15) lateFee[d4] = lateFee[d3];
+        (16) clawbackFee[d4] = clawbackFee[d3];
         ```
 
 5. **Sub-Loan IDs**: Each sub-loan has a unique ID assigned when the sub-loan is taken. Sub-loan IDs are always sequential within a loan. Each sub-loan stores its index within the loan and the total number of sub-loans for that loan.

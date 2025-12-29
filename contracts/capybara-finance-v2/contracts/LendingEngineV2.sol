@@ -792,6 +792,18 @@ contract LendingEngineV2 is
             _applyRepayment(subLoan, operation);
         } else if (operationKind == uint256(OperationKind.Discount)) {
             _applyDiscount(subLoan, operation);
+        } else if (operationKind == uint256(OperationKind.PrincipalDiscount)) {
+            _applyPrincipalDiscount(subLoan, operation);
+        } else if (operationKind == uint256(OperationKind.PrimaryInterestDiscount)) {
+            _applyPrimaryInterestDiscount(subLoan, operation);
+        } else if (operationKind == uint256(OperationKind.SecondaryInterestDiscount)) {
+            _applySecondaryInterestDiscount(subLoan, operation);
+        } else if (operationKind == uint256(OperationKind.MoratoryInterestDiscount)) {
+            _applyMoratoryInterestDiscount(subLoan, operation);
+        } else if (operationKind == uint256(OperationKind.LateFeeDiscount)) {
+            _applyLateFeeDiscount(subLoan, operation);
+        } else if (operationKind == uint256(OperationKind.ClawbackFeeDiscount)) {
+            _applyClawbackFeeDiscount(subLoan, operation);
         } else if (operationKind == uint256(OperationKind.Revocation)) {
             _applyRevocation(subLoan);
         } else if (operationKind == uint256(OperationKind.Freezing)) {
@@ -1130,6 +1142,75 @@ contract LendingEngineV2 is
         amount = _discountClawbackFee(subLoan, amount);
         amount = _discountPrimaryInterest(subLoan, amount);
         amount = _discountPrincipal(subLoan, amount);
+    }
+
+    /**
+     * @dev Applies a principal discount operation, reducing the tracked principal amount.
+     */
+    function _applyPrincipalDiscount(ProcessingSubLoan memory subLoan, Operation storage operation) internal view {
+        uint256 remainingAmount = _discountPrincipal(subLoan, operation.value);
+        if (remainingAmount > 0) {
+            revert LendingMarketV2_SubLoanDiscountPartExcess();
+        }
+    }
+
+    /**
+     * @dev Applies a primary interest discount operation, reducing the tracked primary interest amount.
+     */
+    function _applyPrimaryInterestDiscount(
+        ProcessingSubLoan memory subLoan,
+        Operation storage operation
+    ) internal view {
+        uint256 remainingAmount = _discountPrimaryInterest(subLoan, operation.value);
+        if (remainingAmount > 0) {
+            revert LendingMarketV2_SubLoanDiscountPartExcess();
+        }
+    }
+
+    /**
+     * @dev Applies a secondary interest discount operation, reducing the tracked secondary interest amount.
+     */
+    function _applySecondaryInterestDiscount(
+        ProcessingSubLoan memory subLoan,
+        Operation storage operation
+    ) internal view {
+        uint256 remainingAmount = _discountSecondaryInterest(subLoan, operation.value);
+        if (remainingAmount > 0) {
+            revert LendingMarketV2_SubLoanDiscountPartExcess();
+        }
+    }
+
+    /**
+     * @dev Applies a moratory interest discount operation, reducing the tracked moratory interest amount.
+     */
+    function _applyMoratoryInterestDiscount(
+        ProcessingSubLoan memory subLoan,
+        Operation storage operation
+    ) internal view {
+        uint256 remainingAmount = _discountMoratoryInterest(subLoan, operation.value);
+        if (remainingAmount > 0) {
+            revert LendingMarketV2_SubLoanDiscountPartExcess();
+        }
+    }
+
+    /**
+     * @dev Applies a late fee discount operation, reducing the tracked late fee amount.
+     */
+    function _applyLateFeeDiscount(ProcessingSubLoan memory subLoan, Operation storage operation) internal view {
+        uint256 remainingAmount = _discountLateFee(subLoan, operation.value);
+        if (remainingAmount > 0) {
+            revert LendingMarketV2_SubLoanDiscountPartExcess();
+        }
+    }
+
+    /**
+     * @dev Applies a clawback fee discount operation, reducing the tracked clawback fee amount.
+     */
+    function _applyClawbackFeeDiscount(ProcessingSubLoan memory subLoan, Operation storage operation) internal view {
+        uint256 remainingAmount = _discountClawbackFee(subLoan, operation.value);
+        if (remainingAmount > 0) {
+            revert LendingMarketV2_SubLoanDiscountPartExcess();
+        }
     }
 
     /**
@@ -1613,16 +1694,25 @@ contract LendingEngineV2 is
 
         if (
             kind == uint256(OperationKind.Repayment) || // Tools: prevent Prettier one-liner
-            kind == uint256(OperationKind.Discount)
+            kind == uint256(OperationKind.Discount) ||
+            kind == uint256(OperationKind.PrincipalDiscount) ||
+            kind == uint256(OperationKind.PrimaryInterestDiscount) ||
+            kind == uint256(OperationKind.SecondaryInterestDiscount) ||
+            kind == uint256(OperationKind.MoratoryInterestDiscount) ||
+            kind == uint256(OperationKind.LateFeeDiscount) ||
+            kind == uint256(OperationKind.ClawbackFeeDiscount)
         ) {
-            // The zero value is prohibited.
-            // The unrounded value is prohibited.
-            // No special value for a full repayment or discount.
             if (value == 0) {
                 revert LendingMarketV2_OperationValueInvalid();
             }
-            if (value != _roundFinancially(value)) {
-                revert LendingMarketV2_SubLoanRepaymentOrDiscountAmountUnrounded();
+            // The repayments and discounts must be financially rounded, except the special discount operations
+            if (
+                kind == uint256(OperationKind.Repayment) || // Tools: prevent Prettier one-liner
+                kind == uint256(OperationKind.Discount)
+            ) {
+                if (value != _roundFinancially(value)) {
+                    revert LendingMarketV2_SubLoanRepaymentOrDiscountAmountUnrounded();
+                }
             }
             if (timestamp > _blockTimestamp()) {
                 revert LendingMarketV2_OperationKindProhibitedInFuture();

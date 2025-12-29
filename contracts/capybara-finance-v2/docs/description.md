@@ -108,17 +108,23 @@
     The `Revoked` status is not reversible for now.
 
 7. **Sub-Loan Operations**: Various operations can be performed on sub-loans. The purpose of an operation is defined by the operation kind. The following operation kinds are supported:
-    - `Repayment`: repay a sub-loan partially or fully.
-    - `Discount`: discount a sub-loan partially or fully.
-    - `Revocation`: revoke the sub-loan.
-    - `Freezing`: freeze the sub-loan.
-    - `Unfreezing`: unfreeze the sub-loan.
-    - `PrimaryRateSetting`: set the primary rate of the sub-loan.
-    - `SecondaryRateSetting`: set the secondary rate of the sub-loan.
-    - `MoratoryRateSetting`: set the moratory rate of the sub-loan.
-    - `LateFeeRateSetting`: set the late fee rate of the sub-loan.
-    - `ClawbackFeeRateSetting`: set the clawback fee rate of the sub-loan.
-    - `DurationSetting`: set the duration of the sub-loan.
+    - `Repayment`: repays a sub-loan partially or fully.
+    - `Discount`: generally discounts a sub-loan partially or fully.
+    - `Revocation`: revokes the sub-loan.
+    - `Freezing`: freezes the sub-loan.
+    - `Unfreezing`: unfreezes the sub-loan.
+    - `PrimaryRateSetting`: sets the primary rate of the sub-loan.
+    - `SecondaryRateSetting`: sets the secondary rate of the sub-loan.
+    - `MoratoryRateSetting`: sets the moratory rate of the sub-loan.
+    - `LateFeeRateSetting`: sets the late fee rate of the sub-loan.
+    - `ClawbackFeeRateSetting`: sets the clawback fee rate of the sub-loan.
+    - `DurationSetting`: sets the duration of the sub-loan.
+    - `PrincipalDiscount`: discounts the principal part of the sub-loan.
+    - `PrimaryInterestDiscount`: discounts the primary interest part of the sub-loan.
+    - `SecondaryInterestDiscount`: discounts the secondary interest part of the sub-loan.
+    - `MoratoryInterestDiscount`: discounts the moratory interest part of the sub-loan.
+    - `LateFeeDiscount`: discounts the late fee part of the sub-loan.
+    - `ClawbackFeeDiscount`: discounts the clawback fee part of the sub-loan.
 
 8. **Operation IDs**: Each operation has an ID within a sub-loan. Operation IDs are `uint16` values from 1 to 65535. The zero ID (`0`) means `no operation`.
 
@@ -348,6 +354,9 @@
     * 0.004999 => 0.01,
     * 0.000001 => 0.01,
     * 0.000000 => 0.00.
+13. The general discount operation works similarly to the repayment operation, but without the token transfers.
+    The special discount operations are used to discount specific parts of the sub-loan.
+14. The value of the repayment and general discount operations must be rounded financially, the value of the special discount operations may not be rounded.
 
 
 ## Credit Line V2

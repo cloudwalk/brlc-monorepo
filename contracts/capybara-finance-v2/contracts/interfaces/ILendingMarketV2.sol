@@ -78,18 +78,24 @@ interface ILendingMarketV2Types {
      *
      * Values:
      *
-     * - Nonexistent = 0 -------------- The operation does not exist. The default value.
-     * - Repayment = 1 ---------------- The repayment of the sub-loan.
-     * - Discount = 2 ----------------- The discount of the sub-loan.
-     * - Revocation = 3 --------------- The revocation of the sub-loan.
-     * - Freezing = 4 ----------------- The freezing of the sub-loan.
-     * - Unfreezing = 5 --------------- The unfreezing of the sub-loan.
-     * - PrimaryRateSetting = 6 ------- The setting of the primary rate of the sub-loan.
-     * - SecondaryRateSetting = 7 ----- The setting of the secondary rate of the sub-loan.
-     * - MoratoryRateSetting = 8 ------ The setting of the moratory rate of the sub-loan.
-     * - LateFeeRateSetting = 9 ------- The setting of the late fee rate of the sub-loan.
-     * - ClawbackFeeRateSetting = 10 -- The setting of the clawback fee rateSetting of the sub-loan.
-     * - DurationSetting = 11 --------- The setting of the duration of the sub-loan.
+     * - Nonexistent = 0 ----------------- The operation does not exist. The default value.
+     * - Repayment = 1 ------------------- The repayment of the sub-loan.
+     * - Discount = 2 -------------------- The general discount of the sub-loan.
+     * - Revocation = 3 ------------------ The revocation of the sub-loan.
+     * - Freezing = 4 -------------------- The freezing of the sub-loan.
+     * - Unfreezing = 5 ------------------ The unfreezing of the sub-loan.
+     * - PrimaryRateSetting = 6 ---------- The setting of the primary rate of the sub-loan.
+     * - SecondaryRateSetting = 7 -------- The setting of the secondary rate of the sub-loan.
+     * - MoratoryRateSetting = 8 --------- The setting of the moratory rate of the sub-loan.
+     * - LateFeeRateSetting = 9 ---------- The setting of the late fee rate of the sub-loan.
+     * - ClawbackFeeRateSetting = 10 ----- The setting of the clawback fee rateSetting of the sub-loan.
+     * - DurationSetting = 11 ------------ The setting of the duration of the sub-loan.
+     * - PrincipalDiscount = 12 ---------- The discount for the principal part of the sub-loan.
+     * - PrimaryInterestDiscount = 13 ---- The discount for the primary interest part of the sub-loan.
+     * - SecondaryInterestDiscount = 14 -- The discount for the secondary interest part of the sub-loan.
+     * - MoratoryInterestDiscount = 15 --- The discount for the moratory interest part of the sub-loan.
+     * - LateFeeDiscount = 16 ------------ The discount for the late fee part of the sub-loan.
+     * - ClawbackFeeDiscount = 17 -------- The discount for the clawback fee part of the sub-loan.
      *
      * Notes:
      *
@@ -100,7 +106,13 @@ interface ILendingMarketV2Types {
      *    - Freezing.
      * 3. The meaning of the value parameter of an operation depends on the operation kind:
      *    - Repayment: The amount of the repayment.
-     *    - Discount: The amount of the discount.
+     *    - Discount: The amount of the general discount.
+     *    - PrincipalDiscount: The amount of the principal discount.
+     *    - PrimaryInterestDiscount: The amount of the primary interest discount.
+     *    - SecondaryInterestDiscount: The amount of the secondary interest discount.
+     *    - MoratoryInterestDiscount: The amount of the moratory interest discount.
+     *    - LateFeeDiscount: The amount of the late fee discount.
+     *    - ClawbackFeeDiscount: The amount of the clawback fee discount.
      *    - Unfreezing: The flag indicating whether the sub-loan duration extension should be skipped during unfreezing:
      *      - 0: The sub-loan duration is extended by the number of days since the freezing timestamp.
      *      - 1: The sub-loan duration is kept without changes.
@@ -110,8 +122,8 @@ interface ILendingMarketV2Types {
      *    - LateFeeRateSetting: The late fee rate of the sub-loan to set.
      *    - ClawbackFeeRateSetting: The clawback fee rate of the sub-loan to set.
      *    - DurationSetting: The duration of the sub-loan to set.
-     * 4. The repayment and discount amounts of an operation must be rounded according to the ACCURACY_FACTOR,
-     *    see the `Constants` contract.
+     * 4. The repayment and general discount amounts of an operation must be rounded financially according to
+     *    the ACCURACY_FACTOR, see the `Constants` contract. The special discount amounts may not be rounded.
      * 5. All rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
      * 6. About the primary/secondary interest and rates see the `docs/description.md` file.
      * 7. About the clawback fee rate see notes in the the `docs/description.md` file.
@@ -128,7 +140,13 @@ interface ILendingMarketV2Types {
         MoratoryRateSetting,
         LateFeeRateSetting,
         ClawbackFeeRateSetting,
-        DurationSetting
+        DurationSetting,
+        PrincipalDiscount,
+        PrimaryInterestDiscount,
+        SecondaryInterestDiscount,
+        MoratoryInterestDiscount,
+        LateFeeDiscount,
+        ClawbackFeeDiscount
     }
 
     /**
@@ -1493,6 +1511,7 @@ interface ILendingMarketV2Errors {
      *  - freezing operation value is not zero.
      *  - unfreezing operation value is not zero or one.
      */
+    // TODO: Split it into rounded, unrounded, zero, non-zero
     error LendingMarketV2_OperationValueInvalid();
 
     /**
@@ -1533,6 +1552,9 @@ interface ILendingMarketV2Errors {
 
     /// @dev Thrown when the discount amount exceeds the outstanding balance of the sub-loan.
     error LendingMarketV2_SubLoanDiscountExcess();
+
+    /// @dev Thrown when the discount amount for a sub-loan part exceeds the tracked amount of the part.
+    error LendingMarketV2_SubLoanDiscountPartExcess();
 
     /// @dev Thrown when the sub-loan duration exceeds the maximum allowed value (uint16).
     error LendingMarketV2_SubLoanDurationExcess();

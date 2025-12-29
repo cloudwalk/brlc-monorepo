@@ -56,6 +56,12 @@ enum OperationKind {
   LateFeeRateSetting = 9,
   ClawbackFeeRateSetting = 10,
   DurationSetting = 11,
+  PrincipalDiscount = 12,
+  PrimaryInterestDiscount = 13,
+  SecondaryInterestDiscount = 14,
+  MoratoryInterestDiscount = 15,
+  LateFeeDiscount = 16,
+  ClawbackFeeDiscount = 17,
 }
 
 interface Fixture {
@@ -3687,7 +3693,7 @@ describe("Contract 'LendingMarket'", () => {
 
       it("one of the operation kinds is greater than allowed", async () => {
         const operationRequest = operationRequests[operationRequests.length - 1];
-        operationRequest.kind = OperationKind.DurationSetting + 1;
+        operationRequest.kind = OperationKind.ClawbackFeeDiscount + 1;
         operationRequest.value = 0n;
         operationRequest.account = ADDRESS_ZERO;
 

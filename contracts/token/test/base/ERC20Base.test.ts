@@ -43,7 +43,7 @@ describe("Contract 'ERC20Base'", async () => {
     let token = await upgrades.deployProxy(
       tokenFactory,
       [TOKEN_NAME, TOKEN_SYMBOL],
-      { unsafeSkipProxyAdminCheck: true }, // This is necessary to run tests on other networks
+      { unsafeSkipProxyAdminCheck: true, kind: "transparent" }, // This is necessary to run tests on other networks
     ) as Contract;
     await token.waitForDeployment();
     token = connect(token, deployer); // Explicitly specifying the initial account

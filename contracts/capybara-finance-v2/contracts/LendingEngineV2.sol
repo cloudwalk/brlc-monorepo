@@ -6,6 +6,7 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
 import { ERC1967Utils } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 import { ABDKMath64x64 } from "./libraries/ABDKMath64x64.sol";
 import { AddressBook } from "./libraries/AddressBook.sol";
@@ -36,6 +37,7 @@ contract LendingEngineV2 is
     // ------------------ Types ----------------------------------- //
 
     using SafeERC20 for IERC20;
+    using SafeCast for uint256;
     using AddressBook for AddressBook.Table;
 
     /**
@@ -1009,9 +1011,7 @@ contract LendingEngineV2 is
         _acceptSubLoanStatusChange(subLoan, storedSubLoan);
 
         // Update storage with the unchecked type conversion is used for all stored values due to prior checks
-        // All type cast operations are safe due to prior checks
-
-        // TODO: Check overflows for some fields, e.g. repayments, discounts, trackedInterests.
+        // All unchecked type cast operations are safe due to prior checks
 
         // State fields, slot 1, 2
         storedSubLoan.state.status = SubLoanStatus(subLoan.status);
@@ -1031,24 +1031,29 @@ contract LendingEngineV2 is
         storedSubLoan.state.discountPrincipal = uint64(subLoan.discountPrincipal);
 
         // State fields, slot 5, 6
-        storedSubLoan.state.trackedPrimaryInterest = uint64(subLoan.trackedPrimaryInterest);
-        storedSubLoan.state.repaidPrimaryInterest = uint64(subLoan.repaidPrimaryInterest);
-        storedSubLoan.state.discountPrimaryInterest = uint64(subLoan.discountPrimaryInterest);
+        storedSubLoan.state.trackedPrimaryInterest = subLoan.trackedPrimaryInterest.toUint64();
+        storedSubLoan.state.repaidPrimaryInterest = subLoan.repaidPrimaryInterest.toUint64();
+        storedSubLoan.state.discountPrimaryInterest = subLoan.discountPrimaryInterest.toUint64();
 
         // State fields, slot 7, 8
-        storedSubLoan.state.trackedSecondaryInterest = uint64(subLoan.trackedSecondaryInterest);
-        storedSubLoan.state.repaidSecondaryInterest = uint64(subLoan.repaidSecondaryInterest);
-        storedSubLoan.state.discountSecondaryInterest = uint64(subLoan.discountSecondaryInterest);
+        storedSubLoan.state.trackedSecondaryInterest = subLoan.trackedSecondaryInterest.toUint64();
+        storedSubLoan.state.repaidSecondaryInterest = subLoan.repaidSecondaryInterest.toUint64();
+        storedSubLoan.state.discountSecondaryInterest = subLoan.discountSecondaryInterest.toUint64();
 
         // State fields, slot 9, 10
-        storedSubLoan.state.trackedMoratoryInterest = uint64(subLoan.trackedMoratoryInterest);
-        storedSubLoan.state.repaidMoratoryInterest = uint64(subLoan.repaidMoratoryInterest);
-        storedSubLoan.state.discountMoratoryInterest = uint64(subLoan.discountMoratoryInterest);
+        storedSubLoan.state.trackedMoratoryInterest = subLoan.trackedMoratoryInterest.toUint64();
+        storedSubLoan.state.repaidMoratoryInterest = subLoan.repaidMoratoryInterest.toUint64();
+        storedSubLoan.state.discountMoratoryInterest = subLoan.discountMoratoryInterest.toUint64();
 
         // State fields, slot 11, 12
-        storedSubLoan.state.trackedLateFee = uint64(subLoan.trackedLateFee);
-        storedSubLoan.state.repaidLateFee = uint64(subLoan.repaidLateFee);
-        storedSubLoan.state.discountLateFee = uint64(subLoan.discountLateFee);
+        storedSubLoan.state.trackedLateFee = subLoan.trackedLateFee.toUint64();
+        storedSubLoan.state.repaidLateFee = subLoan.repaidLateFee.toUint64();
+        storedSubLoan.state.discountLateFee = subLoan.discountLateFee.toUint64();
+
+        // State fields, slot 13, 14
+        storedSubLoan.state.trackedClawbackFee = subLoan.trackedClawbackFee.toUint64();
+        storedSubLoan.state.repaidClawbackFee = subLoan.repaidClawbackFee.toUint64();
+        storedSubLoan.state.discountClawbackFee = subLoan.discountClawbackFee.toUint64();
 
         // Metadata fields
         storedSubLoan.metadata.recentOperationId = uint16(subLoan.recentOperationId);

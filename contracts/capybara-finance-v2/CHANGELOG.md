@@ -48,6 +48,12 @@
     - `erc7201:cloudwalk.storage.CreditLineV2` (was `erc7201:cloudwalk.storage.CreditLine`).
 14. A detailed description of the financial logic and the mathematical formulas backed CFv2 protocol have been added to [docs/description.md](./docs/description.md).
 
+## Migration
+
+1. No migration path from CFv1 is currently available.
+2. No upgrade path of the previously deployed CFv2 is available. The contracts must be redeployed.
+3. For new deployments of CFv2, see [docs/configuration.md](./docs/configuration.md).
+
 # 2.0.0
 
 ## Main Changes

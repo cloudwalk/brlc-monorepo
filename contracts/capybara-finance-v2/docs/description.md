@@ -6,24 +6,93 @@
 
 1. **Central Entities**: The central entities of the protocol are sub-loans (structure `SubLoan`) and operations performed on them (structure `Operation`). Several sub-loans are grouped into a loan, but the contract does not define a dedicated loan structure.
 
-2. **Sub-Loan IDs**: Each sub-loan has a unique ID assigned when the sub-loan is taken. Sub-loan IDs are always sequential within a loan. Each sub-loan stores its index within the loan and the total number of sub-loans for that loan.
+2. **Financial Tracking**: Each sub-loan separately tracks the following financial parts:
+    - The principal. Its initial value equals to the borrowed amount plus the addon amount.
+    - The primary interest. It is the remuneratory interest up to the due date, accrued compoundly on (principal + primary interest) using the primary rate (the remuneratory rate up to the due date).
+    - The secondary interest. It is the remuneratory interest post the due date, accrued compoundly on (principal + primary interest + secondary interest) using the secondary rate (the remuneratory rate post the due date).
+    - The moratory interest. It is the penalty interest, accrued as simple interest on (principal + primary interest) after the due date using the moratory rate.
+    - The late fee. It is the fee applied when the sub-loan becomes overdue. It is calculated as a simple interest on the (principal + primary interest) at the due date using the late fee rate.
+    - The clawback fee. It is the fee applied when a borrower fails to meet the conditions required to retain a discounted primary rate, in particular when a sub-loan (installment) becomes overdue. The fee is equivalent to the interest retroactively recalculated as if the base (non-discounted) primary rate had applied for the entire accrual period and there were no repayments or discounts. The fee is calculated as a compound interest on (principal + primary interest as of the due date) for the number of days since between the sub-loan start date and the due date using the clawback fee rate. 
+   
+   For each financial part, the contract maintains the tracked the following sub-parts:
+   - tracked: the amount remaining to be repaid.
+   - repaid: the amount that has been repaid.
+   - discounted: the amount that has been discounted.
 
-3. **Financial Tracking**: Each sub-loan separately tracks the following financial parts remaining to be repaid:
-    - the principal,
-    - the accrued remuneratory interest up to the due date (primary interest),
-    - the accrued remuneratory interest post the due date (secondary interest),
-    - the accrued moratory interest (penalty interest),
-    - the clawback fee (see notes below),
-    - the late fee.
-   For each financial part, the contract maintains the tracked, repaid, and discounted amounts.
+   The sum of all tracked parts is called the tracked balance.
+   The tracked balance rounded financially is called the outstanding balance.
 
-4. **Interest and Fee Calculations**: The following calculations are performed for each financial part:
-    - the remuneratory interest compounds on (principal + primary interest) up to the due date;
-    - the remuneratory interest compounds on (principal + primary interest + secondary interest) post the due date;
-    - the moratory interest accrues as simple interest on (principal + primary interest) after the due date;
-    - the late fee is imposed as a one-time fee on the (principal + primary interest) at the due date.
+3. **Repayment and Discount Sequence**: If not stated otherwise, the amount provided for a repayment or discount operation decreases the sub-loan parts down to zero in the following order (from the first to the last):
+    - The tracked secondary interest.
+    - The tracked moratory interest.
+    - The tracked late fee.
+    - The tracked clawback fee.
+    - The tracked primary interest.
+    - The tracked principal.
 
-5. **Sub-Loan Status**: Each sub-loan can have one of the following statuses: 
+    The repayment or discount amount must not be greater than the tracked balance.
+
+    A repayment example:
+    - The initial state: all tracked parts equal 100, the tracked balance of the sub-loan is 600.
+    - The provided repayment amount is 550.
+    - The repayment application:
+      * The tracked secondary interest is decreased from 100 to 0. The remaining repayment amount is 450.
+      * The tracked moratory interest is decreased from 100 to 0. The remaining repayment amount is 350.
+      * The tracked late fee is decreased from 100 to 0. The remaining repayment amount is 250.
+      * The tracked clawback fee is decreased from 100 to 0. The remaining repayment amount is 150.
+      * The tracked primary interest is decreased from 100 to 0. The remaining repayment amount is 50.
+      * The tracked principal is decreased from 100 to 50. The remaining repayment amount is 0.
+
+4. **Mathematical Formulas**:
+    - Terms and conditions:
+      * `principal` -- the tracked principal of the sub-loan;
+      * `primaryInterest` -- the tracked primary interest of the sub-loan;
+      * `primaryRate` -- the primary rate provided as the parameter of the sub-loan;
+      * `legalPrincipal` -- the body of the sub-loan plus the primary interest at the due date, do not provided by the contract explicitly;
+      * `secondaryInterest` -- the tracked secondary interest of the sub-loan;
+      * `secondaryRate` -- the secondary rate provided as the parameter of the sub-loan;
+      * `moratoryInterest` -- the tracked moratory interest;
+      * `moratoryRate` -- the moratory rate provided as the parameter of the sub-loan;
+      * `lateFee` -- the tracked late fee;
+      * `lateFeeRate` -- the late fee rate provided as the parameter of the sub-loan;
+      * `clawbackFee` -- the tracked clawback fee;
+      * `clawbackFeeRate` -- the clawback fee rate provided as the parameter of the sub-loan;
+      * `[x]` -- means "at day x";
+      * `d1`, `d2`, ... `di` -- some concrete dates without repayments or discounts between them;
+      * `dx - dy` -- the integer number of days between dx and dy;
+      * `startDate` -- the start date of the sub-loan;
+      * `dueDate` -- the due date of the sub-loan;
+      * `^` -- means "in power of";
+      * `startDate <= d1 <= dueDate`, `startDate <= d2 <= dueDate`, `d2 >= d1`;
+      * `d3 > dueDate`, `d4 > dueDate`, `d4 >= d3`.
+    - Formulas:
+      * Up to the due date:
+        ```
+        (1) principal[d2] = principal[d1];
+        (2) primaryInterest[d2] = (principal[d1] + primaryInterest[d1]) * (1 + primaryRate)^(d2 - d1) - principal[d1];
+        (3) legalPrincipal[d2] = principal[d2] + primaryInterest[d2];
+        (4) secondaryInterest[d2] = 0;
+        (5) moratoryInterest[d2] = 0;
+        (6) lateFee[d2] = 0;
+        (7) clawbackFee[d2] = 0;
+        ```
+      * Post the due date:
+        ```
+        (7) legalPrincipal[dueDate] = principal[dueDate] + primaryInterest[dueDate];
+        (8) lateFee[dueDate] = legalPrincipal[dueDate] * lateFeeRate;
+        (9) clawbackFee[dueDate] = legalPrincipal[dueDate] * (1 + clawbackFeeRate)^(dueDate - startDate) - legalPrincipal[dueDate];
+        
+        (10) principal[d4] = principal[d3];
+        (11) primaryInterest[d4] = primaryInterest[d3];
+        (12) secondaryInterest[d4] = (legalPrincipal[d3] + secondaryInterest[d3]) * (1 + secondaryRate)^(d4 - d3) - legalPrincipal[d3];
+        (13) moratoryInterest[d4] = moratoryInterest[d3] + legalPrincipal[d3] * moratoryRate * (d4 - d3);
+        (14) lateFee[d4] = lateFee[d3];
+        (15) clawbackFee[d4] = clawbackFee[d3];
+        ```
+
+5. **Sub-Loan IDs**: Each sub-loan has a unique ID assigned when the sub-loan is taken. Sub-loan IDs are always sequential within a loan. Each sub-loan stores its index within the loan and the total number of sub-loans for that loan.
+
+6. **Sub-Loan Status**: Each sub-loan can have one of the following statuses: 
     - `Nonexistent` (default value)
     - `Ongoing`: the sub-loan has at least one financial tracking part nonzero.
     - `Repaid`: the sub-loan has all financial tracking parts zeroed.
@@ -38,28 +107,28 @@
 
     The `Revoked` status is not reversible for now.
 
-6. **Sub-Loan Operations**: Various operations can be performed on sub-loans. The purpose of an operation is defined by the operation kind. The following operation kinds are supported:
+7. **Sub-Loan Operations**: Various operations can be performed on sub-loans. The purpose of an operation is defined by the operation kind. The following operation kinds are supported:
     - `Repayment`: repay a sub-loan partially or fully.
     - `Discount`: discount a sub-loan partially or fully.
     - `Revocation`: revoke the sub-loan.
     - `Freezing`: freeze the sub-loan.
     - `Unfreezing`: unfreeze the sub-loan.
-    - `UpToDueRemuneratoryRateSetting`: set the up to the due date remuneratory rate of the sub-loan.
-    - `PostDueRemuneratoryRateSetting`: set the post the due date remuneratory rate of the sub-loan.
+    - `PrimaryRateSetting`: set the primary rate of the sub-loan.
+    - `SecondaryRateSetting`: set the secondary rate of the sub-loan.
     - `MoratoryRateSetting`: set the moratory rate of the sub-loan.
     - `LateFeeRateSetting`: set the late fee rate of the sub-loan.
     - `ClawbackFeeRateSetting`: set the clawback fee rate of the sub-loan.
     - `DurationSetting`: set the duration of the sub-loan.
 
-7. **Operation IDs**: Each operation has an ID within a sub-loan. Operation IDs are `uint16` values from 1 to 65535. The zero ID (`0`) means `no operation`.
+8. **Operation IDs**: Each operation has an ID within a sub-loan. Operation IDs are `uint16` values from 1 to 65535. The zero ID (`0`) means `no operation`.
 
-8. **Operation Ordering**: Operations can be added chronologically, inserted into past history, or scheduled for future execution. They can also be discarded (future ones) or revoked (past ones), enabling complex loan modification scenarios. Operation-related actions include:
+9. **Operation Ordering**: Operations can be added chronologically, inserted into past history, or scheduled for future execution. They can also be discarded (future ones) or revoked (past ones), enabling complex loan modification scenarios. Operation-related actions include:
     - Adding: add an operation to the sub-loan list without processing the sub-loan.
     - Submitting: add an operation to the list and process the sub-loan immediately.
     - Canceling: remove an operation from the list without processing the sub-loan.
     - Voiding: remove an operation from the list and reprocess the sub-loan.
 
-9. **Operation States**:
+10. **Operation States**:
     - Nonexistent = 0: Operation does not exist (default).
     - Pending = 1: Operation is created but not yet applied.
     - Applied = 2: Operation has been successfully applied to the sub-loan.
@@ -67,23 +136,23 @@
     - Dismissed = 4: Operation was voided without being applied.
     - Revoked = 5: Operation was voided after being applied.
 
-10. **Replay Mechanism**: If operations are added sequentially, each new sub-loan state is calculated from the previous state and the newly added operation. If the new operation timestamp predates the last calculated sub-loan state, or if a previous operation is revoked, the system replays all operations for that sub-loan from the beginning.
+11. **Replay Mechanism**: If operations are added sequentially, each new sub-loan state is calculated from the previous state and the newly added operation. If the new operation timestamp predates the last calculated sub-loan state, or if a previous operation is revoked, the system replays all operations for that sub-loan from the beginning.
 
-11. **Event Groups**: The smart contract events fall into four groups:
+12. **Event Groups**: The smart contract events fall into four groups:
     * a. **Loan Events**: Emitted once per loan: `LoanTaken`, `LoanRevoked`.
     * b. **Sub-Loan Taking Event**: Emitted only once per sub-loan: `SubLoanTaken`.
     * c. **Sub-Loan Updating Event**: Emitted whenever a sub-loan changes and carries the full current state: `SubLoanUpdated`. Each event includes `updateIndex` to simplify retrieving previous sub-loan states from the database. For a given sub-loan and transaction, this event is emitted only once even if multiple operations are added or voided.
     * d. **Operation Events**: Emitted once per operation: `OperationApplied`, `OperationPended`, `OperationRevoked`, `OperationDismissed`.
 
-12. **Batch Processing**: All operations support batch processing with atomic transaction guarantees (either all succeed or all fail).
+13. **Batch Processing**: All operations support batch processing with atomic transaction guarantees (either all succeed or all fail).
 
-13. **Operation Logic Restrictions**:
+14. **Operation Logic Restrictions**:
     * a. Repayments, discounts, duration updates, rate changes, and freeze/unfreeze operations can be applied only while the sub-loan is **not** `Revoked` (i.e., `Ongoing` or `Repaid`).
     * b. A sub-loan revocation operation cannot currently be revoked.
     * c. Future-dated repayment and discount operations are currently prohibited.
     * d. The revocation operation cannot be applied externally, only via the loan revocation function.
 
-14. **Program-Based**: Loans are created under lending programs that pair credit lines with liquidity pools, enabling flexible lending configurations inherited from Capybara Finance protocol V1.
+15. **Program-Based**: Loans are created under lending programs that pair credit lines with liquidity pools, enabling flexible lending configurations inherited from Capybara Finance protocol V1.
 
 ### 2. Main Files
 
@@ -224,9 +293,9 @@
 **Initial State:** Same as Example A after the second repayment.
 
 **Adding Rate Change:**
-- Insert operation: UpToDueRemuneratoryRateSetting(ID=3, timestamp=t15, value=1.5%)
-- System replays: initialize revision => apply Repayment1(t10) => apply UpToDueRemuneratoryRateSetting(t15) => apply Repayment2(t20)
-- Operations: [Repayment1(t10), UpToDueRemuneratoryRateSetting(t15), Repayment2(t20)]
+- Insert operation: PrimaryRateSetting(ID=3, timestamp=t15, value=1.5%)
+- System replays: initialize revision => apply Repayment1(t10) => apply PrimaryRateSetting(t15) => apply Repayment2(t20)
+- Operations: [Repayment1(t10), PrimaryRateSetting(t15), Repayment2(t20)]
 - New events: [OperationApplied(ID=3, value=1.5%, timestamp=t15), SubLoanUpdated]
 - Result: Status=Ongoing, outstanding balance is greater because of the new rate at t15
 
@@ -235,8 +304,8 @@
 **Initial State:** Same as Example A after the first repayment.
 
 **Adding Future Rate Change:**
-- Insert operation: UpToDueRemuneratoryRateSetting(ID=2, timestamp=t15, value=2.0%)
-- Operations: [Repayment1(t10), UpToDueRemuneratoryRateSetting(ID=2, timestamp=t15, value=2.0%, status=Pending)]
+- Insert operation: PrimaryRateSetting(ID=2, timestamp=t15, value=2.0%)
+- Operations: [Repayment1(t10), PrimaryRateSetting(ID=2, timestamp=t15, value=2.0%, status=Pending)]
 - New events: [OperationPended(ID=2, value=2.0%, timestamp=t15)]
 - Result: Status=Ongoing, rate change pending
 
@@ -244,8 +313,8 @@
 
 **Second Repayment After Rate Change:**
 - Process pending operations first at t15, then apply repayment at t20
-- Operations: [Repayment1(t10), UpToDueRemuneratoryRateSetting(t15), Repayment2(t20)]
-- New events: [OperationApplied(UpToDueRemuneratoryRateSetting(t15)), OperationApplied(Repayment2(t20)), SubLoanUpdated]
+- Operations: [Repayment1(t10), PrimaryRateSetting(t15), Repayment2(t20)]
+- New events: [OperationApplied(PrimaryRateSetting(t15)), OperationApplied(Repayment2(t20)), SubLoanUpdated]
 - Result: Status=Ongoing, outstanding balance is greater because of the new rate at t15
 
 ### 5. Notes
@@ -279,8 +348,6 @@
     * 0.004999 => 0.01,
     * 0.000001 => 0.01,
     * 0.000000 => 0.00.
-13. The clawback fee is the fee applied when a borrower fails to meet the conditions required to retain a discounted remuneratory interest rate, in particular when a sub-loan (installment) becomes overdue. The fee is equivalent to the interest retroactively recalculated as if the base (non-discounted) remuneratory interest rate had applied for the entire accrual period. **Note:** the current implementation excludes the clawback fee from the internal "tracked balance" used for repayment/discount validation and for deciding the `Repaid` status.
-14. The clawback fee rate is the rate used to compute the clawback fee. It reflects the difference between the discounted remuneratory interest rate and the base remuneratory interest rate and is applied compoundly to the legal principal (principal plus accrued remuneratory interest) as of the due date.
 
 
 ## Credit Line V2

@@ -78,18 +78,18 @@ interface ILendingMarketV2Types {
      *
      * Values:
      *
-     * - Nonexistent = 0 --------------------- The operation does not exist. The default value.
-     * - Repayment = 1 ----------------------- The repayment of the sub-loan.
-     * - Discount = 2 ------------------------ The discount of the sub-loan.
-     * - Revocation = 3 ---------------------- The revocation of the sub-loan.
-     * - Freezing = 4 ------------------------ The freezing of the sub-loan.
-     * - Unfreezing = 5 ---------------------- The unfreezing of the sub-loan.
-     * - UpToDueRemuneratoryRateSetting = 6 -- The setting of the up to the due date remuneratory rate of the sub-loan.
-     * - PostDueRemuneratoryRateSetting = 7 -- The setting of the post the due date remuneratory rate of the sub-loan.
-     * - MoratoryRateSetting = 8 ------------- The setting of the moratory rate of the sub-loan.
-     * - LateFeeRateSetting = 9 -------------- The setting of the late fee rate of the sub-loan.
-     * - ClawbackFeeRateSetting = 10 --------- The setting of the clawback fee rateSetting of the sub-loan.
-     * - DurationSetting = 11 ---------------- The setting of the duration of the sub-loan.
+     * - Nonexistent = 0 -------------- The operation does not exist. The default value.
+     * - Repayment = 1 ---------------- The repayment of the sub-loan.
+     * - Discount = 2 ----------------- The discount of the sub-loan.
+     * - Revocation = 3 --------------- The revocation of the sub-loan.
+     * - Freezing = 4 ----------------- The freezing of the sub-loan.
+     * - Unfreezing = 5 --------------- The unfreezing of the sub-loan.
+     * - PrimaryRateSetting = 6 ------- The setting of the primary rate of the sub-loan.
+     * - SecondaryRateSetting = 7 ----- The setting of the secondary rate of the sub-loan.
+     * - MoratoryRateSetting = 8 ------ The setting of the moratory rate of the sub-loan.
+     * - LateFeeRateSetting = 9 ------- The setting of the late fee rate of the sub-loan.
+     * - ClawbackFeeRateSetting = 10 -- The setting of the clawback fee rateSetting of the sub-loan.
+     * - DurationSetting = 11 --------- The setting of the duration of the sub-loan.
      *
      * Notes:
      *
@@ -104,8 +104,8 @@ interface ILendingMarketV2Types {
      *    - Unfreezing: The flag indicating whether the sub-loan duration extension should be skipped during unfreezing:
      *      - 0: The sub-loan duration is extended by the number of days since the freezing timestamp.
      *      - 1: The sub-loan duration is kept without changes.
-     *    - UpToDueRemuneratoryRateSetting: The up to the due date remuneratory rate of the sub-loan to set.
-     *    - PostDueRemuneratoryRateSetting: The post the due date remuneratory rate of the sub-loan to set.
+     *    - PrimaryRateSetting: The primary rate of the sub-loan to set.
+     *    - SecondaryRateSetting: The secondary rate of the sub-loan to set.
      *    - MoratoryRateSetting: The moratory rate of the sub-loan to set.
      *    - LateFeeRateSetting: The late fee rate of the sub-loan to set.
      *    - ClawbackFeeRateSetting: The clawback fee rate of the sub-loan to set.
@@ -113,7 +113,8 @@ interface ILendingMarketV2Types {
      * 4. The repayment and discount amounts of an operation must be rounded according to the ACCURACY_FACTOR,
      *    see the `Constants` contract.
      * 5. All rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
-     * 6. About the clawback fee rate see notes in the the `docs/description.md` file.
+     * 6. About the primary/secondary interest and rates see the `docs/description.md` file.
+     * 7. About the clawback fee rate see notes in the the `docs/description.md` file.
      */
     enum OperationKind {
         Nonexistent,
@@ -122,8 +123,8 @@ interface ILendingMarketV2Types {
         Revocation,
         Freezing,
         Unfreezing,
-        UpToDueRemuneratoryRateSetting,
-        PostDueRemuneratoryRateSetting,
+        PrimaryRateSetting,
+        SecondaryRateSetting,
         MoratoryRateSetting,
         LateFeeRateSetting,
         ClawbackFeeRateSetting,
@@ -182,8 +183,8 @@ interface ILendingMarketV2Types {
      * - initialDuration ------------------ The initial duration of the sub-loan in days.
      * - borrowedAmount ------------------- The borrowed amount of the sub-loan.
      * - addonAmount ---------------------- The addon amount of the sub-loan.
-     * - initialUpToDueRemuneratoryRate --- The initial up to the due date remuneratory rate of the sub-loan.
-     * - initialPostDueRemuneratoryRate --- The initial post the due date remuneratory rate of the sub-loan.
+     * - initialPrimaryRate --------------- The initial primary rate of the sub-loan.
+     * - initialSecondaryRate ------------- The initial secondary rate of the sub-loan.
      * - initialMoratoryRate -------------- The initial moratory rate of the sub-loan.
      * - initialLateFeeRate --------------- The initial late fee rate of the sub-loan.
      * - initialClawbackFeeRate ----------- The initial clawback fee rate of the sub-loan.
@@ -191,8 +192,9 @@ interface ILendingMarketV2Types {
      * Notes:
      *
      * 1. The borrowed amount and the addon amount together form the principal of the sub-loan.
-     * 2. About the clawback fee rate see notes in the the `docs/description.md` file.
-     * 3. All rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
+     * 2. All rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
+     * 3. About the primary/secondary interest and rates see the `docs/description.md` file.
+     * 4. About the clawback fee rate see notes in the the `docs/description.md` file.
      */
     struct SubLoanInception {
         // Slot 1 -- This data will never change
@@ -205,8 +207,8 @@ interface ILendingMarketV2Types {
         // Slot2 -- This data will never change and is rarely read
         uint64 borrowedAmount;
         uint64 addonAmount;
-        uint32 initialUpToDueRemuneratoryRate;
-        uint32 initialPostDueRemuneratoryRate;
+        uint32 initialPrimaryRate;
+        uint32 initialSecondaryRate;
         uint32 initialMoratoryRate;
         uint32 initialLateFeeRate;
         // No reserve until the end of the storage slot
@@ -257,41 +259,41 @@ interface ILendingMarketV2Types {
      *
      * Fields:
      *
-     * - status ------------------------------- The status of the sub-loan.
-     * - _reservedStatus ---------------------- Reserved for future use.
-     * - duration ----------------------------- The duration of the sub-loan in days.
-     * - freezeTimestamp ---------------------- The timestamp (at UTC timezone) when the sub-loan is frozen.
-     * - trackedTimestamp --------------------- The timestamp (at UTC timezone) at which this state is determined.
-     * - upToDueRemuneratoryRate -------------- The up to the due date remuneratory rate of the sub-loan.
-     * - postDueRemuneratoryRate -------------- The post the due date remuneratory rate of the sub-loan.
-     * - moratoryRate ------------------------- The moratory rate of the sub-loan.
-     * - lateFeeRate -------------------------- The late fee rate of the sub-loan.
-     * - clawbackFeeRate ---------------------- The clawback fee rate of the sub-loan.
-     * - _reserved0 --------------------------- Reserved for future use.
-     * - trackedPrincipal --------------------- The tracked principal of the sub-loan, remaining to be repaid.
-     * - repaidPrincipal ---------------------- The repaid principal of the sub-loan.
-     * - discountPrincipal -------------------- The discount principal of the sub-loan.
-     * - _reserved1 --------------------------- Reserved for future use.
-     * - trackedUpToDueRemuneratoryInterest --- The tracked up to the due date remuneratory interest.
-     * - repaidUpToDueRemuneratoryInterest ---- The repaid up to the due date remuneratory interest.
-     * - discountUpToDueRemuneratoryInterest -- The discount up to the due date remuneratory interest.
-     * - _reserved2 --------------------------- Reserved for future use.
-     * - trackedPostDueRemuneratoryInterest --- The tracked post the due date remuneratory interest.
-     * - repaidPostDueRemuneratoryInterest ---- The repaid post the due date remuneratory interest.
-     * - discountPostDueRemuneratoryInterest -- The discount post the due date remuneratory interest.
-     * - _reserved3 --------------------------- Reserved for future use.
-     * - trackedMoratoryInterest -------------- The tracked moratory interest.
-     * - repaidMoratoryInterest --------------- The repaid moratory interest.
-     * - discountMoratoryInterest ------------- The discount moratory interest.
-     * - _reserved4 --------------------------- Reserved for future use.
-     * - trackedLateFee ----------------------- The tracked late fee.
-     * - repaidLateFee ------------------------ The repaid late fee.
-     * - discountLateFee ---------------------- The discount late fee.
-     * - _reserved5 --------------------------- Reserved for future use.
-     * - trackedClawbackFee ------------------- The tracked clawback fee.
-     * - repaidClawbackFee -------------------- The repaid clawback fee.
-     * - discountClawbackFee ------------------ The discount clawback fee.
-     * - _reserved6 --------------------------- Reserved for future use.
+     * - status --------------------- The status of the sub-loan.
+     * - _reservedStatus ------------ Reserved for future use.
+     * - duration ------------------- The duration of the sub-loan in days.
+     * - freezeTimestamp ------------ The timestamp (at UTC timezone) when the sub-loan is frozen.
+     * - trackedTimestamp ----------- The timestamp (at UTC timezone) at which this state is determined.
+     * - primaryRate ---------------- The primary rate of the sub-loan.
+     * - secondaryRate -------------- The secondary rate of the sub-loan.
+     * - moratoryRate --------------- The moratory rate of the sub-loan.
+     * - lateFeeRate ---------------- The late fee rate of the sub-loan.
+     * - clawbackFeeRate ------------ The clawback fee rate of the sub-loan.
+     * - _reserved0 ----------------- Reserved for future use.
+     * - trackedPrincipal ----------- The tracked principal of the sub-loan, remaining to be repaid.
+     * - repaidPrincipal ------------ The repaid principal of the sub-loan.
+     * - discountPrincipal ---------- The discount principal of the sub-loan.
+     * - _reserved1 ----------------- Reserved for future use.
+     * - trackedPrimaryInterest ----- The tracked primary interest.
+     * - repaidPrimaryInterest ------ The repaid primary interest.
+     * - discountPrimaryInterest ---- The discount primary interest.
+     * - _reserved2 ----------------- Reserved for future use.
+     * - trackedSecondaryInterest --- The tracked secondary interest.
+     * - repaidSecondaryInterest ---- The repaid secondary interest.
+     * - discountSecondaryInterest -- The discount secondary interest.
+     * - _reserved3 ----------------- Reserved for future use.
+     * - trackedMoratoryInterest ---- The tracked moratory interest.
+     * - repaidMoratoryInterest ----- The repaid moratory interest.
+     * - discountMoratoryInterest --- The discount moratory interest.
+     * - _reserved4 ----------------- Reserved for future use.
+     * - trackedLateFee ------------- The tracked late fee.
+     * - repaidLateFee -------------- The repaid late fee.
+     * - discountLateFee ------------ The discount late fee.
+     * - _reserved5 ----------------- Reserved for future use.
+     * - trackedClawbackFee --------- The tracked clawback fee.
+     * - repaidClawbackFee ---------- The repaid clawback fee.
+     * - discountClawbackFee -------- The discount clawback fee.
+     * - _reserved6 ----------------- Reserved for future use.
      *
      * Notes:
      *
@@ -310,7 +312,8 @@ interface ILendingMarketV2Types {
      * 6.  All rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
      * 7.  All fields related to tracked, repaid, and discount amounts are not financially rounded
      *     according to the ACCURACY_FACTOR, see the `Constants` contract.
-     * 8.  About the clawback fee and its rate see notes in the the `docs/description.md` file.
+     * 8.  About the primary/secondary interest and rates see the `docs/description.md` file.
+     * 9.  About the clawback fee and its rate see notes in the the `docs/description.md` file.
      */
     struct SubLoanState {
         // Slot 1, 2 -- Frequently used data for reading and writing
@@ -319,8 +322,8 @@ interface ILendingMarketV2Types {
         uint16 duration;
         uint32 freezeTimestamp;
         uint32 trackedTimestamp;
-        uint32 upToDueRemuneratoryRate;
-        uint32 postDueRemuneratoryRate;
+        uint32 primaryRate;
+        uint32 secondaryRate;
         uint32 moratoryRate;
         uint32 lateFeeRate;
         uint32 clawbackFeeRate;
@@ -334,17 +337,17 @@ interface ILendingMarketV2Types {
         uint256 _reserved1;
         // No reserve until the end of the storage slot
 
-        // Slots 5, 6 -- The up to the due date remuneratory interest related parts
-        uint64 trackedUpToDueRemuneratoryInterest;
-        uint64 repaidUpToDueRemuneratoryInterest;
-        uint64 discountUpToDueRemuneratoryInterest;
+        // Slots 5, 6 -- The primary interest related parts
+        uint64 trackedPrimaryInterest;
+        uint64 repaidPrimaryInterest;
+        uint64 discountPrimaryInterest;
         uint256 _reserved2;
         // No reserve until the end of the storage slot
 
-        // Slots 7, 8 -- The post the due date remuneratory interest related parts
-        uint64 trackedPostDueRemuneratoryInterest;
-        uint64 repaidPostDueRemuneratoryInterest;
-        uint64 discountPostDueRemuneratoryInterest;
+        // Slots 7, 8 -- The secondary interest related parts
+        uint64 trackedSecondaryInterest;
+        uint64 repaidSecondaryInterest;
+        uint64 discountSecondaryInterest;
         uint256 _reserved3;
         // No reserve until the end of the storage slot
 
@@ -413,38 +416,38 @@ interface ILendingMarketV2Types {
      *
      * Values:
      *
-     * - id ----------------------------------- The ID of the sub-loan.
-     * - earliestOperationId ------------------ The ID of the earliest submitted operation of the sub-loan.
-     * - recentOperationId -------------------- The ID of the recent applied operation of the sub-loan.
-     * - status ------------------------------- The status of the sub-loan.
-     * - startTimestamp ----------------------- The timestamp (at UTC timezone) when the sub-loan is started.
-     * - freezeTimestamp ---------------------- The timestamp (at UTC timezone) when the sub-loan is frozen.
-     * - trackedTimestamp --------------------- The timestamp (at UTC timezone) at which this state is determined.
-     * - pendingTimestamp --------------------- The timestamp of the earliest pending operation or zero if none.
-     * - duration ----------------------------- The duration of the sub-loan in days.
-     * - upToDueRemuneratoryRate -------------- The up to the due date remuneratory rate of the sub-loan.
-     * - postDueRemuneratoryRate -------------- The post the due date remuneratory rate of the sub-loan.
-     * - moratoryRate ------------------------- The moratory rate of the sub-loan.
-     * - lateFeeRate -------------------------- The late fee rate of the sub-loan.
-     * - clawbackFeeRate ---------------------- The clawback fee rate of the sub-loan.
-     * - trackedPrincipal --------------------- The tracked principal of the sub-loan, remaining to be repaid.
-     * - repaidPrincipal ---------------------- The repaid principal of the sub-loan.
-     * - discountPrincipal -------------------- The discount principal of the sub-loan.
-     * - trackedUpToDueRemuneratoryInterest --- The tracked up to the due date remuneratory interest.
-     * - discountUpToDueRemuneratoryInterest -- The discount up to the due date remuneratory interest.
-     * - repaidUpToDueRemuneratoryInterest ---- The repaid up to the due date remuneratory interest.
-     * - trackedPostDueRemuneratoryInterest --- The tracked post the due date remuneratory interest.
-     * - discountPostDueRemuneratoryInterest -- The discount post the due date remuneratory interest.
-     * - repaidPostDueRemuneratoryInterest ---- The repaid post the due date remuneratory interest.
-     * - trackedMoratoryInterest -------------- The tracked moratory interest.
-     * - repaidMoratoryInterest --------------- The repaid moratory interest.
-     * - discountMoratoryInterest ------------- The discount moratory interest.
-     * - trackedLateFee ----------------------- The tracked late fee.
-     * - repaidLateFee ------------------------ The repaid late fee.
-     * - discountLateFee ---------------------- The discount late fee.
-     * - trackedClawbackFee ------------------- The tracked clawback fee.
-     * - repaidClawbackFee -------------------- The repaid clawback fee.
-     * - discountClawbackFee ------------------ The discount clawback fee.
+     * - id ------------------------- The ID of the sub-loan.
+     * - earliestOperationId -------- The ID of the earliest submitted operation of the sub-loan.
+     * - recentOperationId ---------- The ID of the recent applied operation of the sub-loan.
+     * - status --------------------- The status of the sub-loan.
+     * - startTimestamp ------------- The timestamp (at UTC timezone) when the sub-loan is started.
+     * - freezeTimestamp ------------ The timestamp (at UTC timezone) when the sub-loan is frozen.
+     * - trackedTimestamp ----------- The timestamp (at UTC timezone) at which this state is determined.
+     * - pendingTimestamp ----------- The timestamp of the earliest pending operation or zero if none.
+     * - duration ------------------- The duration of the sub-loan in days.
+     * - primaryRate ---------------- The primary rate of the sub-loan.
+     * - secondaryRate -------------- The secondary rate of the sub-loan.
+     * - moratoryRate --------------- The moratory rate of the sub-loan.
+     * - lateFeeRate ---------------- The late fee rate of the sub-loan.
+     * - clawbackFeeRate ------------ The clawback fee rate of the sub-loan.
+     * - trackedPrincipal ----------- The tracked principal of the sub-loan, remaining to be repaid.
+     * - repaidPrincipal ------------ The repaid principal of the sub-loan.
+     * - discountPrincipal ---------- The discount principal of the sub-loan.
+     * - trackedPrimaryInterest ----- The tracked primary interest.
+     * - discountPrimaryInterest ---- The discount primary interest.
+     * - repaidPrimaryInterest ------ The repaid primary interest.
+     * - trackedSecondaryInterest --- The tracked secondary interest.
+     * - discountSecondaryInterest -- The discount secondary interest.
+     * - repaidSecondaryInterest ---- The repaid secondary interest.
+     * - trackedMoratoryInterest ---- The tracked moratory interest.
+     * - repaidMoratoryInterest ----- The repaid moratory interest.
+     * - discountMoratoryInterest --- The discount moratory interest.
+     * - trackedLateFee ------------- The tracked late fee.
+     * - repaidLateFee -------------- The repaid late fee.
+     * - discountLateFee ------------ The discount late fee.
+     * - trackedClawbackFee --------- The tracked clawback fee.
+     * - repaidClawbackFee ---------- The repaid clawback fee.
+     * - discountClawbackFee -------- The discount clawback fee.
      *
      * See notes for the appropriate fields in comments for the storage sub-loan structures above:
      * `SubLoanInception`, `SubLoanState`, `SubLoanMetadata`.
@@ -463,8 +466,8 @@ interface ILendingMarketV2Types {
         uint256 pendingTimestamp;
         uint256 duration;
 
-        uint256 upToDueRemuneratoryRate;
-        uint256 postDueRemuneratoryRate;
+        uint256 primaryRate;
+        uint256 secondaryRate;
         uint256 moratoryRate;
         uint256 lateFeeRate;
         uint256 clawbackFeeRate;
@@ -473,13 +476,13 @@ interface ILendingMarketV2Types {
         uint256 repaidPrincipal;
         uint256 discountPrincipal;
 
-        uint256 trackedUpToDueRemuneratoryInterest;
-        uint256 repaidUpToDueRemuneratoryInterest;
-        uint256 discountUpToDueRemuneratoryInterest;
+        uint256 trackedPrimaryInterest;
+        uint256 repaidPrimaryInterest;
+        uint256 discountPrimaryInterest;
 
-        uint256 trackedPostDueRemuneratoryInterest;
-        uint256 repaidPostDueRemuneratoryInterest;
-        uint256 discountPostDueRemuneratoryInterest;
+        uint256 trackedSecondaryInterest;
+        uint256 repaidSecondaryInterest;
+        uint256 discountSecondaryInterest;
 
         uint256 trackedMoratoryInterest;
         uint256 repaidMoratoryInterest;
@@ -501,48 +504,48 @@ interface ILendingMarketV2Types {
      *
      * Fields:
      *
-     * - day ---------------------------------- The day index at which the preview is calculated.
-     * - id ----------------------------------- The ID of the sub-loan.
-     * - firstSubLoanId ----------------------- The ID of the first sub-loan in the loan.
-     * - subLoanCount ------------------------- The number of sub-loans in the loan.
-     * - operationCount ----------------------- The number of operations (with all states) for the sub-loan.
-     * - earliestOperationId ------------------ The ID of the earliest submitted operation of the sub-loan.
-     * - recentOperationId -------------------- The ID of the recent applied operation of the sub-loan.
-     * - latestOperationId -------------------- The ID of the latest submitted operation of the sub-loan.
-     * - status ------------------------------- The status of the sub-loan.
-     * - programId ---------------------------- The ID of the lending program used to take the sub-loan.
-     * - borrower ----------------------------- The address of the borrower.
-     * - borrowedAmount ----------------------- The borrowed amount of the sub-loan.
-     * - addonAmount -------------------------- The addon amount of the sub-loan.
-     * - startTimestamp ----------------------- The timestamp (at UTC timezone) when the sub-loan is started.
-     * - freezeTimestamp ---------------------- The timestamp (at UTC timezone) when the sub-loan is frozen.
-     * - trackedTimestamp --------------------- The timestamp (at UTC timezone) at which this view is determined.
-     * - pendingTimestamp --------------------- The timestamp of the earliest pending operation or zero if none.
-     * - duration ----------------------------- The duration of the sub-loan in days.
-     * - upToDueRemuneratoryRate -------------- The up to the due date remuneratory rate of the sub-loan.
-     * - postDueRemuneratoryRate -------------- The post the due date remuneratory rate of the sub-loan.
-     * - moratoryRate ------------------------- The moratory rate of the sub-loan.
-     * - lateFeeRate -------------------------- The late fee rate of the sub-loan.
-     * - clawbackFeeRate ---------------------- The clawback fee rate of the sub-loan.
-     * - trackedPrincipal --------------------- The tracked principal of the sub-loan, remaining to be repaid.
-     * - repaidPrincipal ---------------------- The repaid principal of the sub-loan.
-     * - discountPrincipal -------------------- The discount principal of the sub-loan.
-     * - trackedUpToDueRemuneratoryInterest --- The tracked up to the due date remuneratory interest.
-     * - discountUpToDueRemuneratoryInterest -- The discount up to the due date remuneratory interest.
-     * - repaidUpToDueRemuneratoryInterest ---- The repaid up to the due date remuneratory interest.
-     * - trackedPostDueRemuneratoryInterest --- The tracked post the due date remuneratory interest.
-     * - discountPostDueRemuneratoryInterest -- The discount post the due date remuneratory interest.
-     * - repaidPostDueRemuneratoryInterest ---- The repaid post the due date remuneratory interest.
-     * - trackedMoratoryInterest -------------- The tracked moratory interest.
-     * - repaidMoratoryInterest --------------- The repaid moratory interest.
-     * - discountMoratoryInterest ------------- The discount moratory interest.
-     * - trackedLateFee ----------------------- The tracked late fee.
-     * - repaidLateFee ------------------------ The repaid late fee.
-     * - discountLateFee ---------------------- The discount late fee.
-     * - trackedClawbackFee ------------------- The tracked clawback fee.
-     * - repaidClawbackFee -------------------- The repaid clawback fee.
-     * - discountClawbackFee ------------------ The discount clawback fee.
-     * - outstandingBalance ------------------- The outstanding balance of the sub-loan, see notes below.
+     * - day ------------------------ The day index at which the preview is calculated.
+     * - id ------------------------- The ID of the sub-loan.
+     * - firstSubLoanId ------------- The ID of the first sub-loan in the loan.
+     * - subLoanCount --------------- The number of sub-loans in the loan.
+     * - operationCount ------------- The number of operations (with all states) for the sub-loan.
+     * - earliestOperationId -------- The ID of the earliest submitted operation of the sub-loan.
+     * - recentOperationId ---------- The ID of the recent applied operation of the sub-loan.
+     * - latestOperationId ---------- The ID of the latest submitted operation of the sub-loan.
+     * - status --------------------- The status of the sub-loan.
+     * - programId ------------------ The ID of the lending program used to take the sub-loan.
+     * - borrower ------------------- The address of the borrower.
+     * - borrowedAmount ------------- The borrowed amount of the sub-loan.
+     * - addonAmount ---------------- The addon amount of the sub-loan.
+     * - startTimestamp ------------- The timestamp (at UTC timezone) when the sub-loan is started.
+     * - freezeTimestamp ------------ The timestamp (at UTC timezone) when the sub-loan is frozen.
+     * - trackedTimestamp ----------- The timestamp (at UTC timezone) at which this view is determined.
+     * - pendingTimestamp ----------- The timestamp of the earliest pending operation or zero if none.
+     * - duration ------------------- The duration of the sub-loan in days.
+     * - primaryRate ---------------- The primary rate of the sub-loan.
+     * - secondaryRate -------------- The secondary rate of the sub-loan.
+     * - moratoryRate --------------- The moratory rate of the sub-loan.
+     * - lateFeeRate ---------------- The late fee rate of the sub-loan.
+     * - clawbackFeeRate ------------ The clawback fee rate of the sub-loan.
+     * - trackedPrincipal ----------- The tracked principal of the sub-loan, remaining to be repaid.
+     * - repaidPrincipal ------------ The repaid principal of the sub-loan.
+     * - discountPrincipal ---------- The discount principal of the sub-loan.
+     * - trackedPrimaryInterest ----- The tracked primary interest.
+     * - discountPrimaryInterest ---- The discount primary interest.
+     * - repaidPrimaryInterest ------ The repaid primary interest.
+     * - trackedSecondaryInterest --- The tracked secondary interest.
+     * - discountSecondaryInterest -- The discount secondary interest.
+     * - repaidSecondaryInterest ---- The repaid secondary interest.
+     * - trackedMoratoryInterest ---- The tracked moratory interest.
+     * - repaidMoratoryInterest ----- The repaid moratory interest.
+     * - discountMoratoryInterest --- The discount moratory interest.
+     * - trackedLateFee ------------- The tracked late fee.
+     * - repaidLateFee -------------- The repaid late fee.
+     * - discountLateFee ------------ The discount late fee.
+     * - trackedClawbackFee --------- The tracked clawback fee.
+     * - repaidClawbackFee ---------- The repaid clawback fee.
+     * - discountClawbackFee -------- The discount clawback fee.
+     * - outstandingBalance --------- The outstanding balance of the sub-loan, see notes below.
      *
      * Notes:
      *
@@ -585,8 +588,8 @@ interface ILendingMarketV2Types {
         uint256 pendingTimestamp;
         uint256 duration;
 
-        uint256 upToDueRemuneratoryRate;
-        uint256 postDueRemuneratoryRate;
+        uint256 primaryRate;
+        uint256 secondaryRate;
         uint256 moratoryRate;
         uint256 lateFeeRate;
         uint256 clawbackFeeRate;
@@ -595,13 +598,13 @@ interface ILendingMarketV2Types {
         uint256 repaidPrincipal;
         uint256 discountPrincipal;
 
-        uint256 trackedUpToDueRemuneratoryInterest;
-        uint256 repaidUpToDueRemuneratoryInterest;
-        uint256 discountUpToDueRemuneratoryInterest;
+        uint256 trackedPrimaryInterest;
+        uint256 repaidPrimaryInterest;
+        uint256 discountPrimaryInterest;
 
-        uint256 trackedPostDueRemuneratoryInterest;
-        uint256 repaidPostDueRemuneratoryInterest;
-        uint256 discountPostDueRemuneratoryInterest;
+        uint256 trackedSecondaryInterest;
+        uint256 repaidSecondaryInterest;
+        uint256 discountSecondaryInterest;
 
         uint256 trackedMoratoryInterest;
         uint256 repaidMoratoryInterest;
@@ -625,39 +628,39 @@ interface ILendingMarketV2Types {
      *
      * Fields:
      *
-     * - day --------------------------------------- The day index at which the preview is calculated.
-     * - firstSubLoanId ---------------------------- The ID of the first sub-loan in the loan.
-     * - subLoanCount ------------------------------ The number of sub-loans in the loan.
-     * - ongoingSubLoanCount ----------------------- The number of all ongoing sub-loans in the loan despite of the overdue status.
-     * - overdueSubLoanCount ----------------------- The number of ongoing overdue sub-loans in the loan.
-     * - repaidSubLoanCount ------------------------ The number of fully repaid sub-loans in the loan.
-     * - revokedSubLoanCount ----------------------- The number of revoked sub-loans in the loan.
-     * - programId --------------------------------- The ID of the lending program used to take the loan.
-     * - borrower ---------------------------------- The address of the borrower.
-     * - totalBorrowedAmount ----------------------- The total borrowed amount.
-     * - totalAddonAmount -------------------------- The total addon amount.
-     * - totalTrackedPrincipal --------------------- The total tracked principal.
-     * - totalRepaidPrincipal ---------------------- The total repaid principal.
-     * - totalDiscountPrincipal -------------------- The total discount principal.
-     * - totalTrackedLegalPrincipal ---------------- The total tracked legal principal.
-     * - totalRepaidLegalPrincipal ----------------- The total repaid legal principal.
-     * - totalDiscountLegalPrincipal --------------- The total discount legal principal.
-     * - totalTrackedUpToDueRemuneratoryInterest --- The total tracked up to the due date remuneratory interest.
-     * - totalRepaidUpToDueRemuneratoryInterest ---- The total repaid up to the due date remuneratory interest.
-     * - totalDiscountUpToDueRemuneratoryInterest -- The total discount up to the due date remuneratory interest.
-     * - totalTrackedPostDueRemuneratoryInterest --- The total tracked post the due date remuneratory interest.
-     * - totalRepaidPostDueRemuneratoryInterest ---- The total repaid post the due date remuneratory interest.
-     * - totalDiscountPostDueRemuneratoryInterest -- The total discount post the due date remuneratory interest.
-     * - totalTrackedMoratoryInterest -------------- The total tracked moratory interest.
-     * - totalRepaidMoratoryInterest --------------- The total repaid moratory interest.
-     * - totalDiscountMoratoryInterest ------------- The total discount moratory interest.
-     * - totalTrackedLateFee ----------------------- The total tracked late fee.
-     * - totalRepaidLateFee ------------------------ The total repaid late fee.
-     * - totalDiscountLateFee ---------------------- The total discount late fee.
-     * - totalTrackedClawbackFee ------------------- The total tracked clawback fee.
-     * - totalRepaidClawbackFee -------------------- The total repaid clawback fee.
-     * - totalDiscountClawbackFee ------------------ The total discount clawback fee.
-     * - totalOutstandingBalance ------------------- The total outstanding balance.
+     * - day ----------------------------- The day index at which the preview is calculated.
+     * - firstSubLoanId ------------------ The ID of the first sub-loan in the loan.
+     * - subLoanCount -------------------- The number of sub-loans in the loan.
+     * - ongoingSubLoanCount ------------- The number of all ongoing sub-loans in the loan despite of the overdue status.
+     * - overdueSubLoanCount ------------- The number of ongoing overdue sub-loans in the loan.
+     * - repaidSubLoanCount -------------- The number of fully repaid sub-loans in the loan.
+     * - revokedSubLoanCount ------------- The number of revoked sub-loans in the loan.
+     * - programId ----------------------- The ID of the lending program used to take the loan.
+     * - borrower ------------------------ The address of the borrower.
+     * - totalBorrowedAmount ------------- The total borrowed amount.
+     * - totalAddonAmount ---------------- The total addon amount.
+     * - totalTrackedPrincipal ----------- The total tracked principal.
+     * - totalRepaidPrincipal ------------ The total repaid principal.
+     * - totalDiscountPrincipal ---------- The total discount principal.
+     * - totalTrackedLegalPrincipal ------ The total tracked legal principal.
+     * - totalRepaidLegalPrincipal ------- The total repaid legal principal.
+     * - totalDiscountLegalPrincipal ----- The total discount legal principal.
+     * - totalTrackedPrimaryInterest ----- The total tracked primary interest.
+     * - totalRepaidPrimaryInterest ------ The total repaid primary interest.
+     * - totalDiscountPrimaryInterest ---- The total discount primary interest.
+     * - totalTrackedSecondaryInterest --- The total tracked secondary interest.
+     * - totalRepaidSecondaryInterest ---- The total repaid secondary interest.
+     * - totalDiscountSecondaryInterest -- The total discount secondary interest.
+     * - totalTrackedMoratoryInterest ---- The total tracked moratory interest.
+     * - totalRepaidMoratoryInterest ----- The total repaid moratory interest.
+     * - totalDiscountMoratoryInterest --- The total discount moratory interest.
+     * - totalTrackedLateFee ------------- The total tracked late fee.
+     * - totalRepaidLateFee -------------- The total repaid late fee.
+     * - totalDiscountLateFee ------------ The total discount late fee.
+     * - totalTrackedClawbackFee --------- The total tracked clawback fee.
+     * - totalRepaidClawbackFee ---------- The total repaid clawback fee.
+     * - totalDiscountClawbackFee -------- The total discount clawback fee.
+     * - totalOutstandingBalance --------- The total outstanding balance.
      *
      * Notes:
      *
@@ -690,13 +693,13 @@ interface ILendingMarketV2Types {
         uint256 totalRepaidLegalPrincipal;
         uint256 totalDiscountLegalPrincipal;
 
-        uint256 totalTrackedUpToDueRemuneratoryInterest;
-        uint256 totalRepaidUpToDueRemuneratoryInterest;
-        uint256 totalDiscountUpToDueRemuneratoryInterest;
+        uint256 totalTrackedPrimaryInterest;
+        uint256 totalRepaidPrimaryInterest;
+        uint256 totalDiscountPrimaryInterest;
 
-        uint256 totalTrackedPostDueRemuneratoryInterest;
-        uint256 totalRepaidPostDueRemuneratoryInterest;
-        uint256 totalDiscountPostDueRemuneratoryInterest;
+        uint256 totalTrackedSecondaryInterest;
+        uint256 totalRepaidSecondaryInterest;
+        uint256 totalDiscountSecondaryInterest;
 
         uint256 totalTrackedMoratoryInterest;
         uint256 totalRepaidMoratoryInterest;
@@ -818,28 +821,28 @@ interface ILendingMarketV2Types {
      *
      * Fields:
      *
-     * - borrowedAmount ------------ The borrowed amount of the sub-loan.
-     * - addonAmount --------------- The addon amount of the sub-loan.
-     * - duration ------------------ The duration of the sub-loan in days.
-     * - upToDueRemuneratoryRate --- The up to the due date remuneratory rate of the sub-loan.
-     * - postDueRemuneratoryRate --- The post the due date remuneratory rate of the sub-loan.
-     * - moratoryRate -------------- The moratory rate of the sub-loan.
-     * - lateFeeRate --------------- The late fee rate of the sub-loan.
-     * - clawbackFeeRate ----------- The clawback fee rate of the sub-loan.
+     * - borrowedAmount --- The borrowed amount of the sub-loan.
+     * - addonAmount ------ The addon amount of the sub-loan.
+     * - duration --------- The duration of the sub-loan in days.
+     * - primaryRate ------ The primary rate of the sub-loan.
+     * - secondaryRate ---- The secondary rate of the sub-loan.
+     * - moratoryRate ----- The moratory rate of the sub-loan.
+     * - lateFeeRate ------ The late fee rate of the sub-loan.
+     * - clawbackFeeRate -- The clawback fee rate of the sub-loan.
      *
      * Notes:
      *
      * 1. All fields must be provided for each sub-loan request.
      * 2. The number of requests defines the number of sub-loans to take within the loan.
      * 3. The rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
-     * 4. About the clawback fee rate see notes in the the `docs/description.md` file.
+     * 4. About the primary rate, secondary rate, clawback fee rate see notes in the the `docs/description.md` file.
      */
     struct SubLoanTakingRequest {
         uint256 borrowedAmount;
         uint256 addonAmount;
         uint256 duration;
-        uint256 upToDueRemuneratoryRate;
-        uint256 postDueRemuneratoryRate;
+        uint256 primaryRate;
+        uint256 secondaryRate;
         uint256 moratoryRate;
         uint256 lateFeeRate;
         uint256 clawbackFeeRate;
@@ -949,8 +952,8 @@ interface ILendingMarketV2PrimaryEvents is ILendingMarketV2Types {
      * @param duration The duration of the sub-loan in days.
      * @param packedRates The packed rates of the sub-loan. A bitfield with the following bits:
      *
-     * - 32  bits from   0 to  31: the up to the due date remuneratory interest rate.
-     * - 32  bits from  32 to  63: the post the due date remuneratory interest rate.
+     * - 32  bits from   0 to  31: the primary rate.
+     * - 32  bits from  32 to  63: the secondary rate.
      * - 32  bits from  64 to  95: the moratory interest rate.
      * - 32  bits from  96 to 127: the late fee rate.
      * - 32  bits from 128 to 159: the clawback fee rate.
@@ -1007,8 +1010,8 @@ interface ILendingMarketV2PrimaryEvents is ILendingMarketV2Types {
      * @param packedParameters The packed parameters of the sub-loan, see notes above.
      * @param packedRates The packed rates of the sub-loan, see notes above.
      * @param packedPrincipalParts The packed principal parts.
-     * @param packedUpToDueRemuneratoryInterestParts The packed up to the due date remuneratory interest parts
-     * @param packedPostDueRemuneratoryInterestParts The packed post the due date remuneratory interest parts.
+     * @param packedPrimaryInterestParts The packed primary interest parts
+     * @param packedSecondaryInterestParts The packed secondary interest parts.
      * @param packedMoratoryInterestParts The packed moratory interest parts.
      * @param packedLateFeeParts The packed late fee parts.
      * @param packedClawbackFeeParts The packed clawback fee parts.
@@ -1020,8 +1023,8 @@ interface ILendingMarketV2PrimaryEvents is ILendingMarketV2Types {
         bytes32 packedParameters,
         bytes32 packedRates,
         bytes32 packedPrincipalParts,
-        bytes32 packedUpToDueRemuneratoryInterestParts,
-        bytes32 packedPostDueRemuneratoryInterestParts,
+        bytes32 packedPrimaryInterestParts,
+        bytes32 packedSecondaryInterestParts,
         bytes32 packedMoratoryInterestParts,
         bytes32 packedLateFeeParts,
         bytes32 packedClawbackFeeParts

@@ -47,8 +47,8 @@ abstract contract LendingMarketV2Core is
     function _calculateTrackedBalance(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
         return
             subLoan.trackedPrincipal +
-            subLoan.trackedUpToDueRemuneratoryInterest +
-            subLoan.trackedPostDueRemuneratoryInterest +
+            subLoan.trackedPrimaryInterest +
+            subLoan.trackedSecondaryInterest +
             subLoan.trackedMoratoryInterest +
             subLoan.trackedLateFee +
             subLoan.trackedClawbackFee;

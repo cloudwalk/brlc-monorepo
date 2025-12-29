@@ -307,8 +307,8 @@ contract LendingEngineV2 is
         }
         // All rates cannot exceed 100%
         if (
-            subLoanTakingRequest.upToDueRemuneratoryRate > INTEREST_RATE_FACTOR ||
-            subLoanTakingRequest.postDueRemuneratoryRate > INTEREST_RATE_FACTOR ||
+            subLoanTakingRequest.primaryRate > INTEREST_RATE_FACTOR ||
+            subLoanTakingRequest.secondaryRate > INTEREST_RATE_FACTOR ||
             subLoanTakingRequest.moratoryRate > INTEREST_RATE_FACTOR ||
             subLoanTakingRequest.lateFeeRate > INTEREST_RATE_FACTOR ||
             subLoanTakingRequest.clawbackFeeRate > INTEREST_RATE_FACTOR
@@ -332,8 +332,8 @@ contract LendingEngineV2 is
             subLoan.inception.initialDuration = uint16(duration);
             subLoan.inception.borrowedAmount = uint64(borrowedAmount);
             subLoan.inception.addonAmount = uint64(subLoanTakingRequest.addonAmount);
-            subLoan.inception.initialUpToDueRemuneratoryRate = uint32(subLoanTakingRequest.upToDueRemuneratoryRate);
-            subLoan.inception.initialPostDueRemuneratoryRate = uint32(subLoanTakingRequest.postDueRemuneratoryRate);
+            subLoan.inception.initialPrimaryRate = uint32(subLoanTakingRequest.primaryRate);
+            subLoan.inception.initialSecondaryRate = uint32(subLoanTakingRequest.secondaryRate);
             subLoan.inception.initialMoratoryRate = uint32(subLoanTakingRequest.moratoryRate);
             subLoan.inception.initialLateFeeRate = uint32(subLoanTakingRequest.lateFeeRate);
             subLoan.inception.initialClawbackFeeRate = uint32(subLoanTakingRequest.clawbackFeeRate);
@@ -344,8 +344,8 @@ contract LendingEngineV2 is
             subLoan.state.duration = uint16(duration);
             // subLoan.state.freezeTimestamp = 0;
             subLoan.state.trackedTimestamp = uint32(startTimestamp);
-            subLoan.state.upToDueRemuneratoryRate = uint32(subLoanTakingRequest.upToDueRemuneratoryRate);
-            subLoan.state.postDueRemuneratoryRate = uint32(subLoanTakingRequest.postDueRemuneratoryRate);
+            subLoan.state.primaryRate = uint32(subLoanTakingRequest.primaryRate);
+            subLoan.state.secondaryRate = uint32(subLoanTakingRequest.secondaryRate);
             subLoan.state.moratoryRate = uint32(subLoanTakingRequest.moratoryRate);
             subLoan.state.lateFeeRate = uint32(subLoanTakingRequest.lateFeeRate);
             subLoan.state.clawbackFeeRate = uint32(subLoanTakingRequest.clawbackFeeRate);
@@ -357,15 +357,15 @@ contract LendingEngineV2 is
             // subLoan.state._reserved1 = 0;
 
             // State fields, slot 5, 6
-            // subLoan.state.trackedUpToDueRemuneratoryInterest = 0;
-            // subLoan.state.repaidUpToDueRemuneratoryInterest = 0;
-            // subLoan.state.discountUpToDueRemuneratoryInterest = 0;
+            // subLoan.state.trackedPrimaryInterest = 0;
+            // subLoan.state.repaidPrimaryInterest = 0;
+            // subLoan.state.discountPrimaryInterest = 0;
             // subLoan.state._reserved2 = 0;
 
             // State fields, slot 7, 8
-            // subLoan.state.trackedPostDueRemuneratoryInterest = 0;
-            // subLoan.state.repaidPostDueRemuneratoryInterest = 0;
-            // subLoan.state.discountPostDueRemuneratoryInterest = 0;
+            // subLoan.state.trackedSecondaryInterest = 0;
+            // subLoan.state.repaidSecondaryInterest = 0;
+            // subLoan.state.discountSecondaryInterest = 0;
             // subLoan.state._reserved3 = 0;
 
             // State fields, slot 9, 10
@@ -398,8 +398,8 @@ contract LendingEngineV2 is
 
         {
             uint256 packedRates = _packRates(
-                subLoanTakingRequest.upToDueRemuneratoryRate,
-                subLoanTakingRequest.postDueRemuneratoryRate,
+                subLoanTakingRequest.primaryRate,
+                subLoanTakingRequest.secondaryRate,
                 subLoanTakingRequest.moratoryRate,
                 subLoanTakingRequest.lateFeeRate,
                 subLoanTakingRequest.clawbackFeeRate
@@ -798,10 +798,10 @@ contract LendingEngineV2 is
             _applyFreezing(subLoan, operation);
         } else if (operationKind == uint256(OperationKind.Unfreezing)) {
             _applyUnfreezing(subLoan, operation);
-        } else if (operationKind == uint256(OperationKind.UpToDueRemuneratoryRateSetting)) {
-            subLoan.upToDueRemuneratoryRate = operation.value;
-        } else if (operationKind == uint256(OperationKind.PostDueRemuneratoryRateSetting)) {
-            subLoan.postDueRemuneratoryRate = operation.value;
+        } else if (operationKind == uint256(OperationKind.PrimaryRateSetting)) {
+            subLoan.primaryRate = operation.value;
+        } else if (operationKind == uint256(OperationKind.SecondaryRateSetting)) {
+            subLoan.secondaryRate = operation.value;
         } else if (operationKind == uint256(OperationKind.MoratoryRateSetting)) {
             subLoan.moratoryRate = operation.value;
         } else if (operationKind == uint256(OperationKind.LateFeeRateSetting)) {
@@ -856,8 +856,8 @@ contract LendingEngineV2 is
         subLoan.recentOperationId = 0;
         subLoan.status = uint256(SubLoanStatus.Ongoing);
         subLoan.duration = storedSubLoan.inception.initialDuration;
-        subLoan.upToDueRemuneratoryRate = storedSubLoan.inception.initialUpToDueRemuneratoryRate;
-        subLoan.postDueRemuneratoryRate = storedSubLoan.inception.initialPostDueRemuneratoryRate;
+        subLoan.primaryRate = storedSubLoan.inception.initialPrimaryRate;
+        subLoan.secondaryRate = storedSubLoan.inception.initialSecondaryRate;
         subLoan.moratoryRate = storedSubLoan.inception.initialMoratoryRate;
         subLoan.lateFeeRate = storedSubLoan.inception.initialLateFeeRate;
         subLoan.clawbackFeeRate = storedSubLoan.inception.initialClawbackFeeRate;
@@ -866,13 +866,13 @@ contract LendingEngineV2 is
         subLoan.repaidPrincipal = 0;
         subLoan.discountPrincipal = 0;
 
-        subLoan.trackedUpToDueRemuneratoryInterest = 0;
-        subLoan.repaidUpToDueRemuneratoryInterest = 0;
-        subLoan.discountUpToDueRemuneratoryInterest = 0;
+        subLoan.trackedPrimaryInterest = 0;
+        subLoan.repaidPrimaryInterest = 0;
+        subLoan.discountPrimaryInterest = 0;
 
-        subLoan.trackedPostDueRemuneratoryInterest = 0;
-        subLoan.repaidPostDueRemuneratoryInterest = 0;
-        subLoan.discountPostDueRemuneratoryInterest = 0;
+        subLoan.trackedSecondaryInterest = 0;
+        subLoan.repaidSecondaryInterest = 0;
+        subLoan.discountSecondaryInterest = 0;
 
         subLoan.trackedMoratoryInterest = 0;
         subLoan.repaidMoratoryInterest = 0;
@@ -891,7 +891,7 @@ contract LendingEngineV2 is
     }
 
     /**
-     * @dev Accrues remuneratory and moratory interest, and imposes late fees based on elapsed days.
+     * @dev Accrues interest and imposes fees based on elapsed days.
      */
     function _accrueInterest(
         ProcessingSubLoan memory subLoan, // Tools: prevent Prettier one-liner
@@ -914,54 +914,46 @@ contract LendingEngineV2 is
             uint256 dueDay = startDay + subLoan.duration;
             if (begDay <= dueDay) {
                 if (finishDay <= dueDay) {
-                    _accrueUpToDueRemuneratoryInterest(subLoan, finishDay - begDay);
+                    _accruePrimaryInterest(subLoan, finishDay - begDay);
                 } else {
-                    _accrueUpToDueRemuneratoryInterest(subLoan, dueDay - begDay);
+                    _accruePrimaryInterest(subLoan, dueDay - begDay);
                     _imposeClawbackFee(subLoan, dueDay - startDay);
                     _imposeLateFee(subLoan);
-                    _accruePostDueRemuneratoryInterest(subLoan, finishDay - dueDay);
+                    _accrueSecondaryInterest(subLoan, finishDay - dueDay);
                     _accrueMoratoryInterest(subLoan, finishDay - dueDay);
                 }
             } else {
-                _accruePostDueRemuneratoryInterest(subLoan, finishDay - begDay);
+                _accrueSecondaryInterest(subLoan, finishDay - begDay);
                 _accrueMoratoryInterest(subLoan, finishDay - begDay);
             }
         }
     }
 
     /**
-     * @dev Accrues up to the due date remuneratory interest using compound interest.
+     * @dev Accrues primary interest using compound interest.
      */
-    function _accrueUpToDueRemuneratoryInterest(ProcessingSubLoan memory subLoan, uint256 dayCount) internal pure {
-        uint256 oldTrackedBalance = subLoan.trackedPrincipal + subLoan.trackedUpToDueRemuneratoryInterest;
-        uint256 newTrackedBalance = _calculateCompoundInterest(
-            oldTrackedBalance,
-            dayCount,
-            subLoan.upToDueRemuneratoryRate
-        );
-        subLoan.trackedUpToDueRemuneratoryInterest += newTrackedBalance - oldTrackedBalance;
+    function _accruePrimaryInterest(ProcessingSubLoan memory subLoan, uint256 dayCount) internal pure {
+        uint256 oldTrackedBalance = subLoan.trackedPrincipal + subLoan.trackedPrimaryInterest;
+        uint256 newTrackedBalance = _calculateCompoundInterest(oldTrackedBalance, dayCount, subLoan.primaryRate);
+        subLoan.trackedPrimaryInterest += newTrackedBalance - oldTrackedBalance;
     }
 
     /**
-     * @dev Accrues post the due date remuneratory interest using compound interest.
+     * @dev Accrues secondary interest using compound interest.
      */
-    function _accruePostDueRemuneratoryInterest(ProcessingSubLoan memory subLoan, uint256 dayCount) internal pure {
+    function _accrueSecondaryInterest(ProcessingSubLoan memory subLoan, uint256 dayCount) internal pure {
         uint256 oldTrackedBalance = subLoan.trackedPrincipal +
-            subLoan.trackedUpToDueRemuneratoryInterest +
-            subLoan.trackedPostDueRemuneratoryInterest;
-        uint256 newTrackedBalance = _calculateCompoundInterest(
-            oldTrackedBalance,
-            dayCount,
-            subLoan.postDueRemuneratoryRate
-        );
-        subLoan.trackedPostDueRemuneratoryInterest += newTrackedBalance - oldTrackedBalance;
+            subLoan.trackedPrimaryInterest +
+            subLoan.trackedSecondaryInterest;
+        uint256 newTrackedBalance = _calculateCompoundInterest(oldTrackedBalance, dayCount, subLoan.secondaryRate);
+        subLoan.trackedSecondaryInterest += newTrackedBalance - oldTrackedBalance;
     }
 
     /**
      * @dev Accrues moratory interest using simple interest calculation on the principal.
      */
     function _accrueMoratoryInterest(ProcessingSubLoan memory subLoan, uint256 dayCount) internal pure {
-        uint256 accrualBase = (subLoan.trackedPrincipal + subLoan.trackedUpToDueRemuneratoryInterest) * dayCount;
+        uint256 accrualBase = (subLoan.trackedPrincipal + subLoan.trackedPrimaryInterest) * dayCount;
         subLoan.trackedMoratoryInterest += _calculateSimpleInterest(accrualBase, subLoan.moratoryRate);
     }
 
@@ -969,7 +961,7 @@ contract LendingEngineV2 is
      * @dev Imposes a one-time late fee calculated as a percentage of the tracked principal.
      */
     function _imposeLateFee(ProcessingSubLoan memory subLoan) internal pure {
-        uint256 trackedLegalPrincipal = subLoan.trackedPrincipal + subLoan.trackedUpToDueRemuneratoryInterest;
+        uint256 trackedLegalPrincipal = subLoan.trackedPrincipal + subLoan.trackedPrimaryInterest;
         subLoan.trackedLateFee = _calculateSimpleInterest(trackedLegalPrincipal, subLoan.lateFeeRate);
     }
 
@@ -977,7 +969,7 @@ contract LendingEngineV2 is
      * @dev Imposes a one-time clawback fee calculate.
      */
     function _imposeClawbackFee(ProcessingSubLoan memory subLoan, uint256 dayCount) internal pure {
-        uint256 oldTrackedLegalPrincipal = subLoan.trackedPrincipal + subLoan.trackedUpToDueRemuneratoryInterest;
+        uint256 oldTrackedLegalPrincipal = subLoan.trackedPrincipal + subLoan.trackedPrimaryInterest;
         uint256 newTrackedLegalPrincipal = _calculateCompoundInterest(
             oldTrackedLegalPrincipal,
             dayCount,
@@ -1015,8 +1007,8 @@ contract LendingEngineV2 is
         storedSubLoan.state.duration = uint16(subLoan.duration);
         storedSubLoan.state.freezeTimestamp = uint32(subLoan.freezeTimestamp);
         storedSubLoan.state.trackedTimestamp = uint32(subLoan.trackedTimestamp);
-        storedSubLoan.state.upToDueRemuneratoryRate = uint32(subLoan.upToDueRemuneratoryRate);
-        storedSubLoan.state.postDueRemuneratoryRate = uint32(subLoan.postDueRemuneratoryRate);
+        storedSubLoan.state.primaryRate = uint32(subLoan.primaryRate);
+        storedSubLoan.state.secondaryRate = uint32(subLoan.secondaryRate);
         storedSubLoan.state.moratoryRate = uint32(subLoan.moratoryRate);
         storedSubLoan.state.lateFeeRate = uint32(subLoan.lateFeeRate);
         storedSubLoan.state.clawbackFeeRate = uint32(subLoan.clawbackFeeRate);
@@ -1027,14 +1019,14 @@ contract LendingEngineV2 is
         storedSubLoan.state.discountPrincipal = uint64(subLoan.discountPrincipal);
 
         // State fields, slot 5, 6
-        storedSubLoan.state.trackedUpToDueRemuneratoryInterest = uint64(subLoan.trackedUpToDueRemuneratoryInterest);
-        storedSubLoan.state.repaidUpToDueRemuneratoryInterest = uint64(subLoan.repaidUpToDueRemuneratoryInterest);
-        storedSubLoan.state.discountUpToDueRemuneratoryInterest = uint64(subLoan.discountUpToDueRemuneratoryInterest);
+        storedSubLoan.state.trackedPrimaryInterest = uint64(subLoan.trackedPrimaryInterest);
+        storedSubLoan.state.repaidPrimaryInterest = uint64(subLoan.repaidPrimaryInterest);
+        storedSubLoan.state.discountPrimaryInterest = uint64(subLoan.discountPrimaryInterest);
 
         // State fields, slot 7, 8
-        storedSubLoan.state.trackedPostDueRemuneratoryInterest = uint64(subLoan.trackedPostDueRemuneratoryInterest);
-        storedSubLoan.state.repaidPostDueRemuneratoryInterest = uint64(subLoan.repaidPostDueRemuneratoryInterest);
-        storedSubLoan.state.discountPostDueRemuneratoryInterest = uint64(subLoan.discountPostDueRemuneratoryInterest);
+        storedSubLoan.state.trackedSecondaryInterest = uint64(subLoan.trackedSecondaryInterest);
+        storedSubLoan.state.repaidSecondaryInterest = uint64(subLoan.repaidSecondaryInterest);
+        storedSubLoan.state.discountSecondaryInterest = uint64(subLoan.discountSecondaryInterest);
 
         // State fields, slot 9, 10
         storedSubLoan.state.trackedMoratoryInterest = uint64(subLoan.trackedMoratoryInterest);
@@ -1070,8 +1062,8 @@ contract LendingEngineV2 is
             ((uint256(storedSubLoan.metadata.latestOperationId) & type(uint16).max) << 208);
 
         uint256 packedRates = _packRates(
-            subLoan.upToDueRemuneratoryRate,
-            subLoan.postDueRemuneratoryRate,
+            subLoan.primaryRate,
+            subLoan.secondaryRate,
             subLoan.moratoryRate,
             subLoan.lateFeeRate,
             subLoan.clawbackFeeRate
@@ -1083,8 +1075,8 @@ contract LendingEngineV2 is
             bytes32(packedParameters),
             bytes32(packedRates),
             bytes32(_packPrincipalParts(subLoan)),
-            bytes32(_packUpToDueRemuneratoryInterestParts(subLoan)),
-            bytes32(_packPostDueRemuneratoryInterestParts(subLoan)),
+            bytes32(_packPrimaryInterestParts(subLoan)),
+            bytes32(_packSecondaryInterestParts(subLoan)),
             bytes32(_packMoratoryInterestParts(subLoan)),
             bytes32(_packLateFeeParts(subLoan)),
             bytes32(_packClawbackParts(subLoan))
@@ -1109,11 +1101,11 @@ contract LendingEngineV2 is
             amount = trackedBalance;
         }
 
-        amount = _repayPostDueRemuneratoryInterest(subLoan, amount);
+        amount = _repaySecondaryInterest(subLoan, amount);
         amount = _repayMoratoryInterest(subLoan, amount);
         amount = _repayLateFee(subLoan, amount);
         amount = _repayClawbackFee(subLoan, amount);
-        amount = _repayUpToDueRemuneratoryInterest(subLoan, amount);
+        amount = _repayPrimaryInterest(subLoan, amount);
         amount = _repayPrincipal(subLoan, amount);
     }
 
@@ -1132,11 +1124,11 @@ contract LendingEngineV2 is
             amount = trackedBalance;
         }
 
-        amount = _discountPostDueRemuneratoryInterest(subLoan, amount);
+        amount = _discountSecondaryInterest(subLoan, amount);
         amount = _discountMoratoryInterest(subLoan, amount);
         amount = _discountLateFee(subLoan, amount);
         amount = _discountClawbackFee(subLoan, amount);
-        amount = _discountUpToDueRemuneratoryInterest(subLoan, amount);
+        amount = _discountPrimaryInterest(subLoan, amount);
         amount = _discountPrincipal(subLoan, amount);
     }
 
@@ -1146,8 +1138,8 @@ contract LendingEngineV2 is
     function _applyRevocation(ProcessingSubLoan memory subLoan) internal pure {
         subLoan.status = uint256(SubLoanStatus.Revoked);
         subLoan.trackedPrincipal = 0;
-        subLoan.trackedUpToDueRemuneratoryInterest = 0;
-        subLoan.trackedPostDueRemuneratoryInterest = 0;
+        subLoan.trackedPrimaryInterest = 0;
+        subLoan.trackedSecondaryInterest = 0;
         subLoan.trackedMoratoryInterest = 0;
         subLoan.trackedLateFee = 0;
     }
@@ -1204,13 +1196,10 @@ contract LendingEngineV2 is
     }
 
     /**
-     * @dev Repays up to the due date remuneratory interest, returning the remaining amount.
+     * @dev Repays primary interest, returning the remaining amount.
      */
-    function _repayUpToDueRemuneratoryInterest(
-        ProcessingSubLoan memory subLoan,
-        uint256 amount
-    ) internal pure returns (uint256) {
-        uint256 changeAmount = subLoan.trackedUpToDueRemuneratoryInterest;
+    function _repayPrimaryInterest(ProcessingSubLoan memory subLoan, uint256 amount) internal pure returns (uint256) {
+        uint256 changeAmount = subLoan.trackedPrimaryInterest;
         if (changeAmount > amount) {
             changeAmount = amount;
         }
@@ -1219,20 +1208,17 @@ contract LendingEngineV2 is
         }
         unchecked {
             amount -= changeAmount;
-            subLoan.trackedUpToDueRemuneratoryInterest -= changeAmount;
+            subLoan.trackedPrimaryInterest -= changeAmount;
         }
-        subLoan.repaidUpToDueRemuneratoryInterest += changeAmount;
+        subLoan.repaidPrimaryInterest += changeAmount;
         return amount;
     }
 
     /**
-     * @dev Repays post the due date remuneratory interest, returning the remaining amount.
+     * @dev Repays secondary interest, returning the remaining amount.
      */
-    function _repayPostDueRemuneratoryInterest(
-        ProcessingSubLoan memory subLoan,
-        uint256 amount
-    ) internal pure returns (uint256) {
-        uint256 changeAmount = subLoan.trackedPostDueRemuneratoryInterest;
+    function _repaySecondaryInterest(ProcessingSubLoan memory subLoan, uint256 amount) internal pure returns (uint256) {
+        uint256 changeAmount = subLoan.trackedSecondaryInterest;
         if (changeAmount > amount) {
             changeAmount = amount;
         }
@@ -1241,9 +1227,9 @@ contract LendingEngineV2 is
         }
         unchecked {
             amount -= changeAmount;
-            subLoan.trackedPostDueRemuneratoryInterest -= changeAmount;
+            subLoan.trackedSecondaryInterest -= changeAmount;
         }
-        subLoan.repaidPostDueRemuneratoryInterest += changeAmount;
+        subLoan.repaidSecondaryInterest += changeAmount;
         return amount;
     }
 
@@ -1324,13 +1310,13 @@ contract LendingEngineV2 is
     }
 
     /**
-     * @dev Discounts up to the due date remuneratory interest, returning the remaining amount.
+     * @dev Discounts primary interest, returning the remaining amount.
      */
-    function _discountUpToDueRemuneratoryInterest(
+    function _discountPrimaryInterest(
         ProcessingSubLoan memory subLoan,
         uint256 amount
     ) internal pure returns (uint256) {
-        uint256 changeAmount = subLoan.trackedUpToDueRemuneratoryInterest;
+        uint256 changeAmount = subLoan.trackedPrimaryInterest;
         if (changeAmount > amount) {
             changeAmount = amount;
         }
@@ -1339,20 +1325,20 @@ contract LendingEngineV2 is
         }
         unchecked {
             amount -= changeAmount;
-            subLoan.trackedUpToDueRemuneratoryInterest -= changeAmount;
+            subLoan.trackedPrimaryInterest -= changeAmount;
         }
-        subLoan.discountUpToDueRemuneratoryInterest += changeAmount;
+        subLoan.discountPrimaryInterest += changeAmount;
         return amount;
     }
 
     /**
-     * @dev Discounts post the due date remuneratory interest, returning the remaining amount.
+     * @dev Discounts secondary interest, returning the remaining amount.
      */
-    function _discountPostDueRemuneratoryInterest(
+    function _discountSecondaryInterest(
         ProcessingSubLoan memory subLoan,
         uint256 amount
     ) internal pure returns (uint256) {
-        uint256 changeAmount = subLoan.trackedPostDueRemuneratoryInterest;
+        uint256 changeAmount = subLoan.trackedSecondaryInterest;
         if (changeAmount > amount) {
             changeAmount = amount;
         }
@@ -1361,9 +1347,9 @@ contract LendingEngineV2 is
         }
         unchecked {
             amount -= changeAmount;
-            subLoan.trackedPostDueRemuneratoryInterest -= changeAmount;
+            subLoan.trackedSecondaryInterest -= changeAmount;
         }
-        subLoan.discountPostDueRemuneratoryInterest += changeAmount;
+        subLoan.discountSecondaryInterest += changeAmount;
         return amount;
     }
 
@@ -1600,8 +1586,8 @@ contract LendingEngineV2 is
         }
 
         if (
-            kind == uint256(OperationKind.UpToDueRemuneratoryRateSetting) ||
-            kind == uint256(OperationKind.PostDueRemuneratoryRateSetting) ||
+            kind == uint256(OperationKind.PrimaryRateSetting) ||
+            kind == uint256(OperationKind.SecondaryRateSetting) ||
             kind == uint256(OperationKind.MoratoryRateSetting) ||
             kind == uint256(OperationKind.LateFeeRateSetting) ||
             kind == uint256(OperationKind.ClawbackFeeRateSetting)
@@ -1685,8 +1671,8 @@ contract LendingEngineV2 is
         subLoan.pendingTimestamp = storedSubLoan.metadata.pendingTimestamp;
         subLoan.duration = storedSubLoan.state.duration;
 
-        subLoan.upToDueRemuneratoryRate = storedSubLoan.state.upToDueRemuneratoryRate;
-        subLoan.postDueRemuneratoryRate = storedSubLoan.state.postDueRemuneratoryRate;
+        subLoan.primaryRate = storedSubLoan.state.primaryRate;
+        subLoan.secondaryRate = storedSubLoan.state.secondaryRate;
         subLoan.moratoryRate = storedSubLoan.state.moratoryRate;
         subLoan.lateFeeRate = storedSubLoan.state.lateFeeRate;
         subLoan.clawbackFeeRate = storedSubLoan.state.clawbackFeeRate;
@@ -1695,13 +1681,13 @@ contract LendingEngineV2 is
         subLoan.repaidPrincipal = storedSubLoan.state.repaidPrincipal;
         subLoan.discountPrincipal = storedSubLoan.state.discountPrincipal;
 
-        subLoan.trackedUpToDueRemuneratoryInterest = storedSubLoan.state.trackedUpToDueRemuneratoryInterest;
-        subLoan.repaidUpToDueRemuneratoryInterest = storedSubLoan.state.repaidUpToDueRemuneratoryInterest;
-        subLoan.discountUpToDueRemuneratoryInterest = storedSubLoan.state.discountUpToDueRemuneratoryInterest;
+        subLoan.trackedPrimaryInterest = storedSubLoan.state.trackedPrimaryInterest;
+        subLoan.repaidPrimaryInterest = storedSubLoan.state.repaidPrimaryInterest;
+        subLoan.discountPrimaryInterest = storedSubLoan.state.discountPrimaryInterest;
 
-        subLoan.trackedPostDueRemuneratoryInterest = storedSubLoan.state.trackedPostDueRemuneratoryInterest;
-        subLoan.repaidPostDueRemuneratoryInterest = storedSubLoan.state.repaidPostDueRemuneratoryInterest;
-        subLoan.discountPostDueRemuneratoryInterest = storedSubLoan.state.discountPostDueRemuneratoryInterest;
+        subLoan.trackedSecondaryInterest = storedSubLoan.state.trackedSecondaryInterest;
+        subLoan.repaidSecondaryInterest = storedSubLoan.state.repaidSecondaryInterest;
+        subLoan.discountSecondaryInterest = storedSubLoan.state.discountSecondaryInterest;
 
         subLoan.trackedMoratoryInterest = storedSubLoan.state.trackedMoratoryInterest;
         subLoan.repaidMoratoryInterest = storedSubLoan.state.repaidMoratoryInterest;
@@ -1825,8 +1811,8 @@ contract LendingEngineV2 is
         summary.totalAddonAmount += subLoan.inception.addonAmount;
         summary.totalRepaidAmount +=
             subLoan.state.repaidPrincipal +
-            subLoan.state.repaidUpToDueRemuneratoryInterest +
-            subLoan.state.repaidPostDueRemuneratoryInterest +
+            subLoan.state.repaidPrimaryInterest +
+            subLoan.state.repaidSecondaryInterest +
             subLoan.state.repaidMoratoryInterest +
             subLoan.state.repaidLateFee;
         if (subLoan.state.status == SubLoanStatus.Ongoing) {
@@ -1868,26 +1854,26 @@ contract LendingEngineV2 is
     }
 
     /**
-     * @dev Packs the up to the due date remuneratory interest parts (tracked, repaid, discount) into a single value.
+     * @dev Packs the primary interest parts (tracked, repaid, discount) into a single value.
      */
-    function _packUpToDueRemuneratoryInterestParts(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
+    function _packPrimaryInterestParts(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
         return
             _packAmountParts(
-                subLoan.trackedUpToDueRemuneratoryInterest,
-                subLoan.repaidUpToDueRemuneratoryInterest,
-                subLoan.discountUpToDueRemuneratoryInterest
+                subLoan.trackedPrimaryInterest,
+                subLoan.repaidPrimaryInterest,
+                subLoan.discountPrimaryInterest
             );
     }
 
     /**
-     * @dev Packs the post the due date remuneratory interest parts (tracked, repaid, discount) into a single value.
+     * @dev Packs the secondary interest parts (tracked, repaid, discount) into a single value.
      */
-    function _packPostDueRemuneratoryInterestParts(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
+    function _packSecondaryInterestParts(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
         return
             _packAmountParts(
-                subLoan.trackedPostDueRemuneratoryInterest,
-                subLoan.repaidPostDueRemuneratoryInterest,
-                subLoan.discountPostDueRemuneratoryInterest
+                subLoan.trackedSecondaryInterest,
+                subLoan.repaidSecondaryInterest,
+                subLoan.discountSecondaryInterest
             );
     }
 
@@ -1932,23 +1918,23 @@ contract LendingEngineV2 is
      *
      * The packed rates is a bitfield with the following bits:
      *
-     * - 32 bits from   0 to  31: the up to the due date remuneratory interest rate.
-     * - 32 bits from  32 to  63: the post the due date remuneratory interest rate.
+     * - 32 bits from   0 to  31: the primary rate.
+     * - 32 bits from  32 to  63: the secondary rate.
      * - 32 bits from  64 to  95: the moratory interest rate.
      * - 32 bits from  96 to 127: the late fee rate.
      * - 32 bits from 128 to 159: the clawback fee rate.
      * - 96 bits from 160 to 255: reserved for future usage.
      */
     function _packRates(
-        uint256 upToDueRemuneratoryRate,
-        uint256 postDueRemuneratoryRate,
+        uint256 primaryRate,
+        uint256 secondaryRate,
         uint256 moratoryRate,
         uint256 lateFeeRate,
         uint256 clawbackFeeRate
     ) internal pure returns (uint256) {
         return
-            ((upToDueRemuneratoryRate & type(uint32).max) << 0) |
-            ((postDueRemuneratoryRate & type(uint32).max) << 32) |
+            ((primaryRate & type(uint32).max) << 0) |
+            ((secondaryRate & type(uint32).max) << 32) |
             ((moratoryRate & type(uint32).max) << 64) |
             ((lateFeeRate & type(uint32).max) << 96) |
             ((clawbackFeeRate & type(uint32).max) << 128);

@@ -297,10 +297,12 @@ contract LendingMarketV2 is
 
         // Be sure the provided address is proxy
         address engineImplementation;
-        try engineImplementation = ILendingEngineV2(engine_).getImplementation() {} catch {
+        try ILendingEngineV2(engine_).getImplementation() returns (address engineImplementation_) {
+            engineImplementation = engineImplementation_;
+        } catch {
             revert LendingMarketV2_EngineAddressInvalid();
         }
-        if (engineImplementation != address(0)) {
+        if (engineImplementation == address(0)) {
             revert LendingMarketV2_EngineAddressInvalid();
         }
         if (engineImplementation.code.length == 0) {
@@ -556,8 +558,8 @@ contract LendingMarketV2 is
         preview.pendingTimestamp = subLoan.pendingTimestamp;
         preview.duration = subLoan.duration;
 
-        preview.upToDueRemuneratoryRate = subLoan.upToDueRemuneratoryRate;
-        preview.postDueRemuneratoryRate = subLoan.postDueRemuneratoryRate;
+        preview.primaryRate = subLoan.primaryRate;
+        preview.secondaryRate = subLoan.secondaryRate;
         preview.moratoryRate = subLoan.moratoryRate;
         preview.lateFeeRate = subLoan.lateFeeRate;
         preview.clawbackFeeRate = subLoan.clawbackFeeRate;
@@ -566,13 +568,13 @@ contract LendingMarketV2 is
         preview.repaidPrincipal = subLoan.repaidPrincipal;
         preview.discountPrincipal = subLoan.discountPrincipal;
 
-        preview.trackedUpToDueRemuneratoryInterest = subLoan.trackedUpToDueRemuneratoryInterest;
-        preview.repaidUpToDueRemuneratoryInterest = subLoan.repaidUpToDueRemuneratoryInterest;
-        preview.discountUpToDueRemuneratoryInterest = subLoan.discountUpToDueRemuneratoryInterest;
+        preview.trackedPrimaryInterest = subLoan.trackedPrimaryInterest;
+        preview.repaidPrimaryInterest = subLoan.repaidPrimaryInterest;
+        preview.discountPrimaryInterest = subLoan.discountPrimaryInterest;
 
-        preview.trackedPostDueRemuneratoryInterest = subLoan.trackedPostDueRemuneratoryInterest;
-        preview.repaidPostDueRemuneratoryInterest = subLoan.repaidPostDueRemuneratoryInterest;
-        preview.discountPostDueRemuneratoryInterest = subLoan.discountPostDueRemuneratoryInterest;
+        preview.trackedSecondaryInterest = subLoan.trackedSecondaryInterest;
+        preview.repaidSecondaryInterest = subLoan.repaidSecondaryInterest;
+        preview.discountSecondaryInterest = subLoan.discountSecondaryInterest;
 
         preview.trackedMoratoryInterest = subLoan.trackedMoratoryInterest;
         preview.repaidMoratoryInterest = subLoan.repaidMoratoryInterest;
@@ -647,13 +649,13 @@ contract LendingMarketV2 is
             preview.totalRepaidPrincipal += singleLoanPreview.repaidPrincipal;
             preview.totalDiscountPrincipal += singleLoanPreview.discountPrincipal;
 
-            preview.totalTrackedUpToDueRemuneratoryInterest += singleLoanPreview.trackedUpToDueRemuneratoryInterest;
-            preview.totalRepaidUpToDueRemuneratoryInterest += singleLoanPreview.repaidUpToDueRemuneratoryInterest;
-            preview.totalDiscountUpToDueRemuneratoryInterest += singleLoanPreview.discountUpToDueRemuneratoryInterest;
+            preview.totalTrackedPrimaryInterest += singleLoanPreview.trackedPrimaryInterest;
+            preview.totalRepaidPrimaryInterest += singleLoanPreview.repaidPrimaryInterest;
+            preview.totalDiscountPrimaryInterest += singleLoanPreview.discountPrimaryInterest;
 
-            preview.totalTrackedPostDueRemuneratoryInterest += singleLoanPreview.trackedPostDueRemuneratoryInterest;
-            preview.totalRepaidPostDueRemuneratoryInterest += singleLoanPreview.repaidPostDueRemuneratoryInterest;
-            preview.totalDiscountPostDueRemuneratoryInterest += singleLoanPreview.discountUpToDueRemuneratoryInterest;
+            preview.totalTrackedSecondaryInterest += singleLoanPreview.trackedSecondaryInterest;
+            preview.totalRepaidSecondaryInterest += singleLoanPreview.repaidSecondaryInterest;
+            preview.totalDiscountSecondaryInterest += singleLoanPreview.discountPrimaryInterest;
 
             preview.totalTrackedMoratoryInterest += singleLoanPreview.trackedMoratoryInterest;
             preview.totalRepaidMoratoryInterest += singleLoanPreview.repaidMoratoryInterest;

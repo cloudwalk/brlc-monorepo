@@ -125,8 +125,7 @@ interface ILendingMarketV2Types {
      * 4. The repayment and general discount amounts of an operation must be rounded financially according to
      *    the ACCURACY_FACTOR, see the `Constants` contract. The special discount amounts may not be rounded.
      * 5. All rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
-     * 6. About the primary/secondary interest and rates see the `docs/description.md` file.
-     * 7. About the clawback fee rate see notes in the the `docs/description.md` file.
+     * 6. About the primary/secondary rates, clawback fee rate see notes in the `docs/description.md` file.
      */
     enum OperationKind {
         Nonexistent,
@@ -211,8 +210,8 @@ interface ILendingMarketV2Types {
      *
      * 1. The borrowed amount and the addon amount together form the principal of the sub-loan.
      * 2. All rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
-     * 3. About the primary/secondary interest and rates see the `docs/description.md` file.
-     * 4. About the clawback fee rate see notes in the the `docs/description.md` file.
+     * 3. About the primary/secondary interest, related rates, and clawback fee rate see notes in the
+     *    `docs/description.md` file.
      */
     struct SubLoanInception {
         // Slot 1 -- This data will never change
@@ -330,8 +329,8 @@ interface ILendingMarketV2Types {
      * 6.  All rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
      * 7.  All fields related to tracked, repaid, and discount amounts are not financially rounded
      *     according to the ACCURACY_FACTOR, see the `Constants` contract.
-     * 8.  About the primary/secondary interest and rates see the `docs/description.md` file.
-     * 9.  About the clawback fee and its rate see notes in the the `docs/description.md` file.
+     * 8.  About the primary/secondary interest, related rates, and clawback fee (and its rate) see notes in the
+     *     `docs/description.md` file.
      */
     struct SubLoanState {
         // Slot 1, 2 -- Frequently used data for reading and writing

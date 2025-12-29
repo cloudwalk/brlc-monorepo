@@ -320,14 +320,15 @@ const ACCURACY_FACTOR = 10_000n;
 const SUB_LOAN_COUNT_MAX = 180;
 const OPERATION_COUNT_MAX = 10_000;
 const DAY_BOUNDARY_OFFSET = -3 * 3600;
+const DAY_IN_SECONDS = 86400;
 const SUB_LOAN_AUTO_ID_START = 10_000_000n;
 const TOKEN_DECIMALS = 6n;
 const INITIAL_BALANCE = 1_000_000n * 10n ** TOKEN_DECIMALS;
-const UP_TO_DUE_REMUNERATORY_RATE = (INTEREST_RATE_FACTOR / 100); // 1%
-const POST_DUE_REMUNERATORY_RATE = (INTEREST_RATE_FACTOR / 100) * 2; // 2%
-const MORATORY_RATE = (INTEREST_RATE_FACTOR / 100) * 3; // 3%
-const LATE_FEE_RATE = (INTEREST_RATE_FACTOR / 100) * 4; // 4%
-const CLAWBACK_FEE_RATE = (INTEREST_RATE_FACTOR / 100) * 5; // 5%
+const UP_TO_DUE_REMUNERATORY_RATE = (INTEREST_RATE_FACTOR / 1000); // 0.1%
+const POST_DUE_REMUNERATORY_RATE = (INTEREST_RATE_FACTOR / 1000) * 2; // 0.2%
+const MORATORY_RATE = (INTEREST_RATE_FACTOR / 1000) * 3; // 0.3%
+const LATE_FEE_RATE = (INTEREST_RATE_FACTOR / 1000) * 4; // 0.4%
+const CLAWBACK_FEE_RATE = (INTEREST_RATE_FACTOR / 1000) * 5; // 0.5%
 const MAX_UINT8 = maxUintForBits(8);
 const MAX_UINT16 = maxUintForBits(16);
 const MAX_UINT16_NUMBER = Number(MAX_UINT16);
@@ -973,16 +974,16 @@ function createTypicalLoanTakingRequest(fixture: Fixture): LoanTakingRequest {
 function createTypicalSubLoanTakingRequests(
   subLoanCount: number,
 ): SubLoanTakingRequest[] {
-  const onePercentRate = INTEREST_RATE_FACTOR / 100;
+  const oneTenthPercentRate = INTEREST_RATE_FACTOR / 1000;
   return Array.from({ length: subLoanCount }, (_, i) => ({
     borrowedAmount: 1000n * BigInt(i + 1) * 10n ** TOKEN_DECIMALS,
     addonAmount: 100n * BigInt(i + 1) * 10n ** TOKEN_DECIMALS,
     duration: 30 * (i + 1),
-    primaryRate: UP_TO_DUE_REMUNERATORY_RATE + onePercentRate * (i + 1),
-    secondaryRate: POST_DUE_REMUNERATORY_RATE + onePercentRate * (i + 1),
-    moratoryRate: MORATORY_RATE + onePercentRate * (i + 1),
-    lateFeeRate: LATE_FEE_RATE + onePercentRate * (i + 1),
-    clawbackFeeRate: CLAWBACK_FEE_RATE + onePercentRate * (i + 1),
+    primaryRate: UP_TO_DUE_REMUNERATORY_RATE + oneTenthPercentRate * (i + 1),
+    secondaryRate: POST_DUE_REMUNERATORY_RATE + oneTenthPercentRate * (i + 1),
+    moratoryRate: MORATORY_RATE + oneTenthPercentRate * (i + 1),
+    lateFeeRate: LATE_FEE_RATE + oneTenthPercentRate * (i + 1),
+    clawbackFeeRate: CLAWBACK_FEE_RATE + oneTenthPercentRate * (i + 1),
   }));
 }
 
@@ -1062,14 +1063,27 @@ function isOverdue(subLoan: SubLoan, timestamp: number): boolean {
   return dayIndex(timestamp) > dueDay;
 }
 
-function accruePrimaryInterest(subLoan: SubLoan, timestamp: number) {
-  const oldTrackedBalance = subLoan.state.trackedPrincipal + subLoan.state.trackedPrimaryInterest;
-  const interestRate = subLoan.state.primaryRate;
-  const days = dayIndex(timestamp) - dayIndex(subLoan.state.trackedTimestamp);
-  const newTrackedBalance = BigInt(
-    Math.round(Number(oldTrackedBalance) * ((1 + Number(interestRate) / INTEREST_RATE_FACTOR) ** days)),
+function calculateCompoundInterest(baseAmount: bigint, interestRate: number, days: number): bigint {
+  const newBaseAmount = BigInt(
+    Math.round(
+      Number(baseAmount) * ((1 + interestRate / INTEREST_RATE_FACTOR) ** days),
+    ),
   );
-  subLoan.state.trackedPrimaryInterest += newTrackedBalance - oldTrackedBalance;
+  return newBaseAmount - baseAmount;
+}
+
+function calculateSimpleInterest(baseAmount: bigint, interestRate: number, days: number): bigint {
+  return BigInt(
+    Math.round(
+      (Number(baseAmount) * interestRate * days) / INTEREST_RATE_FACTOR,
+    ),
+  );
+}
+
+function accruePrimaryInterest(subLoan: SubLoan, timestamp: number) {
+  const trackedBalance = subLoan.state.trackedPrincipal + subLoan.state.trackedPrimaryInterest;
+  const days = dayIndex(timestamp) - dayIndex(subLoan.state.trackedTimestamp);
+  subLoan.state.trackedPrimaryInterest += calculateCompoundInterest(trackedBalance, subLoan.state.primaryRate, days);
 }
 
 function roundFinancially(amount: bigint) {
@@ -4077,6 +4091,77 @@ describe("Contract 'LendingMarket'", () => {
       ({ market } = fixture);
       const loan = await takeTypicalLoan(fixture, { subLoanCount: 3 });
       subLoan = loan.subLoans[2];
+    });
+
+    describe("Executes as expected for different timestamps after the sub-loan started", () => {
+      function defineExpectedPreview(subLoan: SubLoan, timestamp: number): SubLoanPreview {
+        const preview = defineExpectedSubLoanPreview(subLoan);
+
+        preview.day = dayIndex(timestamp);
+        preview.daysSinceStart = preview.day - dayIndex(subLoan.inception.startTimestamp);
+        preview.trackedTimestamp = timestamp;
+
+        const daysUpToDue = preview.daysSinceStart > subLoan.inception.initialDuration
+          ? subLoan.inception.initialDuration
+          : preview.daysSinceStart;
+        const daysPostDue = preview.daysSinceStart - daysUpToDue;
+
+        preview.trackedPrimaryInterest = calculateCompoundInterest(
+          preview.trackedPrincipal,
+          preview.primaryRate,
+          daysUpToDue,
+        );
+
+        if (daysPostDue > 0) {
+          const legalPrincipal = preview.trackedPrincipal + preview.trackedPrimaryInterest;
+          preview.trackedSecondaryInterest =
+            calculateCompoundInterest(legalPrincipal, preview.secondaryRate, daysPostDue);
+          preview.trackedMoratoryInterest = calculateSimpleInterest(legalPrincipal, preview.moratoryRate, daysPostDue);
+          preview.trackedLateFee = calculateSimpleInterest(legalPrincipal, preview.lateFeeRate, 1);
+          preview.trackedClawbackFee = calculateCompoundInterest(legalPrincipal, preview.clawbackFeeRate, daysUpToDue);
+        }
+
+        preview.outstandingBalance = roundFinancially(
+          preview.trackedPrincipal +
+          preview.trackedPrimaryInterest +
+          preview.trackedSecondaryInterest +
+          preview.trackedMoratoryInterest +
+          preview.trackedLateFee +
+          preview.trackedClawbackFee,
+        );
+
+        return preview;
+      }
+
+      async function checkPreview(subLoan: SubLoan, timestamp: number) {
+        const expectedPreview = defineExpectedPreview(subLoan, timestamp);
+        const actualPreview = await market.getSubLoanPreview(subLoan.id, timestamp);
+        checkEquality(
+          resultToObject(actualPreview),
+          expectedPreview,
+          subLoan.indexInLoan,
+        );
+      }
+
+      it("one day before the due date", async () => {
+        const timestamp = subLoan.inception.startTimestamp + (subLoan.inception.initialDuration - 1) * DAY_IN_SECONDS;
+        await checkPreview(subLoan, timestamp);
+      });
+
+      it("at the due date", async () => {
+        const timestamp = subLoan.inception.startTimestamp + subLoan.inception.initialDuration * DAY_IN_SECONDS;
+        await checkPreview(subLoan, timestamp);
+      });
+
+      it("one day after the due date", async () => {
+        const timestamp = subLoan.inception.startTimestamp + (subLoan.inception.initialDuration + 1) * DAY_IN_SECONDS;
+        await checkPreview(subLoan, timestamp);
+      });
+
+      it("ten day after the due date", async () => {
+        const timestamp = subLoan.inception.startTimestamp + (subLoan.inception.initialDuration + 10) * DAY_IN_SECONDS;
+        await checkPreview(subLoan, timestamp);
+      });
     });
 
     describe("Is reverted if", () => {

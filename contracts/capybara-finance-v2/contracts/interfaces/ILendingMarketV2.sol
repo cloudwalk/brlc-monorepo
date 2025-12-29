@@ -1443,6 +1443,16 @@ interface ILendingMarketV2Errors {
      */
     error LendingMarketV2_LoanDurationsInvalid();
 
+    /// @dev Thrown when the principal amount of a loan exceeds the maximum allowed value.
+    error LendingMarketV2_LoanPrincipalExcess();
+
+    /**
+     * @dev Thrown when the sub-loan start timestamp is invalid.
+     *
+     * E.g., it is in the future (greater than block.timestamp).
+     */
+    error LendingMarketV2_LoanStartTimestampInvalid();
+
     /**
      * @dev Thrown when an operation account is not zero for operation kinds that do not require it.
      *
@@ -1502,17 +1512,11 @@ interface ILendingMarketV2Errors {
     /// @dev Thrown when the operation timestamp exceeds the maximum allowed value of `type(uint32).max`.
     error LendingMarketV2_OperationTimestampExcess();
 
-    /**
-     * @dev Thrown when the operation value is invalid.
-     *
-     *  E.g.:
-     *
-     *  - when the repayment or discount operation value is zero.
-     *  - freezing operation value is not zero.
-     *  - unfreezing operation value is not zero or one.
-     */
-    // TODO: Split it into rounded, unrounded, zero, non-zero
-    error LendingMarketV2_OperationValueInvalid();
+    /// @dev Thrown when the operation value exceeds the maximum allowed value.
+    error LendingMarketV2_OperationValueExcess();
+
+    /// @dev Thrown when the provided operation value is wrongly set to non-zero.
+    error LendingMarketV2_OperationValueNonzero();
 
     /**
      * @dev Thrown when trying to void an operation of a kind for which voiding is prohibited.
@@ -1585,13 +1589,6 @@ interface ILendingMarketV2Errors {
     /// @dev Thrown when the sub-loan does not exist.
     error LendingMarketV2_SubLoanNonexistent();
 
-    /**
-     * @dev Thrown when the principal amount of a loan is invalid.
-     *
-     * E.g. the amount exceeds the maximum allowed value (uint64).
-     */
-    error LendingMarketV2_SubLoanPrincipalInvalid();
-
     /// @dev Thrown when the repayer address is zero for a repayment operation.
     error LendingMarketV2_SubLoanRapayerAddressZero();
 
@@ -1603,15 +1600,11 @@ interface ILendingMarketV2Errors {
     /// @dev Thrown when the repayment amount exceeds the outstanding balance of the sub-loan.
     error LendingMarketV2_SubLoanRepaymentExcess();
 
-    /// @dev Thrown when the repayment or discount amount is not rounded to the accuracy factor.
+    /// @dev Thrown when the repayment or discount amount is not financially rounded.
     error LendingMarketV2_SubLoanRepaymentOrDiscountAmountUnrounded();
 
-    /**
-     * @dev Thrown when the sub-loan start timestamp is invalid.
-     *
-     * E.g., it is in the future (greater than block.timestamp).
-     */
-    error LendingMarketV2_SubLoanStartTimestampInvalid();
+    /// @dev Thrown when the repayment or discount amount is wrongly set to zero.
+    error LendingMarketV2_SubLoanRepaymentOrDiscountAmountZero();
 
     /// @dev Thrown when trying to perform an operation on a revoked sub-loan.
     error LendingMarketV2_SubLoanRevoked();

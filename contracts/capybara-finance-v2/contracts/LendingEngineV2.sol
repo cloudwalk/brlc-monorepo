@@ -1608,7 +1608,7 @@ contract LendingEngineV2 is
             revert LendingMarketV2_BorrowerAddressZero();
         }
         if (loanTakingRequest.startTimestamp > _blockTimestamp() || loanTakingRequest.startTimestamp == 1) {
-            revert LendingMarketV2_SubLoanStartTimestampInvalid();
+            revert LendingMarketV2_LoanStartTimestampInvalid();
         }
 
         if (
@@ -1626,7 +1626,7 @@ contract LendingEngineV2 is
         }
         unchecked {
             if (addonAmount + borrowedAmount > type(uint64).max) {
-                revert LendingMarketV2_SubLoanPrincipalInvalid();
+                revert LendingMarketV2_LoanPrincipalExcess();
             }
         }
 
@@ -1666,13 +1666,13 @@ contract LendingEngineV2 is
 
         if (kind == uint256(OperationKind.Freezing)) {
             if (value != 0) {
-                revert LendingMarketV2_OperationValueInvalid();
+                revert LendingMarketV2_OperationValueNonzero();
             }
         }
 
         if (kind == uint256(OperationKind.Unfreezing)) {
             if (value > 1) {
-                revert LendingMarketV2_OperationValueInvalid();
+                revert LendingMarketV2_OperationValueExcess();
             }
         }
 
@@ -1713,7 +1713,7 @@ contract LendingEngineV2 is
             kind == uint256(OperationKind.ClawbackFeeDiscount)
         ) {
             if (value == 0) {
-                revert LendingMarketV2_OperationValueInvalid();
+                revert LendingMarketV2_SubLoanRepaymentOrDiscountAmountZero();
             }
             // The repayments and discounts must be financially rounded, except the special discount operations
             if (

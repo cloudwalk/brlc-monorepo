@@ -378,6 +378,7 @@ const ERROR_NAME_LIQUIDITY_POOL_ADDRESS_INVALID = "LendingMarketV2_LiquidityPool
 const ERROR_NAME_LIQUIDITY_POOL_ADDRESS_ZERO = "LendingMarketV2_LiquidityPoolAddressZero";
 const ERROR_NAME_LOAN_BORROWED_AMOUNT_INVALID = "LendingMarketV2_LoanBorrowedAmountInvalid";
 const ERROR_NAME_LOAN_DURATIONS_INVALID = "LendingMarketV2_LoanDurationsInvalid";
+const ERROR_NAME_LOAN_START_TIMESTAMP_INVALID = "LendingMarketV2_LoanStartTimestampInvalid";
 const ERROR_NAME_OPERATION_APPLYING_TIMESTAMP_TOO_EARLY = "LendingMarketV2_OperationApplyingTimestampTooEarly";
 const ERROR_NAME_OPERATION_DISMISSED_ALREADY = "LendingMarketV2_OperationDismissedAlready";
 const ERROR_NAME_OPERATION_KIND_INVALID = "LendingMarketV2_OperationKindInvalid";
@@ -395,7 +396,6 @@ const ERROR_NAME_SUB_LOAN_EXISTENT_ALREADY = "LendingMarketV2_SubLoanExistentAlr
 const ERROR_NAME_SUB_LOAN_NONEXISTENT = "LendingMarketV2_SubLoanNonexistent";
 const ERROR_NAME_SUB_LOAN_REVOKED = "LendingMarketV2_SubLoanRevoked";
 const ERROR_NAME_SUB_LOAN_RATE_VALUE_EXCESS = "LendingMarketV2_SubLoanRateValueExcess";
-const ERROR_NAME_SUB_LOAN_START_TIMESTAMP_INVALID = "LendingMarketV2_SubLoanStartTimestampInvalid";
 const ERROR_NAME_UNDERLYING_TOKEN_ADDRESS_ZERO = "LendingMarketV2_UnderlyingTokenAddressZero";
 
 // Errors of the mock contracts
@@ -1879,14 +1879,14 @@ describe("Contract 'LendingMarket'", () => {
         loanTakingRequest.startTimestamp = latestBlockTimestamp + 10000;
 
         await expect(market.connect(admin).takeLoan(loanTakingRequest, subLoanTakingRequests))
-          .to.be.revertedWithCustomError(market, ERROR_NAME_SUB_LOAN_START_TIMESTAMP_INVALID);
+          .to.be.revertedWithCustomError(market, ERROR_NAME_LOAN_START_TIMESTAMP_INVALID);
       });
 
       it("the start timestamp is 1 (reserved special value)", async () => {
         loanTakingRequest.startTimestamp = 1;
 
         await expect(market.connect(admin).takeLoan(loanTakingRequest, subLoanTakingRequests))
-          .to.be.revertedWithCustomError(market, ERROR_NAME_SUB_LOAN_START_TIMESTAMP_INVALID);
+          .to.be.revertedWithCustomError(market, ERROR_NAME_LOAN_START_TIMESTAMP_INVALID);
       });
 
       it("the total borrowed amount is zero", async () => {

@@ -46,11 +46,11 @@ jobs:
       - name: Build all contracts
         run: pnpm run -r --workspace-concurrency=-1 build # build all with concurrency -1 (cpu core count)
 
-      - name: Test all contracts without coverage if not on Linux
+      - name: Test all contracts in hardhat network without coverage if not on Linux
         run: pnpm run -r --workspace-concurrency=-1 test # test all with concurrency -1 (cpu core count)
         if: runner.os != 'Linux'
 
-      - name: Test all contracts with coverage if on Linux
+      - name: Test all contracts in hardhat network with coverage if on Linux
         run: pnpm run -r --workspace-concurrency=-1 test:coverage # test all with concurrency -1 (cpu core count)
         if: runner.os == 'Linux'
 

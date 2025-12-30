@@ -2,11 +2,13 @@ name: E2E tests in Stratus
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "stratus-integration"]
   pull_request:
     branches: ["*"]
 env:
   STRATUS_REF: v0.25.1-beta
+  STRATUS_ARTIFACT_NAME: stratus-linux
+  STRATUS_PORT: "3000"
 jobs:
   build-stratus:
     runs-on: ubuntu-latest
@@ -14,7 +16,6 @@ jobs:
     env:
       STRATUS_DIR: stratus-src
       STRATUS_BIN_PATH: stratus-src/target/debug/stratus
-      STRATUS_ARTIFACT_NAME: stratus-linux
 
     steps:
       - name: Set git to use LF
@@ -122,21 +123,18 @@ jobs:
           contracts_json="$(node ./scripts/get-contracts-for-stratus-test.js)"
 
           echo "contracts=${contracts_json}"
-          echo "count=${count}"
 
-          echo "matrix={\"contract\":${contracts_json}}" >> "$GITHUB_OUTPUT"
+          echo "matrix=${contracts_json}" >> "$GITHUB_OUTPUT"
 
   stratus-e2e:
     runs-on: ubuntu-latest
     name: Stratus E2E (${{ matrix.contract }})
     needs: [build-stratus, contract-matrix]
+    if: needs.contract-matrix.outputs.matrix != '' && needs.contract-matrix.outputs.matrix != '[]'
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.contract-matrix.outputs.matrix) }}
-    env:
-      STRATUS_PORT: "3000"
-      STRATUS_ARTIFACT_NAME: stratus-linux
-
+      matrix:
+        contract: ${{ fromJSON(needs.contract-matrix.outputs.matrix) }}
     steps:
       - name: Set git to use LF
         run: |

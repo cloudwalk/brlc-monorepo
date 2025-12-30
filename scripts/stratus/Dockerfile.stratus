@@ -1,0 +1,15 @@
+FROM ubuntu:noble
+
+RUN apt-get update && \
+  apt-get install -y build-essential pkg-config libssl-dev libsasl2-dev curl git clang libclang-dev && \
+  rm -rf /var/lib/apt/lists/*
+
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+ENV PATH="/root/.cargo/bin:$PATH"
+
+WORKDIR /app
+RUN git clone https://github.com/cloudwalk/stratus.git -b v0.25.1-beta --depth 1 . 
+
+RUN cargo build --features dev --release
+
+ENTRYPOINT [ "./target/release/stratus" ]

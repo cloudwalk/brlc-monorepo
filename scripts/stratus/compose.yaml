@@ -1,0 +1,12 @@
+services:
+  stratus:
+    build:
+      dockerfile: Dockerfile.stratus
+    image: stratus-dev:latest
+    ports:
+      - 3000:3000
+    environment:
+      - CHAIN_ID=1337
+    command:
+      - --leader
+      - -a=0.0.0.0:3000

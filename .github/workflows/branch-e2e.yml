@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - "main"
-      - "stratus-integration" # TODO: remove this after Stratus integration is complete
   pull_request:
     branches:
       - "*"

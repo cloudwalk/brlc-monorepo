@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - stratus-integration
   workflow_dispatch:
 
 jobs:

@@ -90,6 +90,6 @@ jobs:
           base: main
           labels: |
             automated
-          draft: true
+          draft: false
           maintainer-can-modify: false
           commit-message: "auto: update contract signatures"

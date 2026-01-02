@@ -17,9 +17,6 @@ jobs:
     name: Build Stratus artifact
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-      # TODO: looks like we could skip whole job if check existing artifact
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -37,7 +34,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Checkout Stratus sources
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: cloudwalk/stratus
           ref: ${{ env.STRATUS_REF }}
@@ -140,10 +137,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          chmod +x ./stratus-bin
+          chmod +x ./stratus-bin/stratus
           export CHAIN_ID=1337
 
-          nohup ./stratus-bin --leader -a=127.0.0.1:${STRATUS_PORT} > stratus.log 2>&1 &
+          nohup ./stratus-bin/stratus --leader -a=127.0.0.1:${STRATUS_PORT} > stratus.log 2>&1 &
           echo $! > stratus.pid
 
           # Wait for TCP port to accept connections

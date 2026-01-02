@@ -2,30 +2,24 @@ name: E2E tests in Stratus
 
 on:
   push:
-    branches: ["main", "stratus-integration"]
+    branches:
+      - "main"
+      - "stratus-integration" # TODO: remove this after Stratus integration is complete
   pull_request:
-    branches: ["*"]
+    branches:
+      - "*"
 env:
   STRATUS_REF: v0.25.1-beta
-  STRATUS_ARTIFACT_NAME: stratus-linux
   STRATUS_PORT: "3000"
 jobs:
   build-stratus:
     runs-on: ubuntu-latest
     name: Build Stratus artifact
-    env:
-      STRATUS_DIR: stratus-src
-      STRATUS_BIN_PATH: stratus-src/target/debug/stratus
 
     steps:
-      - name: Set git to use LF
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.eol lf
-
       - name: Checkout code
         uses: actions/checkout@v6
-
+      # TODO: looks like we could skip whole job if check existing artifact
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -42,59 +36,40 @@ jobs:
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo registry/git
-        id: cargo-cache
-        uses: actions/cache@v4
+      - name: Checkout Stratus sources
+        uses: actions/checkout@v5
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: cargo-${{ runner.os }}-${{ env.STRATUS_REF }}-stable
-          restore-keys: |
-            cargo-${{ runner.os }}-${{ env.STRATUS_REF }}-
-            cargo-${{ runner.os }}-
-
-      - name: Clone Stratus sources
-        run: |
-          rm -rf "${STRATUS_DIR}"
-          git clone https://github.com/cloudwalk/stratus.git -b "${STRATUS_REF}" --depth 1 "${STRATUS_DIR}"
+          repository: cloudwalk/stratus
+          ref: ${{ env.STRATUS_REF }}
 
       - name: Cache Stratus target dir
         id: stratus-target-cache
         uses: actions/cache@v4
         with:
-          path: ${{ env.STRATUS_DIR }}/target
-          key: stratus-target-${{ runner.os }}-${{ env.STRATUS_REF }}-stable
-          restore-keys: |
-            stratus-target-${{ runner.os }}-${{ env.STRATUS_REF }}-
-            stratus-target-${{ runner.os }}-
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: stratus-build-${{ runner.os }}-${{ env.STRATUS_REF }}
 
       - name: Build Stratus (debug, cached)
         shell: bash
         run: |
           set -euo pipefail
-          if [[ "${{ steps.stratus-target-cache.outputs.cache-hit }}" == "true" && -x "${STRATUS_BIN_PATH}" ]]; then
+          if [[ "${{ steps.stratus-target-cache.outputs.cache-hit }}" == "true" && -x target/debug/stratus ]]; then
             echo "Stratus binary already present from cache; skipping cargo build."
             exit 0
           fi
 
-          cd "${STRATUS_DIR}"
           cargo build --features dev
-
-      - name: Package Stratus binary
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -x "${STRATUS_BIN_PATH}"
-          mkdir -p dist/stratus
-          cp "${STRATUS_BIN_PATH}" dist/stratus/stratus
 
       - name: Upload Stratus artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.STRATUS_ARTIFACT_NAME }}-${{ env.STRATUS_REF }}
-          path: dist/stratus/stratus
+          name: stratus-bin-${{ runner.os }}-${{ env.STRATUS_REF }}
+          path: target/debug/stratus
           if-no-files-found: error
+          overwrite: true
 
   contract-matrix:
     runs-on: ubuntu-latest
@@ -136,11 +111,6 @@ jobs:
       matrix:
         contract: ${{ fromJSON(needs.contract-matrix.outputs.matrix) }}
     steps:
-      - name: Set git to use LF
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.eol lf
-
       - name: Checkout code
         uses: actions/checkout@v6
 
@@ -161,19 +131,19 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GHA_PAT }}
 
       - name: Download Stratus artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
-          name: ${{ env.STRATUS_ARTIFACT_NAME }}-${{ env.STRATUS_REF }}
-          path: ./.stratus-bin
+          name: stratus-bin-${{ runner.os }}-${{ env.STRATUS_REF }}
+          path: ./stratus-bin
 
       - name: Start Stratus
         shell: bash
         run: |
           set -euo pipefail
-          chmod +x ./.stratus-bin/stratus
+          chmod +x ./stratus-bin
           export CHAIN_ID=1337
 
-          nohup ./.stratus-bin/stratus --leader -a=127.0.0.1:${STRATUS_PORT} > stratus.log 2>&1 &
+          nohup ./stratus-bin --leader -a=127.0.0.1:${STRATUS_PORT} > stratus.log 2>&1 &
           echo $! > stratus.pid
 
           # Wait for TCP port to accept connections

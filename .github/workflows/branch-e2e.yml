@@ -73,11 +73,6 @@ jobs:
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
-      - name: Set git to use LF
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.eol lf
-
       - name: Checkout code
         uses: actions/checkout@v6
 
@@ -90,11 +85,8 @@ jobs:
         id: matrix
         shell: bash
         run: |
-          set -euo pipefail
-          contracts_json="$(node ./scripts/get-contracts-for-stratus-test.js)"
-
-          echo "contracts=${contracts_json}"
-
+          contracts_json="$(corepack pnpm -s run get-e2e-contracts)"
+          echo "Got contracts for E2E tests: ${contracts_json}"
           echo "matrix=${contracts_json}" >> "$GITHUB_OUTPUT"
 
   stratus-e2e:
@@ -157,7 +149,6 @@ jobs:
       - name: Run contract Stratus tests
         shell: bash
         run: |
-          set -euo pipefail
           pnpm -C "contracts/${{ matrix.contract }}" test:stratus
         env:
           STRATUS_PORT: ${{ env.STRATUS_PORT }}
